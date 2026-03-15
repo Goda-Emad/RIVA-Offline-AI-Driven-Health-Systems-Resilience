@@ -1,1 +1,51 @@
-
+drug_a,drug_b,severity,effect_ar,severity_score
+warfarin,aspirin,high,خطر نزيف داخلي شديد,3
+warfarin,ibuprofen,high,زيادة خطر النزيف,3
+warfarin,paracetamol,high,تعزيز مفعول وارفارين,3
+metformin,alcohol,high,خطر الحماض اللاكتيكي,3
+digoxin,amiodarone,high,سمية قلبية خطيرة,3
+simvastatin,amlodipine,high,تلف عضلي رابدوميوليسيس,3
+ssri,tramadol,high,متلازمة السيروتونين,3
+maoi,ssri,high,أزمة ضغط دم حادة,3
+methotrexate,nsaids,high,سمية كلوية وكبدية,3
+warfarin,rifampicin,high,تقليل مفعول وارفارين بشكل حاد,3
+lithium,nsaids,high,ارتفاع مستوى الليثيوم - سمية,3
+clozapine,ciprofloxacin,high,ارتفاع مستوى كلوزابين - تشنجات,3
+carbamazepine,erythromycin,high,ارتفاع مستوى كارباميزيبين,3
+phenytoin,fluconazole,high,ارتفاع مستوى فينيتوين - سمية,3
+amiodarone,simvastatin,high,تلف عضلي شديد,3
+aspirin,ibuprofen,medium,قرحة معدة,2
+aspirin,diclofenac,medium,قرحة معدة وزيادة النزيف,2
+metformin,glibenclamide,medium,هبوط سكر,2
+captopril,potassium,medium,ارتفاع البوتاسيوم,2
+amoxicillin,warfarin,medium,تعزيز مضاد التخثر,2
+ciprofloxacin,antacid,medium,تقليل امتصاص المضاد الحيوي,2
+metronidazole,alcohol,medium,غثيان وقيء شديد,2
+ibuprofen,captopril,medium,تقليل فعالية الضغط,2
+furosemide,gentamicin,medium,سمية الكلى والأذن,2
+atorvastatin,clarithromycin,medium,زيادة مستوى الستاتين,2
+amlodipine,clarithromycin,medium,انخفاض ضغط الدم,2
+metformin,contrast_dye,medium,خطر الحماض اللاكتيكي,2
+spironolactone,potassium,medium,فرط بوتاسيوم الدم,2
+fluconazole,warfarin,medium,تعزيز مفعول وارفارين,2
+omeprazole,clopidogrel,medium,تقليل فعالية كلوبيدوجريل,2
+metformin,ibuprofen,medium,مراقبة وظائف الكلى,2
+digoxin,furosemide,medium,نقص البوتاسيوم يزيد سمية الديجوكسين,2
+theophylline,ciprofloxacin,medium,ارتفاع مستوى الثيوفيلين,2
+carbamazepine,oral_contraceptive,medium,تقليل فاعلية موانع الحمل,2
+azithromycin,antacid,medium,تقليل امتصاص الأزيثروميسين,2
+calcium,iron,low,تقليل امتصاص الحديد,1
+levothyroxine,calcium,low,تقليل امتصاص الهرمون,1
+iron,antacid,low,تقليل امتصاص الحديد,1
+simvastatin,omeprazole,low,زيادة طفيفة في مستوى الستاتين,1
+tetracycline,milk,low,تقليل امتصاص المضاد الحيوي,1
+bisphosphonate,calcium,low,تقليل امتصاص الدواء,1
+metformin,vitamin_b12,low,تقليل امتصاص فيتامين ب12,1
+aspirin,vitamin_c,low,زيادة امتصاص الأسبرين,1
+warfarin,vitamin_k,low,تقليل مفعول وارفارين,1
+iron,vitamin_c,low,زيادة امتصاص الحديد مفيدة,1
+calcium,vitamin_d,low,تعزيز امتصاص الكالسيوم مفيدة,1
+omeprazole,magnesium,low,تقليل امتصاص المغنيسيوم,1
+furosemide,vitamin_b1,low,نقص الثيامين,1
+methotrexate,folic_acid,low,فولات يقلل سمية الميثوتريكسات,1
+iron,green_tea,low,تقليل امتصاص الحديد,1

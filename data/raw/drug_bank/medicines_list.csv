@@ -1,1 +1,51 @@
-
+generic_name,brand_name,name_ar,category,common_dose,price_egp
+paracetamol,panadol,باراسيتامول,مسكن,500mg,5
+ibuprofen,brufen,إيبوبروفين,مسكن,400mg,10
+aspirin,aspocid,أسبرين,مسكن/قلب,100mg,6
+diclofenac,cataflam,ديكلوفيناك,مضاد التهاب,50mg,12
+naproxen,synflex,نابروكسين,مضاد التهاب,500mg,15
+tramadol,tramal,ترامادول,مسكن قوي,50mg,20
+amoxicillin,amoxil,أموكسيسيلين,مضاد حيوي,500mg,25
+ciprofloxacin,ciproxin,سيبروفلوكساسين,مضاد حيوي,500mg,30
+metronidazole,flagyl,ميترونيدازول,مضاد حيوي,500mg,15
+azithromycin,zithromax,أزيثروميسين,مضاد حيوي,500mg,45
+amoxicillin_clavulanate,augmentin,أموكسيسيلين+كلافولانيك,مضاد حيوي,625mg,55
+cephalexin,ceporex,سيفاليكسين,مضاد حيوي,500mg,30
+doxycycline,vibramycin,دوكسيسيكلين,مضاد حيوي,100mg,25
+clarithromycin,klacid,كلاريثروميسين,مضاد حيوي,500mg,60
+warfarin,coumadin,وارفارين,مضاد تخثر,5mg,20
+clopidogrel,plavix,كلوبيدوجريل,مضاد تخثر,75mg,45
+metformin,glucophage,ميتفورمين,سكر,500mg,15
+glibenclamide,daonil,جليبنكلاميد,سكر,5mg,8
+glimepiride,amaryl,جليميبيريد,سكر,2mg,20
+insulin,actrapid,إنسولين,سكر,100IU,80
+captopril,capoten,كابتوبريل,ضغط,25mg,8
+amlodipine,norvasc,أملوديبين,ضغط,5mg,20
+losartan,cozaar,لوسارتان,ضغط,50mg,25
+atenolol,tenormin,أتينولول,ضغط/قلب,50mg,10
+enalapril,renitec,إيناليبريل,ضغط,5mg,15
+simvastatin,zocor,سيمفاستاتين,كوليسترول,20mg,25
+atorvastatin,lipitor,أتورفاستاتين,كوليسترول,20mg,35
+furosemide,lasix,فيوروسيميد,مدر بول,40mg,5
+spironolactone,aldactone,سبيرونولاكتون,مدر بول,25mg,12
+digoxin,lanoxin,ديجوكسين,قلب,0.25mg,10
+amiodarone,cordarone,أميودارون,قلب,200mg,35
+omeprazole,nexium,أوميبرازول,معدة,20mg,12
+ranitidine,zantac,رانيتيدين,معدة,150mg,8
+domperidone,motilium,دومبيريدون,غثيان,10mg,10
+metoclopramide,primperan,ميتوكلوبراميد,غثيان,10mg,8
+levothyroxine,eltroxin,ليفوثيروكسين,غدة درقية,50mcg,15
+carbamazepine,tegretol,كارباميزيبين,صرع,200mg,20
+phenytoin,dilantin,فينيتوين,صرع,100mg,15
+diazepam,valium,ديازيبام,مهدئ,5mg,15
+alprazolam,xanax,ألبرازولام,قلق,0.5mg,20
+lithium,priadel,ليثيوم,نفسي,400mg,25
+fluoxetine,prozac,فلوكسيتين,اكتئاب,20mg,30
+sertraline,zoloft,سيرترالين,اكتئاب,50mg,35
+calcium,caltrate,كالسيوم,مكمل,500mg,10
+iron,ferrograd,حديد,مكمل,325mg,8
+folic_acid,folicap,حمض الفوليك,مكمل,5mg,5
+vitamin_d,devit,فيتامين د,مكمل,1000IU,15
+potassium,slow_k,بوتاسيوم,مكمل,600mg,12
+magnesium,magnesia,مغنيسيوم,مكمل,250mg,10
+zinc,zincomed,زنك,مكمل,220mg,12
