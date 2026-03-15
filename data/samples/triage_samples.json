@@ -1,1 +1,2090 @@
-
+[
+  {
+    "id": "14adb147",
+    "patient_id": "P001",
+    "age": 66,
+    "gender": "male",
+    "temperature": 36.7,
+    "pain_level": 4,
+    "symptoms": [
+      "سعال"
+    ],
+    "current_medications": [
+      "aspirin",
+      "captopril"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "b874e69a",
+    "patient_id": "P002",
+    "age": 73,
+    "gender": "male",
+    "temperature": 37.1,
+    "pain_level": 1,
+    "symptoms": [
+      "ألم صدر"
+    ],
+    "current_medications": [],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "9711957d",
+    "patient_id": "P003",
+    "age": 74,
+    "gender": "female",
+    "temperature": 39.9,
+    "pain_level": 1,
+    "symptoms": [
+      "ألم بطن",
+      "سعال",
+      "ضيق تنفس"
+    ],
+    "current_medications": [
+      "paracetamol"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "bcf14d77",
+    "patient_id": "P004",
+    "age": 7,
+    "gender": "female",
+    "temperature": 38.5,
+    "pain_level": 3,
+    "symptoms": [
+      "قيء",
+      "ألم ظهر",
+      "طفح جلدي",
+      "غثيان"
+    ],
+    "current_medications": [
+      "metformin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "0a598185",
+    "patient_id": "P005",
+    "age": 51,
+    "gender": "male",
+    "temperature": 38.3,
+    "pain_level": 6,
+    "symptoms": [
+      "غثيان"
+    ],
+    "current_medications": [
+      "metformin",
+      "aspirin",
+      "ibuprofen"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "e198fdad",
+    "patient_id": "P006",
+    "age": 48,
+    "gender": "male",
+    "temperature": 38.6,
+    "pain_level": 4,
+    "symptoms": [
+      "دوخة",
+      "سعال",
+      "ضيق تنفس",
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "aspirin",
+      "warfarin",
+      "ibuprofen"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "da918740",
+    "patient_id": "P007",
+    "age": 12,
+    "gender": "female",
+    "temperature": 40.3,
+    "pain_level": 9,
+    "symptoms": [
+      "صداع شديد",
+      "سعال",
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "captopril",
+      "warfarin"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "6e8cdd5e",
+    "patient_id": "P008",
+    "age": 12,
+    "gender": "male",
+    "temperature": 38.0,
+    "pain_level": 6,
+    "symptoms": [
+      "دوخة",
+      "ألم ظهر"
+    ],
+    "current_medications": [
+      "aspirin"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "4333fa18",
+    "patient_id": "P009",
+    "age": 47,
+    "gender": "male",
+    "temperature": 37.8,
+    "pain_level": 4,
+    "symptoms": [
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "aspirin",
+      "captopril",
+      "amoxicillin"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "776eb669",
+    "patient_id": "P010",
+    "age": 32,
+    "gender": "female",
+    "temperature": 39.9,
+    "pain_level": 8,
+    "symptoms": [
+      "صداع شديد",
+      "ألم بطن",
+      "قيء",
+      "التهاب حلق"
+    ],
+    "current_medications": [
+      "metformin",
+      "ibuprofen",
+      "paracetamol"
+    ],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "33c2396b",
+    "patient_id": "P011",
+    "age": 25,
+    "gender": "female",
+    "temperature": 39.0,
+    "pain_level": 6,
+    "symptoms": [
+      "ألم بطن",
+      "غثيان"
+    ],
+    "current_medications": [],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "734b3d31",
+    "patient_id": "P012",
+    "age": 9,
+    "gender": "male",
+    "temperature": 37.9,
+    "pain_level": 1,
+    "symptoms": [
+      "قيء"
+    ],
+    "current_medications": [
+      "amoxicillin",
+      "metformin",
+      "ibuprofen"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "8179e59d",
+    "patient_id": "P013",
+    "age": 34,
+    "gender": "male",
+    "temperature": 38.4,
+    "pain_level": 8,
+    "symptoms": [
+      "ألم بطن",
+      "ألم صدر"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "6a241a7e",
+    "patient_id": "P014",
+    "age": 19,
+    "gender": "male",
+    "temperature": 39.1,
+    "pain_level": 6,
+    "symptoms": [
+      "ضيق تنفس",
+      "صداع شديد",
+      "قيء",
+      "حمى"
+    ],
+    "current_medications": [
+      "captopril",
+      "metformin",
+      "aspirin"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "fa3abc77",
+    "patient_id": "P015",
+    "age": 78,
+    "gender": "female",
+    "temperature": 37.8,
+    "pain_level": 3,
+    "symptoms": [
+      "ألم ظهر"
+    ],
+    "current_medications": [
+      "amoxicillin",
+      "warfarin"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "49c882b9",
+    "patient_id": "P016",
+    "age": 33,
+    "gender": "female",
+    "temperature": 36.7,
+    "pain_level": 3,
+    "symptoms": [
+      "صداع شديد",
+      "دوخة"
+    ],
+    "current_medications": [
+      "warfarin"
+    ],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "baad5a7c",
+    "patient_id": "P017",
+    "age": 40,
+    "gender": "male",
+    "temperature": 38.8,
+    "pain_level": 2,
+    "symptoms": [
+      "التهاب حلق",
+      "ألم ظهر",
+      "ألم صدر",
+      "غثيان"
+    ],
+    "current_medications": [
+      "aspirin",
+      "ibuprofen",
+      "captopril"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "2d50a714",
+    "patient_id": "P018",
+    "age": 69,
+    "gender": "male",
+    "temperature": 37.8,
+    "pain_level": 10,
+    "symptoms": [
+      "قيء",
+      "ألم صدر",
+      "حمى",
+      "صداع شديد"
+    ],
+    "current_medications": [
+      "metformin"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "dfa70018",
+    "patient_id": "P019",
+    "age": 37,
+    "gender": "female",
+    "temperature": 38.6,
+    "pain_level": 6,
+    "symptoms": [
+      "دوخة",
+      "ألم صدر",
+      "ألم ظهر"
+    ],
+    "current_medications": [],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "82570da8",
+    "patient_id": "P020",
+    "age": 9,
+    "gender": "male",
+    "temperature": 38.8,
+    "pain_level": 10,
+    "symptoms": [
+      "ألم صدر",
+      "دوخة",
+      "ألم ظهر"
+    ],
+    "current_medications": [
+      "amoxicillin",
+      "omeprazole"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "d7e2e223",
+    "patient_id": "P021",
+    "age": 70,
+    "gender": "male",
+    "temperature": 38.1,
+    "pain_level": 10,
+    "symptoms": [
+      "ألم بطن"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "metformin"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "e551e159",
+    "patient_id": "P022",
+    "age": 48,
+    "gender": "female",
+    "temperature": 37.9,
+    "pain_level": 9,
+    "symptoms": [
+      "ألم صدر",
+      "دوخة",
+      "إرهاق"
+    ],
+    "current_medications": [
+      "paracetamol",
+      "amoxicillin",
+      "captopril"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "f74db07c",
+    "patient_id": "P023",
+    "age": 53,
+    "gender": "male",
+    "temperature": 39.0,
+    "pain_level": 9,
+    "symptoms": [
+      "صداع شديد"
+    ],
+    "current_medications": [
+      "amoxicillin"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "b78e2576",
+    "patient_id": "P024",
+    "age": 36,
+    "gender": "female",
+    "temperature": 36.9,
+    "pain_level": 6,
+    "symptoms": [
+      "إرهاق",
+      "حمى",
+      "قيء"
+    ],
+    "current_medications": [
+      "ibuprofen"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "30a6eb75",
+    "patient_id": "P025",
+    "age": 62,
+    "gender": "male",
+    "temperature": 39.9,
+    "pain_level": 4,
+    "symptoms": [
+      "ألم ظهر",
+      "حمى"
+    ],
+    "current_medications": [
+      "metformin",
+      "warfarin",
+      "amoxicillin"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "473c8d37",
+    "patient_id": "P026",
+    "age": 59,
+    "gender": "female",
+    "temperature": 38.9,
+    "pain_level": 9,
+    "symptoms": [
+      "ألم صدر",
+      "ضيق تنفس",
+      "طفح جلدي",
+      "دوخة"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "4b2924b6",
+    "patient_id": "P027",
+    "age": 24,
+    "gender": "female",
+    "temperature": 37.3,
+    "pain_level": 1,
+    "symptoms": [
+      "إرهاق",
+      "قيء",
+      "دوخة",
+      "التهاب حلق"
+    ],
+    "current_medications": [
+      "ibuprofen"
+    ],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "6cd5fad3",
+    "patient_id": "P028",
+    "age": 73,
+    "gender": "female",
+    "temperature": 40.1,
+    "pain_level": 3,
+    "symptoms": [
+      "طفح جلدي",
+      "سعال",
+      "ألم بطن",
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "warfarin",
+      "omeprazole"
+    ],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "e6a80dd9",
+    "patient_id": "P029",
+    "age": 27,
+    "gender": "male",
+    "temperature": 39.8,
+    "pain_level": 9,
+    "symptoms": [
+      "ألم بطن",
+      "قيء",
+      "صداع شديد",
+      "إرهاق"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "aspirin"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "1001dfab",
+    "patient_id": "P030",
+    "age": 57,
+    "gender": "female",
+    "temperature": 39.7,
+    "pain_level": 9,
+    "symptoms": [
+      "حمى"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "paracetamol"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "b101409a",
+    "patient_id": "P031",
+    "age": 52,
+    "gender": "male",
+    "temperature": 38.2,
+    "pain_level": 7,
+    "symptoms": [
+      "ألم بطن",
+      "قيء"
+    ],
+    "current_medications": [
+      "metformin",
+      "paracetamol",
+      "omeprazole"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "5b795a83",
+    "patient_id": "P032",
+    "age": 59,
+    "gender": "male",
+    "temperature": 36.9,
+    "pain_level": 2,
+    "symptoms": [
+      "غثيان"
+    ],
+    "current_medications": [
+      "ibuprofen"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "8d7c37ec",
+    "patient_id": "P033",
+    "age": 20,
+    "gender": "male",
+    "temperature": 37.3,
+    "pain_level": 1,
+    "symptoms": [
+      "غثيان",
+      "ألم بطن",
+      "صداع شديد",
+      "طفح جلدي"
+    ],
+    "current_medications": [
+      "amoxicillin"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "80f8a762",
+    "patient_id": "P034",
+    "age": 59,
+    "gender": "male",
+    "temperature": 38.5,
+    "pain_level": 5,
+    "symptoms": [
+      "سعال"
+    ],
+    "current_medications": [],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "834dce32",
+    "patient_id": "P035",
+    "age": 58,
+    "gender": "female",
+    "temperature": 36.6,
+    "pain_level": 3,
+    "symptoms": [
+      "سعال",
+      "قيء"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "warfarin",
+      "metformin"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "71166023",
+    "patient_id": "P036",
+    "age": 19,
+    "gender": "female",
+    "temperature": 37.2,
+    "pain_level": 6,
+    "symptoms": [
+      "إرهاق",
+      "ضيق تنفس",
+      "حمى",
+      "غثيان"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "53443073",
+    "patient_id": "P037",
+    "age": 36,
+    "gender": "male",
+    "temperature": 40.4,
+    "pain_level": 5,
+    "symptoms": [
+      "ضيق تنفس",
+      "التهاب حلق",
+      "سعال"
+    ],
+    "current_medications": [
+      "aspirin"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "22227e4d",
+    "patient_id": "P038",
+    "age": 9,
+    "gender": "female",
+    "temperature": 39.8,
+    "pain_level": 9,
+    "symptoms": [
+      "قيء",
+      "دوخة",
+      "حمى"
+    ],
+    "current_medications": [
+      "warfarin",
+      "amoxicillin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "f0e1b09c",
+    "patient_id": "P039",
+    "age": 24,
+    "gender": "female",
+    "temperature": 36.6,
+    "pain_level": 6,
+    "symptoms": [
+      "دوخة",
+      "ألم ظهر",
+      "التهاب حلق",
+      "طفح جلدي"
+    ],
+    "current_medications": [
+      "metformin"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "876c5c0f",
+    "patient_id": "P040",
+    "age": 44,
+    "gender": "male",
+    "temperature": 39.8,
+    "pain_level": 7,
+    "symptoms": [
+      "طفح جلدي",
+      "دوخة",
+      "قيء"
+    ],
+    "current_medications": [
+      "aspirin"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "ab5fde89",
+    "patient_id": "P041",
+    "age": 48,
+    "gender": "male",
+    "temperature": 36.9,
+    "pain_level": 7,
+    "symptoms": [
+      "إرهاق"
+    ],
+    "current_medications": [],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "db48e54e",
+    "patient_id": "P042",
+    "age": 47,
+    "gender": "female",
+    "temperature": 37.7,
+    "pain_level": 9,
+    "symptoms": [
+      "غثيان",
+      "قيء",
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "amoxicillin"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "4e305c44",
+    "patient_id": "P043",
+    "age": 33,
+    "gender": "female",
+    "temperature": 39.0,
+    "pain_level": 3,
+    "symptoms": [
+      "ألم ظهر",
+      "حمى",
+      "ألم بطن"
+    ],
+    "current_medications": [
+      "aspirin",
+      "warfarin",
+      "paracetamol"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "dac2f89b",
+    "patient_id": "P044",
+    "age": 29,
+    "gender": "female",
+    "temperature": 39.1,
+    "pain_level": 10,
+    "symptoms": [
+      "ألم ظهر",
+      "ألم صدر",
+      "قيء",
+      "إرهاق"
+    ],
+    "current_medications": [
+      "amoxicillin"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "fef94d64",
+    "patient_id": "P045",
+    "age": 11,
+    "gender": "male",
+    "temperature": 39.2,
+    "pain_level": 7,
+    "symptoms": [
+      "حمى"
+    ],
+    "current_medications": [
+      "ibuprofen"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "3a56631b",
+    "patient_id": "P046",
+    "age": 13,
+    "gender": "male",
+    "temperature": 39.7,
+    "pain_level": 6,
+    "symptoms": [
+      "قيء",
+      "صداع شديد",
+      "ألم بطن",
+      "ضيق تنفس"
+    ],
+    "current_medications": [],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "8f5167ab",
+    "patient_id": "P047",
+    "age": 22,
+    "gender": "male",
+    "temperature": 40.3,
+    "pain_level": 8,
+    "symptoms": [
+      "ألم بطن",
+      "سعال"
+    ],
+    "current_medications": [
+      "warfarin",
+      "amoxicillin",
+      "paracetamol"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "41f75d1f",
+    "patient_id": "P048",
+    "age": 6,
+    "gender": "female",
+    "temperature": 38.7,
+    "pain_level": 6,
+    "symptoms": [
+      "ألم ظهر",
+      "ضيق تنفس"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "b1d10d2f",
+    "patient_id": "P049",
+    "age": 51,
+    "gender": "female",
+    "temperature": 38.0,
+    "pain_level": 8,
+    "symptoms": [
+      "سعال",
+      "صداع شديد",
+      "طفح جلدي"
+    ],
+    "current_medications": [
+      "warfarin",
+      "paracetamol",
+      "captopril"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "54e5d1e8",
+    "patient_id": "P050",
+    "age": 15,
+    "gender": "female",
+    "temperature": 39.7,
+    "pain_level": 3,
+    "symptoms": [
+      "دوخة",
+      "حمى",
+      "ضيق تنفس"
+    ],
+    "current_medications": [],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "060e2d6a",
+    "patient_id": "P051",
+    "age": 9,
+    "gender": "female",
+    "temperature": 36.6,
+    "pain_level": 3,
+    "symptoms": [
+      "حمى",
+      "دوخة"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "warfarin"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "bacf9b87",
+    "patient_id": "P052",
+    "age": 69,
+    "gender": "female",
+    "temperature": 39.3,
+    "pain_level": 6,
+    "symptoms": [
+      "غثيان",
+      "قيء",
+      "التهاب حلق",
+      "إرهاق"
+    ],
+    "current_medications": [
+      "warfarin",
+      "omeprazole",
+      "aspirin"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "b66ebb02",
+    "patient_id": "P053",
+    "age": 61,
+    "gender": "male",
+    "temperature": 36.5,
+    "pain_level": 2,
+    "symptoms": [
+      "حمى",
+      "قيء",
+      "التهاب حلق",
+      "ألم بطن"
+    ],
+    "current_medications": [
+      "omeprazole"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "46c48e8e",
+    "patient_id": "P054",
+    "age": 48,
+    "gender": "male",
+    "temperature": 39.3,
+    "pain_level": 3,
+    "symptoms": [
+      "إرهاق"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "f04522c8",
+    "patient_id": "P055",
+    "age": 39,
+    "gender": "male",
+    "temperature": 38.5,
+    "pain_level": 6,
+    "symptoms": [
+      "غثيان",
+      "سعال"
+    ],
+    "current_medications": [
+      "omeprazole",
+      "aspirin"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "095616e0",
+    "patient_id": "P056",
+    "age": 30,
+    "gender": "female",
+    "temperature": 38.6,
+    "pain_level": 4,
+    "symptoms": [
+      "دوخة"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "captopril",
+      "amoxicillin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "c0cae337",
+    "patient_id": "P057",
+    "age": 12,
+    "gender": "female",
+    "temperature": 36.7,
+    "pain_level": 9,
+    "symptoms": [
+      "ألم بطن"
+    ],
+    "current_medications": [
+      "aspirin",
+      "warfarin",
+      "paracetamol"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "170d9fbe",
+    "patient_id": "P058",
+    "age": 15,
+    "gender": "female",
+    "temperature": 39.3,
+    "pain_level": 2,
+    "symptoms": [
+      "ألم ظهر",
+      "ضيق تنفس",
+      "إرهاق"
+    ],
+    "current_medications": [
+      "omeprazole"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "51840314",
+    "patient_id": "P059",
+    "age": 42,
+    "gender": "female",
+    "temperature": 37.6,
+    "pain_level": 4,
+    "symptoms": [
+      "التهاب حلق",
+      "ألم ظهر",
+      "طفح جلدي",
+      "ألم بطن"
+    ],
+    "current_medications": [
+      "warfarin",
+      "captopril",
+      "metformin"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "29c99439",
+    "patient_id": "P060",
+    "age": 76,
+    "gender": "female",
+    "temperature": 36.9,
+    "pain_level": 3,
+    "symptoms": [
+      "ألم ظهر"
+    ],
+    "current_medications": [],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "8192bb0c",
+    "patient_id": "P061",
+    "age": 12,
+    "gender": "male",
+    "temperature": 40.2,
+    "pain_level": 1,
+    "symptoms": [
+      "التهاب حلق",
+      "سعال",
+      "ألم ظهر"
+    ],
+    "current_medications": [],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "1f0e1922",
+    "patient_id": "P062",
+    "age": 16,
+    "gender": "female",
+    "temperature": 37.0,
+    "pain_level": 1,
+    "symptoms": [
+      "غثيان"
+    ],
+    "current_medications": [
+      "omeprazole"
+    ],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "f0e9cd7e",
+    "patient_id": "P063",
+    "age": 25,
+    "gender": "female",
+    "temperature": 38.2,
+    "pain_level": 4,
+    "symptoms": [
+      "ضيق تنفس"
+    ],
+    "current_medications": [
+      "captopril",
+      "ibuprofen",
+      "omeprazole"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "4b3df99a",
+    "patient_id": "P064",
+    "age": 9,
+    "gender": "male",
+    "temperature": 38.3,
+    "pain_level": 7,
+    "symptoms": [
+      "ألم صدر",
+      "التهاب حلق"
+    ],
+    "current_medications": [
+      "captopril"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "ed956309",
+    "patient_id": "P065",
+    "age": 47,
+    "gender": "female",
+    "temperature": 39.9,
+    "pain_level": 1,
+    "symptoms": [
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "metformin",
+      "captopril"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "586d5f48",
+    "patient_id": "P066",
+    "age": 65,
+    "gender": "female",
+    "temperature": 38.5,
+    "pain_level": 6,
+    "symptoms": [
+      "ألم ظهر",
+      "دوخة",
+      "ألم بطن",
+      "غثيان"
+    ],
+    "current_medications": [
+      "ibuprofen"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "877d8530",
+    "patient_id": "P067",
+    "age": 62,
+    "gender": "female",
+    "temperature": 38.8,
+    "pain_level": 10,
+    "symptoms": [
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "aspirin",
+      "omeprazole"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "927312c1",
+    "patient_id": "P068",
+    "age": 44,
+    "gender": "male",
+    "temperature": 37.7,
+    "pain_level": 9,
+    "symptoms": [
+      "ألم صدر",
+      "طفح جلدي",
+      "ألم ظهر"
+    ],
+    "current_medications": [
+      "amoxicillin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "7abe8daa",
+    "patient_id": "P069",
+    "age": 23,
+    "gender": "male",
+    "temperature": 39.8,
+    "pain_level": 4,
+    "symptoms": [
+      "التهاب حلق"
+    ],
+    "current_medications": [
+      "ibuprofen",
+      "omeprazole"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "8cf06776",
+    "patient_id": "P070",
+    "age": 31,
+    "gender": "male",
+    "temperature": 38.0,
+    "pain_level": 9,
+    "symptoms": [
+      "سعال",
+      "ضيق تنفس"
+    ],
+    "current_medications": [
+      "amoxicillin",
+      "warfarin"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "6ccbe35e",
+    "patient_id": "P071",
+    "age": 17,
+    "gender": "male",
+    "temperature": 39.1,
+    "pain_level": 4,
+    "symptoms": [
+      "طفح جلدي",
+      "ألم ظهر"
+    ],
+    "current_medications": [
+      "omeprazole",
+      "aspirin"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "ab9f5c96",
+    "patient_id": "P072",
+    "age": 21,
+    "gender": "female",
+    "temperature": 36.5,
+    "pain_level": 1,
+    "symptoms": [
+      "ألم صدر",
+      "دوخة",
+      "سعال",
+      "ضيق تنفس"
+    ],
+    "current_medications": [
+      "metformin",
+      "paracetamol",
+      "amoxicillin"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "14b0e781",
+    "patient_id": "P073",
+    "age": 37,
+    "gender": "male",
+    "temperature": 39.7,
+    "pain_level": 1,
+    "symptoms": [
+      "حمى",
+      "ألم صدر",
+      "ألم بطن",
+      "طفح جلدي"
+    ],
+    "current_medications": [
+      "warfarin",
+      "paracetamol",
+      "omeprazole"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "ae6bfe94",
+    "patient_id": "P074",
+    "age": 14,
+    "gender": "male",
+    "temperature": 38.0,
+    "pain_level": 3,
+    "symptoms": [
+      "ألم ظهر",
+      "قيء"
+    ],
+    "current_medications": [],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "fcc283cd",
+    "patient_id": "P075",
+    "age": 77,
+    "gender": "male",
+    "temperature": 37.5,
+    "pain_level": 8,
+    "symptoms": [
+      "ألم ظهر"
+    ],
+    "current_medications": [],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "a0be5f0e",
+    "patient_id": "P076",
+    "age": 52,
+    "gender": "male",
+    "temperature": 37.6,
+    "pain_level": 6,
+    "symptoms": [
+      "ألم ظهر",
+      "حمى",
+      "سعال",
+      "قيء"
+    ],
+    "current_medications": [
+      "metformin",
+      "aspirin",
+      "amoxicillin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "c5d99c05",
+    "patient_id": "P077",
+    "age": 26,
+    "gender": "male",
+    "temperature": 38.1,
+    "pain_level": 1,
+    "symptoms": [
+      "قيء",
+      "سعال",
+      "دوخة",
+      "التهاب حلق"
+    ],
+    "current_medications": [
+      "warfarin"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "2368d73e",
+    "patient_id": "P078",
+    "age": 7,
+    "gender": "female",
+    "temperature": 36.8,
+    "pain_level": 9,
+    "symptoms": [
+      "دوخة",
+      "ألم صدر",
+      "ألم بطن"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب معدة",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "6f007f5c",
+    "patient_id": "P079",
+    "age": 45,
+    "gender": "female",
+    "temperature": 39.7,
+    "pain_level": 9,
+    "symptoms": [
+      "سعال",
+      "دوخة"
+    ],
+    "current_medications": [
+      "omeprazole",
+      "metformin",
+      "aspirin"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "2e0ccd1d",
+    "patient_id": "P080",
+    "age": 62,
+    "gender": "female",
+    "temperature": 39.3,
+    "pain_level": 8,
+    "symptoms": [
+      "ألم ظهر",
+      "سعال"
+    ],
+    "current_medications": [],
+    "diagnosis": "نزلة برد",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "cde15a98",
+    "patient_id": "P081",
+    "age": 44,
+    "gender": "male",
+    "temperature": 38.0,
+    "pain_level": 5,
+    "symptoms": [
+      "إرهاق",
+      "ألم صدر",
+      "ضيق تنفس",
+      "حمى"
+    ],
+    "current_medications": [],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "f7f78047",
+    "patient_id": "P082",
+    "age": 14,
+    "gender": "male",
+    "temperature": 37.6,
+    "pain_level": 6,
+    "symptoms": [
+      "ألم صدر",
+      "صداع شديد",
+      "ألم بطن",
+      "التهاب حلق"
+    ],
+    "current_medications": [
+      "amoxicillin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "355f1748",
+    "patient_id": "P083",
+    "age": 30,
+    "gender": "male",
+    "temperature": 36.8,
+    "pain_level": 2,
+    "symptoms": [
+      "ألم بطن",
+      "طفح جلدي",
+      "سعال"
+    ],
+    "current_medications": [
+      "aspirin",
+      "omeprazole",
+      "ibuprofen"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "3a03b60c",
+    "patient_id": "P084",
+    "age": 14,
+    "gender": "female",
+    "temperature": 37.8,
+    "pain_level": 5,
+    "symptoms": [
+      "ألم بطن",
+      "حمى",
+      "قيء"
+    ],
+    "current_medications": [],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "32c254df",
+    "patient_id": "P085",
+    "age": 50,
+    "gender": "female",
+    "temperature": 37.8,
+    "pain_level": 5,
+    "symptoms": [
+      "طفح جلدي",
+      "ألم بطن",
+      "حمى"
+    ],
+    "current_medications": [
+      "amoxicillin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "9aa73ca8",
+    "patient_id": "P086",
+    "age": 43,
+    "gender": "female",
+    "temperature": 38.8,
+    "pain_level": 5,
+    "symptoms": [
+      "قيء",
+      "طفح جلدي"
+    ],
+    "current_medications": [
+      "captopril",
+      "ibuprofen",
+      "omeprazole"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "f34e58a7",
+    "patient_id": "P087",
+    "age": 16,
+    "gender": "male",
+    "temperature": 38.1,
+    "pain_level": 8,
+    "symptoms": [
+      "حمى",
+      "ألم صدر",
+      "إرهاق"
+    ],
+    "current_medications": [
+      "paracetamol"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "84fad124",
+    "patient_id": "P088",
+    "age": 19,
+    "gender": "female",
+    "temperature": 37.1,
+    "pain_level": 4,
+    "symptoms": [
+      "ألم ظهر",
+      "التهاب حلق",
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "aspirin"
+    ],
+    "diagnosis": "نزلة برد",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "b0130248",
+    "patient_id": "P089",
+    "age": 55,
+    "gender": "male",
+    "temperature": 39.7,
+    "pain_level": 9,
+    "symptoms": [
+      "صداع شديد"
+    ],
+    "current_medications": [
+      "captopril",
+      "amoxicillin",
+      "omeprazole"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "7daa9766",
+    "patient_id": "P090",
+    "age": 73,
+    "gender": "male",
+    "temperature": 39.8,
+    "pain_level": 6,
+    "symptoms": [
+      "طفح جلدي",
+      "التهاب حلق"
+    ],
+    "current_medications": [
+      "captopril",
+      "amoxicillin"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "5d84a6a1",
+    "patient_id": "P091",
+    "age": 44,
+    "gender": "male",
+    "temperature": 38.2,
+    "pain_level": 2,
+    "symptoms": [
+      "حمى",
+      "إرهاق"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "dac7771c",
+    "patient_id": "P092",
+    "age": 53,
+    "gender": "male",
+    "temperature": 39.3,
+    "pain_level": 7,
+    "symptoms": [
+      "إرهاق",
+      "ألم صدر",
+      "قيء"
+    ],
+    "current_medications": [
+      "amoxicillin",
+      "metformin",
+      "omeprazole"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "10498f4a",
+    "patient_id": "P093",
+    "age": 10,
+    "gender": "male",
+    "temperature": 40.4,
+    "pain_level": 3,
+    "symptoms": [
+      "قيء",
+      "حمى",
+      "غثيان"
+    ],
+    "current_medications": [
+      "amoxicillin"
+    ],
+    "diagnosis": "ارتفاع ضغط الدم",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "564183af",
+    "patient_id": "P094",
+    "age": 71,
+    "gender": "male",
+    "temperature": 39.2,
+    "pain_level": 4,
+    "symptoms": [
+      "ألم ظهر",
+      "التهاب حلق",
+      "ألم صدر"
+    ],
+    "current_medications": [
+      "amoxicillin",
+      "omeprazole",
+      "paracetamol"
+    ],
+    "diagnosis": "إجهاد عام",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "8d520813",
+    "patient_id": "P095",
+    "age": 17,
+    "gender": "male",
+    "temperature": 40.2,
+    "pain_level": 9,
+    "symptoms": [
+      "ألم صدر",
+      "قيء",
+      "حمى",
+      "إرهاق"
+    ],
+    "current_medications": [],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "high",
+    "label": 2,
+    "recommended_action": "طوارئ فوراً",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "56639820",
+    "patient_id": "P096",
+    "age": 54,
+    "gender": "male",
+    "temperature": 38.0,
+    "pain_level": 3,
+    "symptoms": [
+      "صداع شديد"
+    ],
+    "current_medications": [
+      "warfarin",
+      "aspirin"
+    ],
+    "diagnosis": "التهاب بكتيري",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "33eef81a",
+    "patient_id": "P097",
+    "age": 37,
+    "gender": "male",
+    "temperature": 39.1,
+    "pain_level": 5,
+    "symptoms": [
+      "ضيق تنفس",
+      "قيء",
+      "طفح جلدي",
+      "ألم ظهر"
+    ],
+    "current_medications": [],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "03c39505",
+    "patient_id": "P098",
+    "age": 17,
+    "gender": "female",
+    "temperature": 36.8,
+    "pain_level": 4,
+    "symptoms": [
+      "إرهاق",
+      "ألم صدر",
+      "حمى",
+      "صداع شديد"
+    ],
+    "current_medications": [
+      "warfarin",
+      "amoxicillin",
+      "paracetamol"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "d84733b7",
+    "patient_id": "P099",
+    "age": 9,
+    "gender": "male",
+    "temperature": 37.4,
+    "pain_level": 8,
+    "symptoms": [
+      "دوخة",
+      "ألم ظهر"
+    ],
+    "current_medications": [
+      "aspirin",
+      "paracetamol"
+    ],
+    "diagnosis": "التهاب فيروسي",
+    "risk_level": "medium",
+    "label": 1,
+    "recommended_action": "زيارة طبيب",
+    "created_at": "2026-03-15"
+  },
+  {
+    "id": "6451e4d2",
+    "patient_id": "P100",
+    "age": 46,
+    "gender": "female",
+    "temperature": 39.0,
+    "pain_level": 9,
+    "symptoms": [
+      "طفح جلدي"
+    ],
+    "current_medications": [
+      "paracetamol",
+      "ibuprofen"
+    ],
+    "diagnosis": "مغص كلوي",
+    "risk_level": "low",
+    "label": 0,
+    "recommended_action": "علاج منزلي",
+    "created_at": "2026-03-15"
+  }
+]
