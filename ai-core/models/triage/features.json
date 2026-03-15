@@ -1,1 +1,56 @@
-
+{
+  "features": [
+    "Pregnancies",
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI",
+    "DiabetesPedigreeFunction",
+    "Age"
+  ],
+  "target": "Outcome",
+  "n_features": 8,
+  "classes": [
+    "No Diabetes",
+    "Diabetes"
+  ],
+  "metrics": {
+    "accuracy": 74.7,
+    "f1_score": 68.3,
+    "roc_auc": 83.5,
+    "cv_f1": 80.4,
+    "cv_auc": 88.4
+  },
+  "top_features": [
+    "Insulin",
+    "Glucose",
+    "BMI",
+    "Age",
+    "DiabetesPedigreeFunction"
+  ],
+  "scaler": {
+    "mean": [
+      4.012867093182285,
+      126.04980340003968,
+      72.93069159030914,
+      29.744401879310608,
+      151.9601542711258,
+      33.24112730026245,
+      0.49679334487766025,
+      33.91993682861328
+    ],
+    "std": [
+      3.267498586224092,
+      30.613934850415067,
+      12.00147750150536,
+      9.103706469941914,
+      77.36771141309946,
+      6.703670467183397,
+      0.3306439459330283,
+      11.278920209344616
+    ]
+  },
+  "imputation": "KNNImputer (n_neighbors=5)",
+  "smote": "SMOTE on Train only — 186 synthetic samples"
+}
