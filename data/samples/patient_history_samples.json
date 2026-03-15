@@ -1,1 +1,2855 @@
-
+{
+  "dataset": "RIVA Patient History Samples",
+  "version": "1.0",
+  "generated_at": "2026-03-15T14:44:43.517719",
+  "total_patients": 50,
+  "patients": [
+    {
+      "id": "71F23153",
+      "patient_id": "P001",
+      "patient_hash": "b43597773cc0",
+      "name": "فاطمة محمد",
+      "age": 45,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 144.1,
+      "bmi": 34.0,
+      "pregnancies": 4,
+      "blood_pressure": {
+        "systolic": 129,
+        "diastolic": 61
+      },
+      "insulin": 114.5,
+      "diabetes_pedigree": 1.06,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-03-23",
+          "glucose": 129.6,
+          "systolic": 120,
+          "diastolic": 67,
+          "weight_kg": 78.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-02",
+          "glucose": 160.6,
+          "systolic": 147,
+          "diastolic": 86,
+          "weight_kg": 82.9,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-04-07",
+          "glucose": 152.8,
+          "systolic": 119,
+          "diastolic": 83,
+          "weight_kg": 91.6,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-10",
+          "glucose": 160.7,
+          "systolic": 111,
+          "diastolic": 75,
+          "weight_kg": 55.9,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-10",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "57CEAEF3",
+      "patient_id": "P002",
+      "patient_hash": "f2aca9fb87c7",
+      "name": "أم أحمد علي",
+      "age": 58,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "كثرة تبول"
+      ],
+      "current_medications": [
+        "أملوديبين",
+        "كابتوبريل"
+      ],
+      "glucose": 172.4,
+      "bmi": 32.7,
+      "pregnancies": 4,
+      "blood_pressure": {
+        "systolic": 113,
+        "diastolic": 80
+      },
+      "insulin": 40.6,
+      "diabetes_pedigree": 0.251,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-02-11",
+          "glucose": 173.3,
+          "systolic": 141,
+          "diastolic": 68,
+          "weight_kg": 67.0,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-02-11",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "C4D30A75",
+      "patient_id": "P003",
+      "patient_hash": "a7406ce36a22",
+      "name": "سامية إبراهيم",
+      "age": 51,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 199.6,
+      "bmi": 34.0,
+      "pregnancies": 0,
+      "blood_pressure": {
+        "systolic": 136,
+        "diastolic": 70
+      },
+      "insulin": 125.2,
+      "diabetes_pedigree": 0.527,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-01-12",
+          "glucose": 188.7,
+          "systolic": 120,
+          "diastolic": 93,
+          "weight_kg": 59.0,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-06",
+          "glucose": 218.0,
+          "systolic": 129,
+          "diastolic": 70,
+          "weight_kg": 70.5,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-06",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "8FED4DE3",
+      "patient_id": "P004",
+      "patient_hash": "b8ba16b0c9e1",
+      "name": "نورا حسن",
+      "age": 26,
+      "gender": "أنثى",
+      "blood_type": "A-",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "غثيان"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 173.5,
+      "bmi": 27.3,
+      "pregnancies": 0,
+      "blood_pressure": {
+        "systolic": 140,
+        "diastolic": 95
+      },
+      "insulin": 187.8,
+      "diabetes_pedigree": 0.712,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-01-01",
+          "glucose": 179.2,
+          "systolic": 109,
+          "diastolic": 86,
+          "weight_kg": 70.6,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-02-28",
+          "glucose": 157.5,
+          "systolic": 132,
+          "diastolic": 60,
+          "weight_kg": 60.0,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-04",
+          "glucose": 155.2,
+          "systolic": 114,
+          "diastolic": 92,
+          "weight_kg": 93.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-04-14",
+          "glucose": 172.6,
+          "systolic": 126,
+          "diastolic": 74,
+          "weight_kg": 80.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-14",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "250C1F0A",
+      "patient_id": "P005",
+      "patient_hash": "cb64c610130d",
+      "name": "هدى عبدالله",
+      "age": 29,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "عطش شديد",
+        "ضبابية رؤية",
+        "تعب وإرهاق"
+      ],
+      "current_medications": [
+        "جليبنكلاميد",
+        "أوميبرازول"
+      ],
+      "glucose": 179.3,
+      "bmi": 39.0,
+      "pregnancies": 1,
+      "blood_pressure": {
+        "systolic": 105,
+        "diastolic": 69
+      },
+      "insulin": 143.3,
+      "diabetes_pedigree": 0.811,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-03-22",
+          "glucose": 170.5,
+          "systolic": 129,
+          "diastolic": 81,
+          "weight_kg": 65.9,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-03",
+          "glucose": 174.0,
+          "systolic": 106,
+          "diastolic": 61,
+          "weight_kg": 76.3,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-04-03",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "B7E33F58",
+      "patient_id": "P006",
+      "patient_hash": "0d0f213f7913",
+      "name": "مروة خالد",
+      "age": 30,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 154.0,
+      "bmi": 31.7,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 148,
+        "diastolic": 80
+      },
+      "insulin": 47.1,
+      "diabetes_pedigree": 0.275,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-02-28",
+          "glucose": 145.6,
+          "systolic": 135,
+          "diastolic": 71,
+          "weight_kg": 88.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-15",
+          "glucose": 156.9,
+          "systolic": 124,
+          "diastolic": 74,
+          "weight_kg": 55.6,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-23",
+          "glucose": 138.6,
+          "systolic": 116,
+          "diastolic": 82,
+          "weight_kg": 69.7,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-23",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "6DEB75DD",
+      "patient_id": "P007",
+      "patient_hash": "90bc6ad820ce",
+      "name": "رانيا سعيد",
+      "age": 27,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 134.4,
+      "bmi": 23.8,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 115,
+        "diastolic": 61
+      },
+      "insulin": 56.6,
+      "diabetes_pedigree": 1.91,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-04-04",
+          "glucose": 133.1,
+          "systolic": 138,
+          "diastolic": 61,
+          "weight_kg": 82.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-04",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "D66615CA",
+      "patient_id": "P008",
+      "patient_hash": "a6bfd2fd4888",
+      "name": "أميرة عمر",
+      "age": 51,
+      "gender": "أنثى",
+      "blood_type": "A+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "تعب وإرهاق",
+        "عطش شديد",
+        "كثرة تبول"
+      ],
+      "current_medications": [
+        "ميتفورمين"
+      ],
+      "glucose": 185.0,
+      "bmi": 23.5,
+      "pregnancies": 5,
+      "blood_pressure": {
+        "systolic": 146,
+        "diastolic": 68
+      },
+      "insulin": 137.4,
+      "diabetes_pedigree": 0.274,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-16",
+          "glucose": 187.1,
+          "systolic": 125,
+          "diastolic": 73,
+          "weight_kg": 75.8,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-01-17",
+          "glucose": 197.2,
+          "systolic": 132,
+          "diastolic": 66,
+          "weight_kg": 69.1,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-13",
+          "glucose": 183.7,
+          "systolic": 102,
+          "diastolic": 76,
+          "weight_kg": 62.0,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-03-13",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "CE59303E",
+      "patient_id": "P009",
+      "patient_hash": "0d24b7836c8e",
+      "name": "دينا يوسف",
+      "age": 46,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 113.6,
+      "bmi": 40.4,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 130,
+        "diastolic": 65
+      },
+      "insulin": 100.4,
+      "diabetes_pedigree": 1.262,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-03-23",
+          "glucose": 130.8,
+          "systolic": 112,
+          "diastolic": 92,
+          "weight_kg": 90.1,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-03-26",
+          "glucose": 125.1,
+          "systolic": 138,
+          "diastolic": 69,
+          "weight_kg": 88.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-04-06",
+          "glucose": 125.0,
+          "systolic": 139,
+          "diastolic": 66,
+          "weight_kg": 84.2,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-20",
+          "glucose": 128.0,
+          "systolic": 127,
+          "diastolic": 89,
+          "weight_kg": 92.1,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-20",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "B2D52411",
+      "patient_id": "P010",
+      "patient_hash": "73474534995c",
+      "name": "إيمان محمود",
+      "age": 58,
+      "gender": "أنثى",
+      "blood_type": "A+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 168.6,
+      "bmi": 35.1,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 107,
+        "diastolic": 77
+      },
+      "insulin": 173.4,
+      "diabetes_pedigree": 1.348,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-03-24",
+          "glucose": 167.6,
+          "systolic": 104,
+          "diastolic": 77,
+          "weight_kg": 65.2,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-17",
+          "glucose": 162.6,
+          "systolic": 146,
+          "diastolic": 63,
+          "weight_kg": 62.7,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-17",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "81BDF83F",
+      "patient_id": "P011",
+      "patient_hash": "b869c650d61b",
+      "name": "سهير أحمد",
+      "age": 66,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 159.1,
+      "bmi": 37.5,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 130,
+        "diastolic": 64
+      },
+      "insulin": 141.2,
+      "diabetes_pedigree": 1.226,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-04-09",
+          "glucose": 161.4,
+          "systolic": 118,
+          "diastolic": 76,
+          "weight_kg": 85.9,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-17",
+          "glucose": 143.4,
+          "systolic": 138,
+          "diastolic": 72,
+          "weight_kg": 91.7,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-22",
+          "glucose": 152.7,
+          "systolic": 116,
+          "diastolic": 74,
+          "weight_kg": 68.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-04-24",
+          "glucose": 172.1,
+          "systolic": 142,
+          "diastolic": 85,
+          "weight_kg": 60.7,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-24",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "FC5CC0CD",
+      "patient_id": "P012",
+      "patient_hash": "c87c3fbc53c5",
+      "name": "وفاء حسين",
+      "age": 58,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 139.1,
+      "bmi": 27.8,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 111,
+        "diastolic": 86
+      },
+      "insulin": 98.2,
+      "diabetes_pedigree": 0.249,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-01-21",
+          "glucose": 133.4,
+          "systolic": 117,
+          "diastolic": 61,
+          "weight_kg": 64.2,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-10",
+          "glucose": 157.1,
+          "systolic": 112,
+          "diastolic": 77,
+          "weight_kg": 75.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-03-10",
+          "glucose": 125.8,
+          "systolic": 130,
+          "diastolic": 86,
+          "weight_kg": 92.2,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-04-14",
+          "glucose": 145.8,
+          "systolic": 121,
+          "diastolic": 89,
+          "weight_kg": 55.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-14",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "99A1477C",
+      "patient_id": "P013",
+      "patient_hash": "3f0b8e71f99a",
+      "name": "منى إبراهيم",
+      "age": 64,
+      "gender": "أنثى",
+      "blood_type": "O+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 174.0,
+      "bmi": 30.3,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 102,
+        "diastolic": 85
+      },
+      "insulin": 35.3,
+      "diabetes_pedigree": 1.437,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-06",
+          "glucose": 158.7,
+          "systolic": 148,
+          "diastolic": 60,
+          "weight_kg": 74.5,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-02-09",
+          "glucose": 156.4,
+          "systolic": 121,
+          "diastolic": 69,
+          "weight_kg": 57.0,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-03-13",
+          "glucose": 168.9,
+          "systolic": 114,
+          "diastolic": 73,
+          "weight_kg": 59.5,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-13",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "1AD82E04",
+      "patient_id": "P014",
+      "patient_hash": "8bd4293fc2ab",
+      "name": "شيماء علي",
+      "age": 62,
+      "gender": "أنثى",
+      "blood_type": "O+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "ضبابية رؤية",
+        "تعب وإرهاق"
+      ],
+      "current_medications": [
+        "جليميبيريد"
+      ],
+      "glucose": 112.8,
+      "bmi": 37.1,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 143,
+        "diastolic": 88
+      },
+      "insulin": 9.7,
+      "diabetes_pedigree": 0.643,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-02-13",
+          "glucose": 99.1,
+          "systolic": 135,
+          "diastolic": 76,
+          "weight_kg": 61.2,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-11",
+          "glucose": 125.8,
+          "systolic": 119,
+          "diastolic": 66,
+          "weight_kg": 65.8,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-04-03",
+          "glucose": 125.4,
+          "systolic": 101,
+          "diastolic": 87,
+          "weight_kg": 75.6,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-04-21",
+          "glucose": 111.4,
+          "systolic": 136,
+          "diastolic": 65,
+          "weight_kg": 72.0,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-04-21",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "D0DBC6F6",
+      "patient_id": "P015",
+      "patient_hash": "fa1ad547b606",
+      "name": "ريم عبدالرحمن",
+      "age": 59,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 194.8,
+      "bmi": 29.9,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 132,
+        "diastolic": 78
+      },
+      "insulin": 119.4,
+      "diabetes_pedigree": 0.414,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-02-25",
+          "glucose": 182.8,
+          "systolic": 135,
+          "diastolic": 69,
+          "weight_kg": 59.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-22",
+          "glucose": 214.8,
+          "systolic": 126,
+          "diastolic": 73,
+          "weight_kg": 71.5,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-22",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "5BC0ED2D",
+      "patient_id": "P016",
+      "patient_hash": "198e90f8e147",
+      "name": "نادية سامي",
+      "age": 46,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 151.3,
+      "bmi": 24.1,
+      "pregnancies": 1,
+      "blood_pressure": {
+        "systolic": 138,
+        "diastolic": 77
+      },
+      "insulin": 147.5,
+      "diabetes_pedigree": 1.423,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 4,
+          "date": "2026-03-03",
+          "glucose": 159.3,
+          "systolic": 141,
+          "diastolic": 79,
+          "weight_kg": 63.8,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-11",
+          "glucose": 147.0,
+          "systolic": 106,
+          "diastolic": 94,
+          "weight_kg": 76.7,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-04-13",
+          "glucose": 168.8,
+          "systolic": 150,
+          "diastolic": 92,
+          "weight_kg": 68.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-19",
+          "glucose": 146.2,
+          "systolic": 111,
+          "diastolic": 78,
+          "weight_kg": 70.4,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-19",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "062BD0E1",
+      "patient_id": "P017",
+      "patient_hash": "935cde1cdbcb",
+      "name": "هبة محمد",
+      "age": 63,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 85.5,
+      "bmi": 35.8,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 118,
+        "diastolic": 85
+      },
+      "insulin": 111.9,
+      "diabetes_pedigree": 1.066,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-03-14",
+          "glucose": 82.7,
+          "systolic": 148,
+          "diastolic": 92,
+          "weight_kg": 63.2,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-10",
+          "glucose": 84.0,
+          "systolic": 117,
+          "diastolic": 62,
+          "weight_kg": 85.8,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-10",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "59D2CEA4",
+      "patient_id": "P018",
+      "patient_hash": "a9641589662d",
+      "name": "دعاء أحمد",
+      "age": 35,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "عطش شديد"
+      ],
+      "current_medications": [
+        "ميتفورمين",
+        "كابتوبريل"
+      ],
+      "glucose": 164.4,
+      "bmi": 30.1,
+      "pregnancies": 5,
+      "blood_pressure": {
+        "systolic": 118,
+        "diastolic": 95
+      },
+      "insulin": 31.4,
+      "diabetes_pedigree": 0.26,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-01-23",
+          "glucose": 146.7,
+          "systolic": 112,
+          "diastolic": 63,
+          "weight_kg": 74.4,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-11",
+          "glucose": 162.4,
+          "systolic": 117,
+          "diastolic": 87,
+          "weight_kg": 61.0,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-26",
+          "glucose": 181.1,
+          "systolic": 117,
+          "diastolic": 91,
+          "weight_kg": 63.4,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-04-26",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "6047C4D6",
+      "patient_id": "P019",
+      "patient_hash": "c5d8d81aedd2",
+      "name": "ياسمين حسن",
+      "age": 56,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "غثيان"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 137.9,
+      "bmi": 43.8,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 143,
+        "diastolic": 71
+      },
+      "insulin": 32.3,
+      "diabetes_pedigree": 1.326,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-11",
+          "glucose": 138.5,
+          "systolic": 119,
+          "diastolic": 81,
+          "weight_kg": 56.0,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-01-11",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "9AECA992",
+      "patient_id": "P020",
+      "patient_hash": "5f07df4635ea",
+      "name": "روان عمر",
+      "age": 70,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 101.7,
+      "bmi": 43.1,
+      "pregnancies": 1,
+      "blood_pressure": {
+        "systolic": 146,
+        "diastolic": 89
+      },
+      "insulin": 11.4,
+      "diabetes_pedigree": 1.927,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-04-05",
+          "glucose": 87.0,
+          "systolic": 131,
+          "diastolic": 86,
+          "weight_kg": 69.9,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-05",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "B110C970",
+      "patient_id": "P021",
+      "patient_hash": "7edf8a8e20f8",
+      "name": "فاطمة محمد",
+      "age": 60,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 94.7,
+      "bmi": 40.3,
+      "pregnancies": 4,
+      "blood_pressure": {
+        "systolic": 119,
+        "diastolic": 79
+      },
+      "insulin": 46.5,
+      "diabetes_pedigree": 1.819,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-02-20",
+          "glucose": 103.4,
+          "systolic": 126,
+          "diastolic": 65,
+          "weight_kg": 75.1,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-02-26",
+          "glucose": 97.3,
+          "systolic": 126,
+          "diastolic": 78,
+          "weight_kg": 70.8,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-02-26",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "84501620",
+      "patient_id": "P022",
+      "patient_hash": "4a314eabeee7",
+      "name": "أم أحمد علي",
+      "age": 28,
+      "gender": "أنثى",
+      "blood_type": "O+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "غثيان"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 155.7,
+      "bmi": 36.1,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 135,
+        "diastolic": 82
+      },
+      "insulin": 78.6,
+      "diabetes_pedigree": 0.524,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-29",
+          "glucose": 159.6,
+          "systolic": 145,
+          "diastolic": 68,
+          "weight_kg": 90.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-01-29",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "2475D030",
+      "patient_id": "P023",
+      "patient_hash": "b88e48699bf1",
+      "name": "سامية إبراهيم",
+      "age": 50,
+      "gender": "أنثى",
+      "blood_type": "A-",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "تعب وإرهاق"
+      ],
+      "current_medications": [
+        "كابتوبريل",
+        "أملوديبين"
+      ],
+      "glucose": 96.7,
+      "bmi": 26.7,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 105,
+        "diastolic": 67
+      },
+      "insulin": 107.8,
+      "diabetes_pedigree": 1.947,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 4,
+          "date": "2026-02-16",
+          "glucose": 112.0,
+          "systolic": 106,
+          "diastolic": 81,
+          "weight_kg": 62.4,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-02",
+          "glucose": 90.0,
+          "systolic": 101,
+          "diastolic": 84,
+          "weight_kg": 55.5,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-03-25",
+          "glucose": 78.1,
+          "systolic": 122,
+          "diastolic": 73,
+          "weight_kg": 72.3,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-11",
+          "glucose": 115.3,
+          "systolic": 131,
+          "diastolic": 89,
+          "weight_kg": 81.3,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-04-11",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "DC6D0921",
+      "patient_id": "P024",
+      "patient_hash": "2d6bd4404d2d",
+      "name": "نورا حسن",
+      "age": 46,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "غثيان"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 128.0,
+      "bmi": 32.6,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 109,
+        "diastolic": 82
+      },
+      "insulin": 114.6,
+      "diabetes_pedigree": 0.438,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-04-09",
+          "glucose": 113.1,
+          "systolic": 148,
+          "diastolic": 66,
+          "weight_kg": 70.1,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-18",
+          "glucose": 114.9,
+          "systolic": 129,
+          "diastolic": 73,
+          "weight_kg": 91.6,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-18",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "13B3675E",
+      "patient_id": "P025",
+      "patient_hash": "ba4edf3bc4ae",
+      "name": "هدى عبدالله",
+      "age": 69,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "عطش شديد"
+      ],
+      "current_medications": [
+        "جليبنكلاميد",
+        "أملوديبين"
+      ],
+      "glucose": 143.4,
+      "bmi": 28.7,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 123,
+        "diastolic": 63
+      },
+      "insulin": 181.7,
+      "diabetes_pedigree": 1.865,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-01-21",
+          "glucose": 141.0,
+          "systolic": 138,
+          "diastolic": 93,
+          "weight_kg": 83.2,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-01-31",
+          "glucose": 145.9,
+          "systolic": 139,
+          "diastolic": 86,
+          "weight_kg": 75.5,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-07",
+          "glucose": 148.8,
+          "systolic": 149,
+          "diastolic": 66,
+          "weight_kg": 64.2,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-03-07",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "0967C5B2",
+      "patient_id": "P026",
+      "patient_hash": "e81d0d9fd03d",
+      "name": "مروة خالد",
+      "age": 60,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "ضبابية رؤية",
+        "كثرة تبول",
+        "تعب وإرهاق"
+      ],
+      "current_medications": [
+        "جليميبيريد"
+      ],
+      "glucose": 159.2,
+      "bmi": 38.3,
+      "pregnancies": 4,
+      "blood_pressure": {
+        "systolic": 150,
+        "diastolic": 83
+      },
+      "insulin": 28.2,
+      "diabetes_pedigree": 0.818,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-01-16",
+          "glucose": 162.3,
+          "systolic": 127,
+          "diastolic": 88,
+          "weight_kg": 55.8,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-02-13",
+          "glucose": 169.2,
+          "systolic": 139,
+          "diastolic": 92,
+          "weight_kg": 89.4,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-03-16",
+          "glucose": 165.2,
+          "systolic": 108,
+          "diastolic": 64,
+          "weight_kg": 73.3,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-26",
+          "glucose": 145.5,
+          "systolic": 122,
+          "diastolic": 62,
+          "weight_kg": 61.6,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-03-26",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "5F22657E",
+      "patient_id": "P027",
+      "patient_hash": "abc059ff8842",
+      "name": "رانيا سعيد",
+      "age": 35,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 151.3,
+      "bmi": 41.1,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 125,
+        "diastolic": 62
+      },
+      "insulin": 179.3,
+      "diabetes_pedigree": 1.94,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-02-05",
+          "glucose": 144.4,
+          "systolic": 135,
+          "diastolic": 64,
+          "weight_kg": 74.6,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-02-05",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "434FD6CF",
+      "patient_id": "P028",
+      "patient_hash": "c6b45d226aeb",
+      "name": "أميرة عمر",
+      "age": 40,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 100.4,
+      "bmi": 21.4,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 137,
+        "diastolic": 88
+      },
+      "insulin": 187.8,
+      "diabetes_pedigree": 0.144,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-07",
+          "glucose": 112.9,
+          "systolic": 124,
+          "diastolic": 61,
+          "weight_kg": 91.5,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-16",
+          "glucose": 114.5,
+          "systolic": 128,
+          "diastolic": 82,
+          "weight_kg": 68.5,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-16",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "DD180E9E",
+      "patient_id": "P029",
+      "patient_hash": "c7f9c365e450",
+      "name": "دينا يوسف",
+      "age": 59,
+      "gender": "أنثى",
+      "blood_type": "A-",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 82.2,
+      "bmi": 22.8,
+      "pregnancies": 5,
+      "blood_pressure": {
+        "systolic": 119,
+        "diastolic": 72
+      },
+      "insulin": 190.2,
+      "diabetes_pedigree": 0.223,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-01-20",
+          "glucose": 90.0,
+          "systolic": 101,
+          "diastolic": 60,
+          "weight_kg": 74.1,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-02-06",
+          "glucose": 65.3,
+          "systolic": 135,
+          "diastolic": 81,
+          "weight_kg": 67.6,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-02-18",
+          "glucose": 66.4,
+          "systolic": 139,
+          "diastolic": 78,
+          "weight_kg": 61.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-02-18",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "C7100F5B",
+      "patient_id": "P030",
+      "patient_hash": "b3331e5ab250",
+      "name": "إيمان محمود",
+      "age": 26,
+      "gender": "أنثى",
+      "blood_type": "A-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "تعب وإرهاق",
+        "ضبابية رؤية"
+      ],
+      "current_medications": [
+        "أسبرين",
+        "أملوديبين"
+      ],
+      "glucose": 89.5,
+      "bmi": 38.0,
+      "pregnancies": 0,
+      "blood_pressure": {
+        "systolic": 149,
+        "diastolic": 78
+      },
+      "insulin": 168.2,
+      "diabetes_pedigree": 1.742,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-16",
+          "glucose": 107.4,
+          "systolic": 124,
+          "diastolic": 82,
+          "weight_kg": 79.7,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-01-16",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "C6A56B39",
+      "patient_id": "P031",
+      "patient_hash": "f24d0762a4bf",
+      "name": "سهير أحمد",
+      "age": 67,
+      "gender": "أنثى",
+      "blood_type": "O+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 137.0,
+      "bmi": 25.4,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 100,
+        "diastolic": 63
+      },
+      "insulin": 81.3,
+      "diabetes_pedigree": 0.315,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-02-16",
+          "glucose": 146.5,
+          "systolic": 112,
+          "diastolic": 60,
+          "weight_kg": 79.5,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-05",
+          "glucose": 154.4,
+          "systolic": 108,
+          "diastolic": 79,
+          "weight_kg": 62.7,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-05",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "A78A0D58",
+      "patient_id": "P032",
+      "patient_hash": "ad7bc2aadac1",
+      "name": "وفاء حسين",
+      "age": 50,
+      "gender": "أنثى",
+      "blood_type": "A+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 146.0,
+      "bmi": 29.7,
+      "pregnancies": 0,
+      "blood_pressure": {
+        "systolic": 135,
+        "diastolic": 77
+      },
+      "insulin": 157.9,
+      "diabetes_pedigree": 1.015,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 4,
+          "date": "2026-02-08",
+          "glucose": 160.5,
+          "systolic": 103,
+          "diastolic": 82,
+          "weight_kg": 76.0,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-02-09",
+          "glucose": 126.6,
+          "systolic": 122,
+          "diastolic": 84,
+          "weight_kg": 85.2,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-03-10",
+          "glucose": 157.5,
+          "systolic": 113,
+          "diastolic": 77,
+          "weight_kg": 81.9,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-15",
+          "glucose": 149.1,
+          "systolic": 139,
+          "diastolic": 63,
+          "weight_kg": 80.6,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-15",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "C2B9EA0E",
+      "patient_id": "P033",
+      "patient_hash": "5538dcd5676f",
+      "name": "منى إبراهيم",
+      "age": 40,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "غثيان"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 111.2,
+      "bmi": 27.2,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 124,
+        "diastolic": 87
+      },
+      "insulin": 20.1,
+      "diabetes_pedigree": 0.509,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-03-29",
+          "glucose": 129.6,
+          "systolic": 130,
+          "diastolic": 77,
+          "weight_kg": 87.0,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-12",
+          "glucose": 121.6,
+          "systolic": 139,
+          "diastolic": 84,
+          "weight_kg": 84.1,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-12",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "489D8149",
+      "patient_id": "P034",
+      "patient_hash": "88f4b781191c",
+      "name": "شيماء علي",
+      "age": 44,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "ضبابية رؤية",
+        "تعب وإرهاق"
+      ],
+      "current_medications": [
+        "أملوديبين",
+        "جليميبيريد"
+      ],
+      "glucose": 196.3,
+      "bmi": 39.7,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 126,
+        "diastolic": 80
+      },
+      "insulin": 193.1,
+      "diabetes_pedigree": 1.984,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-02-10",
+          "glucose": 196.1,
+          "systolic": 106,
+          "diastolic": 87,
+          "weight_kg": 86.3,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-02-10",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "B0ECE885",
+      "patient_id": "P035",
+      "patient_hash": "216c3065bd04",
+      "name": "ريم عبدالرحمن",
+      "age": 25,
+      "gender": "أنثى",
+      "blood_type": "A-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "كثرة تبول"
+      ],
+      "current_medications": [
+        "كابتوبريل"
+      ],
+      "glucose": 164.5,
+      "bmi": 28.2,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 112,
+        "diastolic": 93
+      },
+      "insulin": 67.3,
+      "diabetes_pedigree": 0.385,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-01-05",
+          "glucose": 155.8,
+          "systolic": 104,
+          "diastolic": 78,
+          "weight_kg": 62.7,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-02-04",
+          "glucose": 164.6,
+          "systolic": 123,
+          "diastolic": 92,
+          "weight_kg": 75.3,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-02-04",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "2C9C55AB",
+      "patient_id": "P036",
+      "patient_hash": "aaccd28a5c6f",
+      "name": "نادية سامي",
+      "age": 56,
+      "gender": "أنثى",
+      "blood_type": "A+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 101.2,
+      "bmi": 37.8,
+      "pregnancies": 4,
+      "blood_pressure": {
+        "systolic": 120,
+        "diastolic": 62
+      },
+      "insulin": 73.1,
+      "diabetes_pedigree": 1.335,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-24",
+          "glucose": 108.4,
+          "systolic": 128,
+          "diastolic": 89,
+          "weight_kg": 75.7,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-15",
+          "glucose": 111.7,
+          "systolic": 112,
+          "diastolic": 94,
+          "weight_kg": 69.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-04-06",
+          "glucose": 92.4,
+          "systolic": 131,
+          "diastolic": 93,
+          "weight_kg": 60.0,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-04-08",
+          "glucose": 83.7,
+          "systolic": 136,
+          "diastolic": 85,
+          "weight_kg": 68.7,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-08",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "8D73123A",
+      "patient_id": "P037",
+      "patient_hash": "f6df86a022b2",
+      "name": "هبة محمد",
+      "age": 33,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 140.7,
+      "bmi": 26.8,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 147,
+        "diastolic": 65
+      },
+      "insulin": 67.9,
+      "diabetes_pedigree": 0.36,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-02-08",
+          "glucose": 127.6,
+          "systolic": 142,
+          "diastolic": 63,
+          "weight_kg": 94.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-02-22",
+          "glucose": 128.8,
+          "systolic": 129,
+          "diastolic": 64,
+          "weight_kg": 59.1,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-27",
+          "glucose": 152.2,
+          "systolic": 125,
+          "diastolic": 93,
+          "weight_kg": 72.7,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-27",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "21AE80BF",
+      "patient_id": "P038",
+      "patient_hash": "cc8714120955",
+      "name": "دعاء أحمد",
+      "age": 55,
+      "gender": "أنثى",
+      "blood_type": "AB+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 196.1,
+      "bmi": 41.0,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 105,
+        "diastolic": 78
+      },
+      "insulin": 140.2,
+      "diabetes_pedigree": 0.706,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 3,
+          "date": "2026-01-17",
+          "glucose": 196.7,
+          "systolic": 121,
+          "diastolic": 66,
+          "weight_kg": 62.7,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-02-09",
+          "glucose": 206.9,
+          "systolic": 124,
+          "diastolic": 67,
+          "weight_kg": 87.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-24",
+          "glucose": 215.4,
+          "systolic": 119,
+          "diastolic": 77,
+          "weight_kg": 92.7,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-13",
+          "glucose": 185.0,
+          "systolic": 126,
+          "diastolic": 65,
+          "weight_kg": 62.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-13",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "895C541A",
+      "patient_id": "P039",
+      "patient_hash": "e8307afbf272",
+      "name": "ياسمين حسن",
+      "age": 61,
+      "gender": "أنثى",
+      "blood_type": "A+",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "غثيان"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 111.5,
+      "bmi": 21.5,
+      "pregnancies": 4,
+      "blood_pressure": {
+        "systolic": 127,
+        "diastolic": 87
+      },
+      "insulin": 60.3,
+      "diabetes_pedigree": 1.729,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-11",
+          "glucose": 118.1,
+          "systolic": 102,
+          "diastolic": 75,
+          "weight_kg": 72.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-02-01",
+          "glucose": 98.9,
+          "systolic": 122,
+          "diastolic": 79,
+          "weight_kg": 78.6,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-03-07",
+          "glucose": 115.3,
+          "systolic": 143,
+          "diastolic": 83,
+          "weight_kg": 59.8,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-07",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "98593B7A",
+      "patient_id": "P040",
+      "patient_hash": "bce6e8fcc0b9",
+      "name": "روان عمر",
+      "age": 35,
+      "gender": "أنثى",
+      "blood_type": "A-",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 184.2,
+      "bmi": 33.6,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 149,
+        "diastolic": 79
+      },
+      "insulin": 119.7,
+      "diabetes_pedigree": 1.959,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-04-09",
+          "glucose": 164.3,
+          "systolic": 103,
+          "diastolic": 75,
+          "weight_kg": 70.5,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-09",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "EE2A34D4",
+      "patient_id": "P041",
+      "patient_hash": "201906059d82",
+      "name": "فاطمة محمد",
+      "age": 47,
+      "gender": "أنثى",
+      "blood_type": "A+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 81.7,
+      "bmi": 37.9,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 144,
+        "diastolic": 86
+      },
+      "insulin": 47.0,
+      "diabetes_pedigree": 1.213,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-01-12",
+          "glucose": 90.6,
+          "systolic": 103,
+          "diastolic": 86,
+          "weight_kg": 80.2,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-27",
+          "glucose": 80.1,
+          "systolic": 101,
+          "diastolic": 79,
+          "weight_kg": 57.3,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-27",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "6581A36F",
+      "patient_id": "P042",
+      "patient_hash": "d85c92dd3f31",
+      "name": "أم أحمد علي",
+      "age": 42,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "لا يوجد",
+      "symptoms": [
+        "ضبابية رؤية",
+        "تعب وإرهاق",
+        "كثرة تبول"
+      ],
+      "current_medications": [
+        "أوميبرازول"
+      ],
+      "glucose": 131.0,
+      "bmi": 21.1,
+      "pregnancies": 2,
+      "blood_pressure": {
+        "systolic": 111,
+        "diastolic": 77
+      },
+      "insulin": 48.5,
+      "diabetes_pedigree": 1.491,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-03",
+          "glucose": 121.9,
+          "systolic": 123,
+          "diastolic": 91,
+          "weight_kg": 87.3,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-19",
+          "glucose": 124.4,
+          "systolic": 116,
+          "diastolic": 73,
+          "weight_kg": 91.7,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-04-19",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "D8DD8D51",
+      "patient_id": "P043",
+      "patient_hash": "2f62c3dbea6a",
+      "name": "سامية إبراهيم",
+      "age": 39,
+      "gender": "أنثى",
+      "blood_type": "O+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 187.9,
+      "bmi": 38.4,
+      "pregnancies": 6,
+      "blood_pressure": {
+        "systolic": 120,
+        "diastolic": 81
+      },
+      "insulin": 169.3,
+      "diabetes_pedigree": 1.458,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-04-05",
+          "glucose": 206.4,
+          "systolic": 140,
+          "diastolic": 87,
+          "weight_kg": 93.3,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 2,
+          "date": "2026-04-12",
+          "glucose": 193.0,
+          "systolic": 118,
+          "diastolic": 66,
+          "weight_kg": 70.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-12",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "A0D792AE",
+      "patient_id": "P044",
+      "patient_hash": "8299c7e8fedd",
+      "name": "نورا حسن",
+      "age": 48,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 101.3,
+      "bmi": 32.1,
+      "pregnancies": 5,
+      "blood_pressure": {
+        "systolic": 140,
+        "diastolic": 85
+      },
+      "insulin": 102.9,
+      "diabetes_pedigree": 1.091,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-02-25",
+          "glucose": 89.2,
+          "systolic": 133,
+          "diastolic": 71,
+          "weight_kg": 75.7,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-03-05",
+          "glucose": 103.5,
+          "systolic": 103,
+          "diastolic": 73,
+          "weight_kg": 84.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-03-10",
+          "glucose": 99.6,
+          "systolic": 106,
+          "diastolic": 76,
+          "weight_kg": 74.0,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-20",
+          "glucose": 109.4,
+          "systolic": 149,
+          "diastolic": 95,
+          "weight_kg": 66.0,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-20",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "DEAB482C",
+      "patient_id": "P045",
+      "patient_hash": "38025f3bbffb",
+      "name": "هدى عبدالله",
+      "age": 45,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "ألم بطن"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 130.0,
+      "bmi": 42.3,
+      "pregnancies": 1,
+      "blood_pressure": {
+        "systolic": 124,
+        "diastolic": 75
+      },
+      "insulin": 87.5,
+      "diabetes_pedigree": 0.319,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-03-01",
+          "glucose": 126.4,
+          "systolic": 148,
+          "diastolic": 69,
+          "weight_kg": 87.1,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-03-22",
+          "glucose": 143.5,
+          "systolic": 107,
+          "diastolic": 76,
+          "weight_kg": 72.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 4,
+          "date": "2026-03-23",
+          "glucose": 124.5,
+          "systolic": 114,
+          "diastolic": 72,
+          "weight_kg": 63.6,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-04-14",
+          "glucose": 142.5,
+          "systolic": 109,
+          "diastolic": 68,
+          "weight_kg": 72.3,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-14",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "F4E2EC84",
+      "patient_id": "P046",
+      "patient_hash": "cab4a22d6260",
+      "name": "مروة خالد",
+      "age": 44,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "ضبابية رؤية",
+        "عطش شديد"
+      ],
+      "current_medications": [
+        "جليبنكلاميد"
+      ],
+      "glucose": 149.5,
+      "bmi": 40.3,
+      "pregnancies": 3,
+      "blood_pressure": {
+        "systolic": 140,
+        "diastolic": 75
+      },
+      "insulin": 35.3,
+      "diabetes_pedigree": 0.283,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-03-01",
+          "glucose": 139.0,
+          "systolic": 126,
+          "diastolic": 82,
+          "weight_kg": 87.3,
+          "doctor_notes": "تعديل جرعة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-30",
+          "glucose": 139.4,
+          "systolic": 111,
+          "diastolic": 73,
+          "weight_kg": 55.9,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-03-30",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "78FEED17",
+      "patient_id": "P047",
+      "patient_hash": "97104179d97b",
+      "name": "رانيا سعيد",
+      "age": 34,
+      "gender": "أنثى",
+      "blood_type": "O+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "صداع"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 84.7,
+      "bmi": 35.6,
+      "pregnancies": 5,
+      "blood_pressure": {
+        "systolic": 135,
+        "diastolic": 78
+      },
+      "insulin": 136.9,
+      "diabetes_pedigree": 1.314,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-03-12",
+          "glucose": 100.3,
+          "systolic": 108,
+          "diastolic": 79,
+          "weight_kg": 72.2,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-03-12",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "50FAAADE",
+      "patient_id": "P048",
+      "patient_hash": "cf03fe16fed7",
+      "name": "أميرة عمر",
+      "age": 50,
+      "gender": "أنثى",
+      "blood_type": "O+",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "كثرة تبول",
+        "تعب وإرهاق",
+        "عطش شديد"
+      ],
+      "current_medications": [
+        "أملوديبين",
+        "جليميبيريد"
+      ],
+      "glucose": 134.5,
+      "bmi": 23.0,
+      "pregnancies": 0,
+      "blood_pressure": {
+        "systolic": 107,
+        "diastolic": 64
+      },
+      "insulin": 143.1,
+      "diabetes_pedigree": 1.011,
+      "outcome": 1,
+      "risk_level": "مرتفع",
+      "triage_level": "urgent",
+      "diagnosis": "سكري",
+      "recommended_action": "متابعة طبيب سكر",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-01-01",
+          "glucose": 154.4,
+          "systolic": 118,
+          "diastolic": 81,
+          "weight_kg": 73.5,
+          "doctor_notes": "تعديل جرعة"
+        }
+      ],
+      "last_visit": "2026-01-01",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "D7746A22",
+      "patient_id": "P049",
+      "patient_hash": "fba92f681a7f",
+      "name": "دينا يوسف",
+      "age": 62,
+      "gender": "أنثى",
+      "blood_type": "O-",
+      "allergies": "بنسلين",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 108.0,
+      "bmi": 36.0,
+      "pregnancies": 5,
+      "blood_pressure": {
+        "systolic": 140,
+        "diastolic": 65
+      },
+      "insulin": 185.6,
+      "diabetes_pedigree": 1.52,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 2,
+          "date": "2026-02-05",
+          "glucose": 113.0,
+          "systolic": 124,
+          "diastolic": 81,
+          "weight_kg": 57.7,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 1,
+          "date": "2026-03-17",
+          "glucose": 98.5,
+          "systolic": 119,
+          "diastolic": 89,
+          "weight_kg": 71.4,
+          "doctor_notes": "متابعة منتظمة"
+        },
+        {
+          "visit_number": 3,
+          "date": "2026-04-09",
+          "glucose": 113.1,
+          "systolic": 128,
+          "diastolic": 77,
+          "weight_kg": 94.3,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-04-09",
+      "created_at": "2026-03-15"
+    },
+    {
+      "id": "7D2F0E05",
+      "patient_id": "P050",
+      "patient_hash": "7b0c826b5be1",
+      "name": "إيمان محمود",
+      "age": 55,
+      "gender": "أنثى",
+      "blood_type": "B+",
+      "allergies": "أسبرين",
+      "symptoms": [
+        "دوخة"
+      ],
+      "current_medications": [
+        "لا يوجد"
+      ],
+      "glucose": 119.5,
+      "bmi": 28.6,
+      "pregnancies": 5,
+      "blood_pressure": {
+        "systolic": 120,
+        "diastolic": 82
+      },
+      "insulin": 116.9,
+      "diabetes_pedigree": 0.286,
+      "outcome": 0,
+      "risk_level": "منخفض",
+      "triage_level": "routine",
+      "diagnosis": "سليم",
+      "recommended_action": "متابعة دورية",
+      "visit_history": [
+        {
+          "visit_number": 1,
+          "date": "2026-02-26",
+          "glucose": 138.0,
+          "systolic": 125,
+          "diastolic": 75,
+          "weight_kg": 61.0,
+          "doctor_notes": "متابعة منتظمة"
+        }
+      ],
+      "last_visit": "2026-02-26",
+      "created_at": "2026-03-15"
+    }
+  ]
+}
