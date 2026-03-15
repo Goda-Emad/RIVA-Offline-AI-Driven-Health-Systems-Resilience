@@ -1,1 +1,122 @@
-
+{
+  "source": "RIVA Triage Explanation Rules",
+  "version": "1.0",
+  "last_updated": "2026-03",
+  "description": "قواعد شرح قرار الفرز الطبي بالعربي",
+  "triage_levels": {
+    "طارئ": {
+      "label": 2,
+      "color": "red",
+      "icon": "🔴",
+      "description": "خطر على الحياة — تدخل فوري خلال دقائق",
+      "action": "اتصل بالإسعاف فوراً",
+      "score_threshold": 0.75
+    },
+    "عاجل": {
+      "label": 1,
+      "color": "orange",
+      "icon": "🟡",
+      "description": "حالة تحتاج طبيب خلال ساعات",
+      "action": "كشف طبيب خلال ساعات",
+      "score_threshold": 0.45
+    },
+    "غير عاجل": {
+      "label": 0,
+      "color": "green",
+      "icon": "🟢",
+      "description": "يمكن المتابعة في العيادة",
+      "action": "راحة + متابعة عيادة",
+      "score_threshold": 0.0
+    }
+  },
+  "score_components": {
+    "physiological": {
+      "weight": 0.5,
+      "description": "تقييم فسيولوجي من نموذج PIMA",
+      "explanation_ar": "بناءً على قياسات السكر والضغط والوزن"
+    },
+    "clinical": {
+      "weight": 0.35,
+      "description": "تقييم الأعراض السريرية",
+      "explanation_ar": "بناءً على شدة الأعراض ومستوى الألم"
+    },
+    "interaction": {
+      "weight": 0.15,
+      "description": "تقييم تعارض الأدوية",
+      "explanation_ar": "بناءً على الأدوية الحالية وتفاعلاتها"
+    }
+  },
+  "symptom_explanations": {
+    "ألم في الصدر": {
+      "weight": 1.0,
+      "explanation_ar": "ألم الصدر خطر محتمل على القلب — يستدعي تدخلاً فورياً",
+      "triage_impact": "طارئ فوراً"
+    },
+    "ضيق تنفس": {
+      "weight": 1.0,
+      "explanation_ar": "صعوبة التنفس تشير لمشكلة في القلب أو الرئة",
+      "triage_impact": "طارئ فوراً"
+    },
+    "فقدان وعي": {
+      "weight": 1.0,
+      "explanation_ar": "فقدان الوعي يشير لخطر فوري على الحياة",
+      "triage_impact": "طارئ فوراً"
+    },
+    "تشنجات": {
+      "weight": 1.0,
+      "explanation_ar": "التشنجات تشير لمشكلة عصبية أو هبوط سكر حاد",
+      "triage_impact": "طارئ فوراً"
+    },
+    "حمى شديدة": {
+      "weight": 0.8,
+      "explanation_ar": "حمى فوق 39 درجة تستدعي تدخلاً سريعاً",
+      "triage_impact": "عاجل"
+    },
+    "عطش شديد": {
+      "weight": 0.5,
+      "explanation_ar": "العطش الشديد مع كثرة التبول يشير لارتفاع السكر",
+      "triage_impact": "عاجل — فحص سكر فوري"
+    },
+    "صداع": {
+      "weight": 0.3,
+      "explanation_ar": "صداع بسيط — يحتاج متابعة",
+      "triage_impact": "غير عاجل"
+    },
+    "غثيان": {
+      "weight": 0.3,
+      "explanation_ar": "غثيان خفيف — مراقبة",
+      "triage_impact": "غير عاجل"
+    }
+  },
+  "diabetes_explanations": {
+    "high_risk": {
+      "threshold": 0.8,
+      "explanation_ar": "احتمال إصابة بالسكري مرتفع جداً — يُنصح بتحليل HbA1c فوراً",
+      "action_ar": "زيارة طبيب الغدد الصماء"
+    },
+    "medium_risk": {
+      "threshold": 0.5,
+      "explanation_ar": "احتمال إصابة بالسكري متوسط — متابعة وتعديل نمط الحياة",
+      "action_ar": "قياس السكر أسبوعياً"
+    },
+    "low_risk": {
+      "threshold": 0.0,
+      "explanation_ar": "احتمال إصابة بالسكري منخفض — متابعة دورية",
+      "action_ar": "فحص سنوي"
+    }
+  },
+  "interaction_explanations": {
+    "high": {
+      "explanation_ar": "تعارض دوائي خطير — يستدعي تدخل طبيب فوراً",
+      "action_ar": "لا تأخذ الدواءين معاً"
+    },
+    "medium": {
+      "explanation_ar": "تعارض دوائي متوسط — يحتاج مراقبة",
+      "action_ar": "استشر الطبيب أو الصيدلاني"
+    },
+    "low": {
+      "explanation_ar": "تعارض دوائي بسيط — مجرد احتياط",
+      "action_ar": "فارق وقت بين الجرعتين"
+    }
+  }
+}
