@@ -11,5 +11,10 @@
   "HighBP",
   "MeanBP",
   "AgeRisk",
-  "HighSugar"
+  "HighSugar",
+  "BP_BS_Interaction",
+  "Total_Risk_Score",
+  "Age_BP_Interaction",
+  "BP_Severity",
+  "BS_Severity"
 ]
