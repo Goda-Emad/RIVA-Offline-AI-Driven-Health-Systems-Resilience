@@ -130,26 +130,49 @@ async def unload_pregnancy_resources():
 
 # ================== 6️⃣ دالة لتجهيز الميزات ==================
 def prepare_features(data: PregnancyRequest):
-    """تجهيز الميزات بالترتيب نفسه اللي اتدرب عليه الموديل"""
+    """تجهيز الميزات بالترتيب نفسه اللي اتدرب عليه الموديل (18 ميزة)"""
     
-    # حساب جميع الميزات الممكنة
+    # حساب جميع الميزات (13 + 5 = 18)
     features_dict = {
+        # الميزات الأساسية (6)
         "Age": data.age,
         "SystolicBP": data.systolic_bp,
         "DiastolicBP": data.diastolic_bp,
         "BS": data.bs,
         "BodyTemp": data.body_temp,
         "HeartRate": data.heart_rate,
+        
+        # الميزات المشتقة (7)
         "PulsePressure": data.systolic_bp - data.diastolic_bp,
         "BP_ratio": round(data.systolic_bp / data.diastolic_bp, 2),
         "Temp_Fever": 1 if data.body_temp > 37.5 else 0,
         "HighBP": 1 if data.systolic_bp > 140 else 0,
         "MeanBP": (data.systolic_bp + 2 * data.diastolic_bp) / 3,
         "AgeRisk": 1 if data.age > 35 else 0,
-        "HighSugar": 1 if data.bs > 7 else 0
+        "HighSugar": 1 if data.bs > 7 else 0,
+        
+        # ⭐ الميزات التفاعلية الجديدة (5) - لازم تضاف هنا!
+        "BP_BS_Interaction": data.systolic_bp * data.bs / 100,
+        "Total_Risk_Score": (
+            (1 if data.systolic_bp > 140 else 0) +
+            (1 if data.age > 35 else 0) +
+            (1 if data.bs > 7 else 0) +
+            (1 if data.body_temp > 37.5 else 0)
+        ),
+        "Age_BP_Interaction": data.age * data.systolic_bp / 100,
+        "BP_Severity": (
+            3 if data.systolic_bp > 160 else
+            2 if data.systolic_bp > 140 else
+            1 if data.systolic_bp > 130 else 0
+        ),
+        "BS_Severity": (
+            3 if data.bs > 11 else
+            2 if data.bs > 8 else
+            1 if data.bs > 6.5 else 0
+        )
     }
     
-    # التحقق من وجود كل الميزات المطلوبة
+    # التحقق من وجود كل الميزات (18 ميزة)
     missing_features = [f for f in feature_names if f not in features_dict]
     if missing_features:
         raise ValueError(f"ميزات ناقصة: {missing_features}")
@@ -160,7 +183,6 @@ def prepare_features(data: PregnancyRequest):
     # تحويل لـ DataFrame
     df = pd.DataFrame([features_list], columns=feature_names)
     return df
-
 # ================== 7️⃣ نقاط النهاية (Endpoints) ==================
 
 @router.post("/pregnancy/predict", response_model=PregnancyResponse)
