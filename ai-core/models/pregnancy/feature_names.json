@@ -1,0 +1,15 @@
+[
+  "Age",
+  "SystolicBP",
+  "DiastolicBP",
+  "BS",
+  "BodyTemp",
+  "HeartRate",
+  "PulsePressure",
+  "BP_ratio",
+  "Temp_Fever",
+  "HighBP",
+  "MeanBP",
+  "AgeRisk",
+  "HighSugar"
+]
