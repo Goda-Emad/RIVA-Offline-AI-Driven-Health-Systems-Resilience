@@ -10,34 +10,27 @@ import os
 import logging
 from typing import List, Dict, Any, Optional
 
-# ================== 1️⃣ إعداد logging بدلاً من print ==================
+# ✅ استيراد الـ predictor
+import sys
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
+from ai_core.local_inference.pregnancy_risk import PregnancyRiskPredictor
+
+# ================== 1️⃣ إعداد logging ==================
 logger = logging.getLogger(__name__)
 
-# ================== 2️⃣ إعداد المسارات الديناميكية (مرنة لأي هيكل) ==================
-# في Production، هنستخدم متغيرات البيئة
-import os
+# ================== 2️⃣ إعداد المسارات ==================
 from dotenv import load_dotenv
-
-# تحميل ملف .env لو موجود
 load_dotenv()
 
-# المسار الأساسي: إما من .env أو من هيكل المجلدات
 BASE_DIR = Path(os.getenv("RIVA_BASE_DIR", Path(__file__).resolve().parent.parent.parent.parent))
 
-# ✅ تم التحديث للنموذج الجديد (بدل القديم)
-MODEL_PATH = BASE_DIR / "ai-core" / "models" / "pregnancy" / "maternal_health_optimized_pipeline.pkl"
-
-# ✅ باقي الملفات زي ما هي (اتحدثت مع الرفع)
-FEATURES_PATH = BASE_DIR / "ai-core" / "models" / "pregnancy" / "feature_names.json"
-CLASS_NAMES_PATH = BASE_DIR / "ai-core" / "models" / "pregnancy" / "class_names.json"
-
-# ✅ الملفات التانية زي ما هي (مفيش تغيير)
+# المسارات للملفات الإضافية
 RISK_FACTORS_PATH = BASE_DIR / "business-intelligence" / "medical-content" / "pregnancy_risk_factors.json"
 SAMPLES_PATH = BASE_DIR / "data-storage" / "samples" / "pregnancy_samples.min.json"
 
 router = APIRouter()
 
-# ================== 3️⃣ نموذج البيانات مع Validations (Pydantic V2) ==================
+# ================== 3️⃣ نموذج البيانات ==================
 class PregnancyRequest(BaseModel):
     """بيانات الحامل (بالعامية المصرية)"""
     patient_id: str
@@ -48,7 +41,6 @@ class PregnancyRequest(BaseModel):
     body_temp: float = Field(..., ge=35, le=42, description="درجة الحرارة")
     heart_rate: int = Field(..., ge=40, le=180, description="نبض القلب")
     
-    # ✅ @classmethod إلزامي مع field_validator في Pydantic V2
     @classmethod
     @field_validator('diastolic_bp')
     def prevent_zero_division(cls, v):
@@ -65,139 +57,76 @@ class PregnancyRequest(BaseModel):
 
 class PregnancyResponse(BaseModel):
     patient_id: str
-    risk_level: str                # low/mid/high
-    risk_level_ar: str             # منخفض/متوسط/مرتفع
+    risk_level: str
+    risk_level_ar: str
     confidence: float
     pulse_pressure: int
     bp_ratio: float
     temp_fever: int
     recommendations: str
 
-# ================== 4️⃣ متغيرات عامة (هتتحمل في Startup مش هنا) ==================
-# هتتحمل في main.py باستخدام lifespan
-model = None
-feature_names = None
-class_names = None
-risk_factors = None
-samples_cache = None
+# ================== 4️⃣ Singleton Predictor ==================
+# ✅ يتم تحميله مرة واحدة فقط عند بدء التشغيل
+_predictor: Optional[PregnancyRiskPredictor] = None
+_risk_factors: Optional[Dict] = None
+_samples_cache: Optional[List] = None
 
-# ================== 5️⃣ دوال التحميل (تتنادى من main.py) ==================
-async def load_pregnancy_resources():
-    """تحميل جميع موارد الحمل (تتنادى عند startup)"""
-    global model, feature_names, class_names, risk_factors, samples_cache
-    
-    logger.info("📦 بدأ تحميل موارد الحمل...")
-    
-    try:
-        # تحميل النموذج
-        logger.info(f"تحميل النموذج من: {MODEL_PATH}")
-        model = joblib.load(MODEL_PATH)
-        
-        # تحميل أسماء الميزات
-        with open(FEATURES_PATH, 'r') as f:
-            feature_names = json.load(f)
-        
-        # تحميل أسماء الفئات
-        with open(CLASS_NAMES_PATH, 'r') as f:
-            class_names = json.load(f)
-        
-        # تحميل عوامل الخطورة
-        with open(RISK_FACTORS_PATH, 'r') as f:
-            risk_factors = json.load(f)
-        
-        # تحميل العينات
-        with open(SAMPLES_PATH, 'r') as f:
-            samples_cache = json.load(f)
-        
-        logger.info(f"✅ تم التحميل: {len(feature_names)} ميزة، {len(class_names)} فئة، {len(samples_cache)} عينة")
-        return True
-        
-    except Exception as e:
-        logger.error(f"❌ فشل تحميل موارد الحمل: {e}")
-        return False
+def get_predictor() -> PregnancyRiskPredictor:
+    """الحصول على نسخة واحدة من الـ predictor (Singleton)"""
+    global _predictor
+    if _predictor is None:
+        logger.info("🚀 إنشاء نسخة جديدة من PregnancyRiskPredictor (مرة واحدة)")
+        _predictor = PregnancyRiskPredictor()
+    return _predictor
 
-async def unload_pregnancy_resources():
-    """تنظيف الموارد (تتنادى عند shutdown)"""
-    global model, feature_names, class_names, risk_factors, samples_cache
+async def load_extra_resources():
+    """تحميل الموارد الإضافية (مرة واحدة)"""
+    global _risk_factors, _samples_cache
     
-    logger.info("🧹 تنظيف موارد الحمل...")
-    model = None
-    feature_names = None
-    class_names = None
-    risk_factors = None
-    samples_cache = None
-    logger.info("✅ تم التنظيف")
+    if _risk_factors is None:
+        try:
+            with open(RISK_FACTORS_PATH, 'r') as f:
+                _risk_factors = json.load(f)
+            logger.info(f"✅ تم تحميل عوامل الخطورة")
+        except Exception as e:
+            logger.error(f"❌ فشل تحميل عوامل الخطورة: {e}")
+            _risk_factors = {}
+    
+    if _samples_cache is None:
+        try:
+            with open(SAMPLES_PATH, 'r') as f:
+                _samples_cache = json.load(f)
+            logger.info(f"✅ تم تحميل {len(_samples_cache)} عينة")
+        except Exception as e:
+            logger.error(f"❌ فشل تحميل العينات: {e}")
+            _samples_cache = []
 
-# ================== 6️⃣ دالة لتجهيز الميزات ==================
-def prepare_features(data: PregnancyRequest):
-    """تجهيز الميزات بالترتيب نفسه اللي اتدرب عليه الموديل"""
-    
-    # الميزات بالترتيب الصحيح (زي ما في feature_names.json)
-    features_dict = {
-        # 1-6: الميزات الأساسية
-        "Age": data.age,
-        "SystolicBP": data.systolic_bp,
-        "DiastolicBP": data.diastolic_bp,
-        "BS": data.bs,
-        "BodyTemp": data.body_temp,
-        "HeartRate": data.heart_rate,
-        
-        # 7-13: الميزات المشتقة
-        "PulsePressure": data.systolic_bp - data.diastolic_bp,
-        "BP_ratio": round(data.systolic_bp / data.diastolic_bp, 2),
-        "Temp_Fever": 1 if data.body_temp > 37.5 else 0,
-        "HighBP": 1 if data.systolic_bp > 140 else 0,
-        "MeanBP": (data.systolic_bp + 2 * data.diastolic_bp) / 3,
-        "AgeRisk": 1 if data.age > 35 else 0,
-        "HighSugar": 1 if data.bs > 7 else 0,
-        
-        # 14-18: الميزات التفاعلية الجديدة
-        "BP_BS_Interaction": data.systolic_bp * data.bs / 100,
-        "Total_Risk_Score": (
-            (1 if data.systolic_bp > 140 else 0) +
-            (1 if data.age > 35 else 0) +
-            (1 if data.bs > 7 else 0) +
-            (1 if data.body_temp > 37.5 else 0)
-        ),
-        "Age_BP_Interaction": data.age * data.systolic_bp / 100,
-        "BP_Severity": (
-            3 if data.systolic_bp > 160 else
-            2 if data.systolic_bp > 140 else
-            1 if data.systolic_bp > 130 else 0
-        ),
-        "BS_Severity": (
-            3 if data.bs > 11 else
-            2 if data.bs > 8 else
-            1 if data.bs > 6.5 else 0
-        )
-    }
-    
-    # ✅ الترتيب حسب feature_names (الضمانة النهائية)
-    features_list = [features_dict[name] for name in feature_names]
-    df = pd.DataFrame([features_list], columns=feature_names)
-    
-    return df
-# ================== 7️⃣ نقاط النهاية (Endpoints) ==================
+# ================== 5️⃣ نقاط النهاية ==================
 
 @router.post("/pregnancy/predict", response_model=PregnancyResponse)
 async def predict_pregnancy_risk(data: PregnancyRequest):
     """
     توقع مستوى خطورة الحمل
     """
-    # التأكد إن الموارد محملة
-    if model is None or feature_names is None:
+    predictor = get_predictor()
+    
+    if not predictor.is_loaded():
         logger.error("محاولة توقع قبل تحميل الموارد")
-        raise HTTPException(status_code=503, detail="الخدمة غير متاحة حالياً (الموارد بتتحمل)")
+        raise HTTPException(status_code=503, detail="الخدمة غير متاحة حالياً (النموذج بيتحمل)")
     
     try:
-        # تجهيز الميزات
-        features_df = prepare_features(data)
-        logger.debug(f"تم تجهيز ميزات للمريض {data.patient_id}")
+        # ✅ استخدام predictor مباشرة
+        result = predictor.predict(
+            age=data.age,
+            systolic_bp=data.systolic_bp,
+            diastolic_bp=data.diastolic_bp,
+            bs=data.bs,
+            body_temp=data.body_temp,
+            heart_rate=data.heart_rate
+        )
         
-        # توقع
-        prediction = model.predict(features_df)[0]
-        probabilities = model.predict_proba(features_df)[0]
-        confidence = float(max(probabilities))
+        if "error" in result:
+            raise HTTPException(status_code=400, detail=result["error"])
         
         # ترجمة النتيجة
         risk_map_ar = {0: "منخفض", 1: "متوسط", 2: "مرتفع"}
@@ -209,17 +138,20 @@ async def predict_pregnancy_risk(data: PregnancyRequest):
             2: "تدخل طبي فوري ومتابعة مكثفة في وحدة الحمل عالي الخطورة"
         }
         
-        logger.info(f"✅ توقع للمريض {data.patient_id}: {class_names[prediction]} بثقة {confidence:.2f}")
+        # تحويل الرقم للنص
+        risk_level_encoded = result["risk_level_encoded"]
+        
+        logger.info(f"✅ توقع للمريض {data.patient_id}: {result['risk_level']} بثقة {result['confidence']:.2f}")
         
         return PregnancyResponse(
             patient_id=data.patient_id,
-            risk_level=class_names[prediction],
-            risk_level_ar=risk_map_ar[prediction],
-            confidence=confidence,
-            pulse_pressure=data.systolic_bp - data.diastolic_bp,
-            bp_ratio=round(data.systolic_bp / data.diastolic_bp, 2),
-            temp_fever=1 if data.body_temp > 37.5 else 0,
-            recommendations=recommendations_map[prediction]
+            risk_level=result["risk_level"],
+            risk_level_ar=risk_map_ar[risk_level_encoded],
+            confidence=result["confidence"],
+            pulse_pressure=result["pulse_pressure"],
+            bp_ratio=result["bp_ratio"],
+            temp_fever=result["temp_fever"],
+            recommendations=recommendations_map[risk_level_encoded]
         )
         
     except ValueError as ve:
@@ -232,25 +164,35 @@ async def predict_pregnancy_risk(data: PregnancyRequest):
 @router.get("/pregnancy/risk-factors")
 async def get_risk_factors():
     """جلب عوامل خطورة الحمل"""
-    if risk_factors is None:
+    await load_extra_resources()
+    if not _risk_factors:
         raise HTTPException(status_code=503, detail="عوامل الخطورة غير محملة")
-    return risk_factors
+    return _risk_factors
 
 @router.get("/pregnancy/samples")
 async def get_samples(limit: int = 10):
     """جلب عينات الحمل"""
-    if samples_cache is None:
+    await load_extra_resources()
+    if not _samples_cache:
         raise HTTPException(status_code=503, detail="العينات غير محملة")
-    return samples_cache[:min(limit, len(samples_cache))]
+    return _samples_cache[:min(limit, len(_samples_cache))]
 
 @router.get("/pregnancy/health")
 async def health_check():
     """التحقق من صحة الخدمة"""
+    predictor = get_predictor()
     return {
         "status": "✅ خدمة pregnancy شغالة",
-        "model_loaded": model is not None,
-        "features": len(feature_names) if feature_names else 0,
-        "classes": class_names if class_names else [],
-        "samples_loaded": len(samples_cache) if samples_cache else 0,
-        "model_path": str(MODEL_PATH)
+        "predictor_loaded": predictor.is_loaded(),
+        "features": len(predictor.feature_names) if predictor.feature_names else 0,
+        "classes": predictor.class_names if predictor.class_names else [],
+        "samples_loaded": len(_samples_cache) if _samples_cache else 0
     }
+
+# ================== 6️⃣ دالة للاستخدام في main.py ==================
+async def init_pregnancy_router():
+    """تهيئة الموارد عند بدء التشغيل"""
+    logger.info("🔄 تهيئة موارد pregnancy...")
+    get_predictor()  # تحميل النموذج
+    await load_extra_resources()  # تحميل الموارد الإضافية
+    logger.info("✅ تم تهيئة جميع موارد pregnancy")
