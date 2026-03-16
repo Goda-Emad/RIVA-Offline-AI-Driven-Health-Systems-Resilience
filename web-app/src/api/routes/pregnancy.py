@@ -130,11 +130,11 @@ async def unload_pregnancy_resources():
 
 # ================== 6️⃣ دالة لتجهيز الميزات ==================
 def prepare_features(data: PregnancyRequest):
-    """تجهيز الميزات بالترتيب نفسه اللي اتدرب عليه الموديل (18 ميزة)"""
+    """تجهيز الميزات بالترتيب نفسه اللي اتدرب عليه الموديل"""
     
-    # حساب جميع الميزات (13 + 5 = 18)
+    # الميزات بالترتيب الصحيح (زي ما في feature_names.json)
     features_dict = {
-        # الميزات الأساسية (6)
+        # 1-6: الميزات الأساسية
         "Age": data.age,
         "SystolicBP": data.systolic_bp,
         "DiastolicBP": data.diastolic_bp,
@@ -142,7 +142,7 @@ def prepare_features(data: PregnancyRequest):
         "BodyTemp": data.body_temp,
         "HeartRate": data.heart_rate,
         
-        # الميزات المشتقة (7)
+        # 7-13: الميزات المشتقة
         "PulsePressure": data.systolic_bp - data.diastolic_bp,
         "BP_ratio": round(data.systolic_bp / data.diastolic_bp, 2),
         "Temp_Fever": 1 if data.body_temp > 37.5 else 0,
@@ -151,7 +151,7 @@ def prepare_features(data: PregnancyRequest):
         "AgeRisk": 1 if data.age > 35 else 0,
         "HighSugar": 1 if data.bs > 7 else 0,
         
-        # ⭐ الميزات التفاعلية الجديدة (5) - لازم تضاف هنا!
+        # 14-18: الميزات التفاعلية الجديدة
         "BP_BS_Interaction": data.systolic_bp * data.bs / 100,
         "Total_Risk_Score": (
             (1 if data.systolic_bp > 140 else 0) +
@@ -172,16 +172,10 @@ def prepare_features(data: PregnancyRequest):
         )
     }
     
-    # التحقق من وجود كل الميزات (18 ميزة)
-    missing_features = [f for f in feature_names if f not in features_dict]
-    if missing_features:
-        raise ValueError(f"ميزات ناقصة: {missing_features}")
-    
-    # ترتيب الميزات حسب feature_names
+    # ✅ الترتيب حسب feature_names (الضمانة النهائية)
     features_list = [features_dict[name] for name in feature_names]
-    
-    # تحويل لـ DataFrame
     df = pd.DataFrame([features_list], columns=feature_names)
+    
     return df
 # ================== 7️⃣ نقاط النهاية (Endpoints) ==================
 
