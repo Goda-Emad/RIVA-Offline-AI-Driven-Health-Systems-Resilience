@@ -24,9 +24,14 @@ load_dotenv()
 # المسار الأساسي: إما من .env أو من هيكل المجلدات
 BASE_DIR = Path(os.getenv("RIVA_BASE_DIR", Path(__file__).resolve().parent.parent.parent.parent))
 
-MODEL_PATH = BASE_DIR / "ai-core" / "models" / "pregnancy" / "maternal_health_xgb_pipeline.pkl"
+# ✅ تم التحديث للنموذج الجديد (بدل القديم)
+MODEL_PATH = BASE_DIR / "ai-core" / "models" / "pregnancy" / "maternal_health_optimized_pipeline.pkl"
+
+# ✅ باقي الملفات زي ما هي (اتحدثت مع الرفع)
 FEATURES_PATH = BASE_DIR / "ai-core" / "models" / "pregnancy" / "feature_names.json"
 CLASS_NAMES_PATH = BASE_DIR / "ai-core" / "models" / "pregnancy" / "class_names.json"
+
+# ✅ الملفات التانية زي ما هي (مفيش تغيير)
 RISK_FACTORS_PATH = BASE_DIR / "business-intelligence" / "medical-content" / "pregnancy_risk_factors.json"
 SAMPLES_PATH = BASE_DIR / "data-storage" / "samples" / "pregnancy_samples.min.json"
 
