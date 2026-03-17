@@ -1,1 +1,18 @@
-
+{
+  "features": [
+    "admit_year",
+    "admit_ELECTIVE",
+    "admit_EMERGENCY",
+    "admit_URGENT",
+    "gender_F",
+    "gender_M",
+    "age",
+    "num_diagnoses",
+    "num_procedures",
+    "num_medications"
+  ],
+  "los_99": 30.471308449074087,
+  "n_samples": 136,
+  "mae": 1.9132229089736938,
+  "r2": 0.06871122121810913
+}
