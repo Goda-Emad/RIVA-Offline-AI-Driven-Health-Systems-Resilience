@@ -1,1 +1,19 @@
-
+{
+  "features": [
+    "length_of_stay",
+    "total_visits",
+    "num_diagnoses",
+    "num_medications",
+    "num_procedures",
+    "charlson_index"
+  ],
+  "importance": [
+    0.0695391297340393,
+    0.5915049314498901,
+    0.07596246153116226,
+    0.10734786093235016,
+    0.07032201439142227,
+    0.08532364666461945
+  ],
+  "model_type": "XGBoost"
+}
