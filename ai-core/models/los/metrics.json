@@ -1,0 +1,37 @@
+{
+  "mae": 3.2303693294525146,
+  "rmse": 4.877101151951055,
+  "r2": -0.8094476461410522,
+  "feature_importance": [
+    {
+      "feature": "age",
+      "importance": 0.48569250106811523
+    },
+    {
+      "feature": "gender_F",
+      "importance": 0.26857805252075195
+    },
+    {
+      "feature": "admit_year",
+      "importance": 0.2189418524503708
+    },
+    {
+      "feature": "admit_ELECTIVE",
+      "importance": 0.02678762935101986
+    },
+    {
+      "feature": "admit_EMERGENCY",
+      "importance": 0.0
+    },
+    {
+      "feature": "admit_URGENT",
+      "importance": 0.0
+    },
+    {
+      "feature": "gender_M",
+      "importance": 0.0
+    }
+  ],
+  "n_samples": 136,
+  "los_99": 30.471308449074087
+}
