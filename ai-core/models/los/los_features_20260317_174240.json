@@ -1,0 +1,35 @@
+{
+  "features": [
+    "CHF",
+    "ARRHYTHMIA",
+    "VALVULAR",
+    "PULMONARY",
+    "PVD",
+    "HYPERTENSION",
+    "PARALYSIS",
+    "NEUROLOGICAL",
+    "HYPOTHYROID",
+    "RENAL",
+    "LIVER",
+    "ULCER",
+    "AIDS",
+    "lab_count",
+    "lab_mean",
+    "had_outpatient_labs",
+    "heart_rate_mean",
+    "sbp_mean",
+    "dbp_mean",
+    "resp_rate_mean",
+    "temperature_mean",
+    "spo2_mean"
+  ],
+  "best_params": {
+    "colsample_bytree": 0.9,
+    "learning_rate": 0.01,
+    "max_depth": 3,
+    "n_estimators": 100,
+    "subsample": 1.0
+  },
+  "final_mae": 7.10795301575946,
+  "model_type": "xgb_tuned"
+}
