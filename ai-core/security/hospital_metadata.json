@@ -1,0 +1,20 @@
+{
+  "database": "hospital.encrypted",
+  "algorithm": "AES-256-GCM",
+  "iterations": 100000,
+  "tables": [
+    "patients",
+    "admissions",
+    "diagnoses",
+    "procedures",
+    "prescriptions",
+    "lab_events",
+    "vital_signs",
+    "readmission_predictions",
+    "los_predictions"
+  ],
+  "views": [
+    "unified_patient_history"
+  ],
+  "created_at": "2026-03-17T12:29:38.333206"
+}
