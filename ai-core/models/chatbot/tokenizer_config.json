@@ -1,1 +1,213 @@
+{
+  "_metadata": {
+    "file": "tokenizer_config.json",
+    "purpose": "Tokenizer configuration for RIVA Egyptian Arabic Medical Chatbot (DistilBERT)",
+    "component": "ai-core/models/chatbot/",
+    "project": "RIVA Health Platform v4.0",
+    "hackathon": "Harvard HSIL 2026 — Building High-Value Health Systems: Leveraging AI",
+    "maintainer": "GODA EMAD",
+    "last_updated": "2026-03-17T17:55:02Z",
+    "schema_version": "2.0",
+    "paired_with": ["model_int8.onnx", "download_flag.json"]
+  },
 
+  "tokenizer_class": "BertTokenizer",
+  "model_type": "distilbert",
+  "base_model": "distilbert-base-multilingual-cased",
+  "finetuned_on": "Egyptian Arabic Medical Corpus (custom)",
+  "vocab_size": 32000,
+  "do_lower_case": false,
+
+  "special_tokens": {
+    "unk_token": "[UNK]",
+    "sep_token": "[SEP]",
+    "pad_token": "[PAD]",
+    "cls_token": "[CLS]",
+    "mask_token": "[MASK]",
+    "unk_token_id": 100,
+    "sep_token_id": 102,
+    "pad_token_id": 0,
+    "cls_token_id": 101,
+    "mask_token_id": 103
+  },
+
+  "tokenization": {
+    "max_length": 512,
+    "truncation": true,
+    "padding": "max_length",
+    "return_attention_mask": true,
+    "return_token_type_ids": false,
+    "add_special_tokens": true,
+    "stride": 0
+  },
+
+  "language_config": {
+    "primary_language": "Egyptian Arabic",
+    "language_code": "ar-EG",
+    "dialect": "Egyptian (العامية المصرية)",
+    "script": "Arabic",
+    "supports_arabizi": true,
+    "supports_mixed_arabic_english": true,
+    "normalization": {
+      "normalize_alef": true,
+      "normalize_hamza": true,
+      "remove_diacritics": true,
+      "remove_tatweel": true,
+      "normalize_teh_marbuta": true,
+      "normalize_yeh": true
+    }
+  },
+
+  "medical_vocabulary": {
+    "domain": "clinical_egyptian_arabic",
+    "custom_tokens_added": 1247,
+    "medical_categories": [
+      "symptoms_arabic",
+      "anatomy_arabic",
+      "medications_arabic",
+      "procedures_arabic",
+      "egyptian_colloquial_medical",
+      "lab_results_arabic",
+      "vital_signs_arabic"
+    ],
+    "sample_custom_tokens": [
+      "عندي_وجع",
+      "بيوجعني",
+      "حمّل",
+      "سخونة",
+      "ضغط_الدم",
+      "سكر_الدم",
+      "أشعة",
+      "تحليل",
+      "وصفة_طبية",
+      "دكتور"
+    ]
+  },
+
+  "intent_labels": {
+    "num_labels": 12,
+    "id2label": {
+      "0": "symptom_description",
+      "1": "triage_intent",
+      "2": "medication_query",
+      "3": "appointment_request",
+      "4": "pregnancy_concern",
+      "5": "school_health_report",
+      "6": "emergency_alert",
+      "7": "test_result_query",
+      "8": "doctor_followup",
+      "9": "nutrition_advice",
+      "10": "mental_health_concern",
+      "11": "general_inquiry"
+    },
+    "label2id": {
+      "symptom_description": 0,
+      "triage_intent": 1,
+      "medication_query": 2,
+      "appointment_request": 3,
+      "pregnancy_concern": 4,
+      "school_health_report": 5,
+      "emergency_alert": 6,
+      "test_result_query": 7,
+      "doctor_followup": 8,
+      "nutrition_advice": 9,
+      "mental_health_concern": 10,
+      "general_inquiry": 11
+    },
+    "high_priority_intents": ["emergency_alert", "triage_intent"],
+    "escalation_threshold": 0.72
+  },
+
+  "preprocessing": {
+    "strip_whitespace": true,
+    "collapse_whitespace": true,
+    "remove_urls": true,
+    "remove_emojis": false,
+    "expand_abbreviations": true,
+    "common_abbreviations": {
+      "دكتور": "طبيب",
+      "مستشفى": "مستشفى",
+      "دوا": "دواء",
+      "عمليه": "عملية",
+      "تحليل": "فحص مختبري"
+    }
+  },
+
+  "inference_config": {
+    "framework": "onnxruntime",
+    "model_file": "model_int8.onnx",
+    "input_names": ["input_ids", "attention_mask"],
+    "output_names": ["logits"],
+    "confidence_threshold": 0.72,
+    "low_confidence_action": "escalate_to_triage",
+    "batch_size": 1,
+    "max_batch_size": 8,
+    "avg_inference_ms": 180,
+    "device": "cpu",
+    "num_threads": 2,
+    "offline_capable": true
+  },
+
+  "downstream_integration": {
+    "triage_model": "../triage/model_int8.onnx",
+    "pregnancy_model": "../pregnancy/maternal_health_optimized_pipeline.pkl",
+    "drug_interaction": "../../local-inference/drug_interaction.py",
+    "ambiguity_handler": "../../local-inference/ambiguity_handler.py",
+    "sentiment_analyzer": "../../voice/dialect_model/sentiment_analyzer.py",
+    "api_route": "web-app/src/api/routes/chat.py",
+    "inference_handler": "../../local-inference/medical_chatbot.py"
+  },
+
+  "training_info": {
+    "base_checkpoint": "distilbert-base-multilingual-cased",
+    "dataset": "arabic_dialects + arabic_sentiment + custom_medical_egyptian",
+    "vocab_file": "vocab.txt",
+    "training_notebook": "notebooks/03_chatbot_model.ipynb",
+    "training_script": "ai-core/training/train_chatbot.py",
+    "config_file": "ai-core/training/configs/chatbot_config.yaml",
+    "epochs": 12,
+    "learning_rate": "2e-5",
+    "optimizer": "AdamW",
+    "test_accuracy": 0.87,
+    "validation_accuracy": 0.85,
+    "trained_by": "GODA EMAD",
+    "trained_on": "2026-03-15"
+  },
+
+  "security": {
+    "pii_masking": true,
+    "pii_fields_masked": ["patient_name", "phone", "national_id"],
+    "session_encryption": "AES-256-GCM",
+    "log_file": "data/databases/sentiment_log.encrypted",
+    "digital_signature": true
+  },
+
+  "version_history": [
+    {
+      "version": "2.0",
+      "date": "2026-03-17",
+      "changes": [
+        "Added 1247 Egyptian medical custom tokens",
+        "Added school_health_report and pregnancy_concern intent classes",
+        "Improved Arabizi support",
+        "Added downstream integration config"
+      ]
+    },
+    {
+      "version": "1.1",
+      "date": "2026-03-10",
+      "changes": [
+        "Added Arabic normalization pipeline",
+        "Added PII masking layer",
+        "Increased vocabulary coverage for medication names"
+      ]
+    },
+    {
+      "version": "1.0",
+      "date": "2026-02-20",
+      "changes": [
+        "Initial release — DistilBERT multilingual tokenizer fine-tuned for Egyptian Arabic"
+      ]
+    }
+  ]
+}
