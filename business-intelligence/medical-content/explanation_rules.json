@@ -1,1 +1,394 @@
-
+{
+  "metadata": {
+    "version": "3.0.0",
+    "last_updated": "2026-03-18T09:06:09.308188",
+    "description": "قواعد شرح نتائج النماذج الطبية - Readmission & LOS",
+    "languages": [
+      "ar",
+      "en"
+    ],
+    "models": [
+      "readmission",
+      "los",
+      "combined"
+    ]
+  },
+  "general_rules": {
+    "confidence_thresholds": {
+      "high": 0.8,
+      "medium": 0.6,
+      "low": 0.4
+    },
+    "risk_colors": {
+      "low": "🟢",
+      "medium": "🟡",
+      "high": "🟠",
+      "critical": "🔴"
+    },
+    "risk_levels_ar": {
+      "low": "منخفض",
+      "medium": "متوسط",
+      "high": "مرتفع",
+      "critical": "حرج"
+    },
+    "risk_levels_en": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    }
+  },
+  "readmission_rules": {
+    "thresholds": {
+      "low": 0.3,
+      "medium": 0.7,
+      "high": 1.0
+    },
+    "summaries": {
+      "ar": {
+        "low": "✅ احتمالية إعادة الدخول منخفضة",
+        "medium": "⚠️ احتمالية إعادة الدخول متوسطة",
+        "high": "🔴 احتمالية إعادة الدخول مرتفعة"
+      },
+      "en": {
+        "low": "✅ Readmission probability is low",
+        "medium": "⚠️ Readmission probability is medium",
+        "high": "🔴 Readmission probability is high"
+      }
+    },
+    "explanations": {
+      "ar": {
+        "low": "بناءً على تحليل حالتك، فرصة عودتك للمستشفى منخفضة. هذا مؤشر جيد على تحسن حالتك واستجابتك للعلاج.",
+        "medium": "هناك احتمال متوسط لإعادة دخولك للمستشفى خلال 30 يوماً. ننصح بمتابعة دقيقة مع طبيبك والالتزام بالعلاج.",
+        "high": "نسبة إعادة الدخول المتوقعة مرتفعة. هذا يستدعي متابعة مكثفة وخطة رعاية خاصة بعد الخروج من المستشفى."
+      },
+      "en": {
+        "low": "Based on your analysis, your chance of readmission is low. This is a good indicator of improvement and treatment response.",
+        "medium": "There is a medium probability of readmission within 30 days. Close follow-up with your doctor and medication adherence is recommended.",
+        "high": "Expected readmission rate is high. This requires intensive follow-up and special care plan after discharge."
+      }
+    },
+    "factor_based_explanations": {
+      "neurological": {
+        "ar": "وجود أمراض عصبية يزيد من احتمالية إعادة الدخول بشكل كبير",
+        "en": "Neurological disorders significantly increase readmission probability"
+      },
+      "renal": {
+        "ar": "مشاكل الكلى تؤثر على استقلاب الأدوية وتزيد من خطر المضاعفات",
+        "en": "Kidney problems affect drug metabolism and increase complication risk"
+      },
+      "chf": {
+        "ar": "قصور القلب يحتاج متابعة دقيقة للوظائف الحيوية",
+        "en": "Heart failure requires close monitoring of vital functions"
+      },
+      "lab_count_high": {
+        "ar": "كثرة التحاليل تشير إلى تعقيد الحالة وزيادة خطر إعادة الدخول",
+        "en": "High lab count indicates case complexity and increased readmission risk"
+      }
+    },
+    "disclaimer_ar": "هذا التنبؤ يستند إلى نماذج ذكاء اصطناعي تم تدريبها على بيانات طبية، ويجب استخدامه كمرجع مساعد للطبيب وليس بديلاً عن التقييم السريري المباشر.",
+    "disclaimer_en": "This prediction is based on AI models trained on medical data and should be used as a辅助 reference for physicians, not as a substitute for direct clinical evaluation."
+  },
+  "los_rules": {
+    "thresholds": {
+      "very_short": 2,
+      "short": 5,
+      "medium": 10,
+      "long": 20,
+      "very_long": 999
+    },
+    "summaries": {
+      "ar": {
+        "very_short": "🟢 مدة إقامة قصيرة جداً",
+        "short": "🟢 مدة إقامة قصيرة",
+        "medium": "🟡 مدة إقامة متوسطة",
+        "long": "🟠 مدة إقامة طويلة",
+        "very_long": "🔴 مدة إقامة طويلة جداً"
+      },
+      "en": {
+        "very_short": "🟢 Very short stay",
+        "short": "🟢 Short stay",
+        "medium": "🟡 Medium stay",
+        "long": "🟠 Long stay",
+        "very_long": "🔴 Very long stay"
+      }
+    },
+    "explanations": {
+      "ar": {
+        "very_short": "من المتوقع أن تكون مدة إقامتك قصيرة جداً (أقل من يومين)، مما يشير إلى تحسن سريع واستجابة جيدة للعلاج.",
+        "short": "مدة إقامتك المتوقعة قصيرة (2-5 أيام). هذا مؤشر جيد على أن حالتك مستقرة وتحتاج رعاية محدودة.",
+        "medium": "من المتوقع أن تكون مدة إقامتك متوسطة (5-10 أيام). تحتاج متابعة منتظمة وتقييم يومي للاستجابة للعلاج.",
+        "long": "مدة الإقامة المتوقعة طويلة (10-20 يوماً). هذا يتطلب خطة رعاية موسعة وفريقاً متعدد التخصصات.",
+        "very_long": "من المتوقع إقامة طويلة جداً (أكثر من 20 يوماً). حالتك معقدة وتحتاج متابعة مكثفة ورعاية مستمرة."
+      },
+      "en": {
+        "very_short": "Your expected length of stay is very short (<2 days), indicating rapid improvement and good treatment response.",
+        "short": "Your expected length of stay is short (2-5 days). This indicates stable condition requiring limited care.",
+        "medium": "Your expected length of stay is medium (5-10 days). You need regular monitoring and daily assessment.",
+        "long": "Expected long stay (10-20 days). This requires extended care plan and multidisciplinary team.",
+        "very_long": "Expected very long stay (>20 days). Your condition is complex requiring intensive monitoring and continuous care."
+      }
+    },
+    "factor_based_explanations": {
+      "renal": {
+        "ar": "أمراض الكلى تطيل مدة الإقامة بسبب الحاجة لمراقبة وظائف الكلى وضبط السوائل",
+        "en": "Kidney disease prolongs stay due to need for renal function monitoring and fluid management"
+      },
+      "neurological": {
+        "ar": "الأمراض العصبية تطيل المدة بشكل كبير بسبب تعقيد الحالة والحاجة لتقييم يومي",
+        "en": "Neurological disorders significantly prolong stay due to case complexity and need for daily assessment"
+      },
+      "icu_stay": {
+        "ar": "دخول العناية المركزة يزيد مدة الإقامة بشكل كبير",
+        "en": "ICU admission significantly increases length of stay"
+      },
+      "surgery_major": {
+        "ar": "الجراحة الكبرى تطيل مدة الإقامة بسبب فترة النقاهة الطويلة",
+        "en": "Major surgery prolongs stay due to long recovery period"
+      }
+    },
+    "confidence_explanations": {
+      "high": {
+        "ar": "الثقة في هذا التنبؤ عالية بناءً على اكتمال البيانات",
+        "en": "Confidence in this prediction is high based on data completeness"
+      },
+      "medium": {
+        "ar": "الثقة متوسطة - هناك بعض البيانات الناقصة",
+        "en": "Medium confidence - some data is missing"
+      },
+      "low": {
+        "ar": "الثقة منخفضة - البيانات محدودة، يرجى توفير معلومات إضافية",
+        "en": "Low confidence - limited data, please provide additional information"
+      }
+    },
+    "range_explanations": {
+      "ar": "النطاق المتوقع لمدة الإقامة يتراوح بين {min} و {max} يوم",
+      "en": "Expected length of stay ranges from {min} to {max} days"
+    }
+  },
+  "combined_rules": {
+    "scenarios": [
+      {
+        "id": "low_low",
+        "condition": "readmission_low AND los_short",
+        "summary_ar": "✅ نتائج مطمئنة - احتمال إعادة دخول منخفض ومدة إقامة قصيرة",
+        "summary_en": "✅ Reassuring results - low readmission risk and short stay",
+        "message_ar": "نتائجك مطمئنة جداً. فرصة عودتك للمستشفى منخفضة ومدة إقامتك متوقعة قصيرة. يمكنك متابعة علاجك في المنزل مع التزامك بالتعليمات الطبية.",
+        "message_en": "Your results are very reassuring. Low readmission chance and expected short stay. You can continue treatment at home following medical instructions."
+      },
+      {
+        "id": "high_low",
+        "condition": "readmission_high AND los_short",
+        "summary_ar": "⚠️ نتائج متباينة - احتمال إعادة دخول مرتفع لكن مدة إقامة قصيرة",
+        "summary_en": "⚠️ Mixed results - high readmission risk but short stay",
+        "message_ar": "على الرغم من أن مدة إقامتك متوقعة قصيرة، إلا أن هناك خطراً مرتفعاً لإعادة دخولك. تحتاج متابعة دقيقة بعد الخروج.",
+        "message_en": "Although your expected stay is short, there is high readmission risk. You need careful follow-up after discharge."
+      },
+      {
+        "id": "low_high",
+        "condition": "readmission_low AND los_long",
+        "summary_ar": "⚠️ حالة معقدة - احتمال إعادة دخول منخفض لكن مدة إقامة طويلة",
+        "summary_en": "⚠️ Complex case - low readmission risk but long stay",
+        "message_ar": "حالتك تتطلب إقامة طويلة في المستشفى للعلاج والمتابعة، لكن فرصة عودتك بعد الخروج منخفضة. هذا مؤشر جيد على فعالية العلاج.",
+        "message_en": "Your condition requires long hospital stay for treatment and monitoring, but readmission chance after discharge is low. This is a good indicator of treatment effectiveness."
+      },
+      {
+        "id": "high_high",
+        "condition": "readmission_high AND los_long",
+        "summary_ar": "🔴 حالة حرجة - خطر مرتفع لإعادة الدخول ومدة إقامة طويلة",
+        "summary_en": "🔴 Critical case - high readmission risk and long stay",
+        "message_ar": "هذه حالة معقدة تحتاج تدخلاً مكثفاً. مدة الإقامة طويلة وخطر إعادة الدخول مرتفع. يفضل تنسيق رعاية متكاملة مع فريق متعدد التخصصات.",
+        "message_en": "This is a complex case requiring intensive intervention. Long stay and high readmission risk. Integrated care coordination with multidisciplinary team is recommended."
+      }
+    ],
+    "recommendations": {
+      "readmission_focus": {
+        "ar": "التركيز على خطة منع إعادة الدخول: متابعة دقيقة، تثقيف المريض، مراجعة الأدوية",
+        "en": "Focus on readmission prevention plan: close follow-up, patient education, medication review"
+      },
+      "los_focus": {
+        "ar": "التركيز على تسريع التعافي: علاج طبيعي مبكر، دعم غذائي، تنسيق خروج",
+        "en": "Focus on accelerating recovery: early physical therapy, nutritional support, discharge coordination"
+      },
+      "both_focus": {
+        "ar": "خطة متكاملة للرعاية: متابعة مكثفة، فريق متعدد التخصصات، تخطيط خروج مبكر",
+        "en": "Integrated care plan: intensive monitoring, multidisciplinary team, early discharge planning"
+      }
+    }
+  },
+  "recommendation_rules": {
+    "categories": {
+      "medication": {
+        "name_ar": "توصيات دوائية",
+        "name_en": "Medication recommendations",
+        "icon": "💊"
+      },
+      "followup": {
+        "name_ar": "توصيات متابعة",
+        "name_en": "Follow-up recommendations",
+        "icon": "📅"
+      },
+      "lifestyle": {
+        "name_ar": "توصيات نمط حياة",
+        "name_en": "Lifestyle recommendations",
+        "icon": "🏃"
+      },
+      "nutrition": {
+        "name_ar": "توصيات غذائية",
+        "name_en": "Nutrition recommendations",
+        "icon": "🥗"
+      },
+      "emergency": {
+        "name_ar": "تعليمات طارئة",
+        "name_en": "Emergency instructions",
+        "icon": "🚨"
+      }
+    },
+    "priorities": {
+      "high": {
+        "name_ar": "عالية",
+        "name_en": "High",
+        "color": "🔴"
+      },
+      "medium": {
+        "name_ar": "متوسطة",
+        "name_en": "Medium",
+        "color": "🟡"
+      },
+      "low": {
+        "name_ar": "عادية",
+        "name_en": "Low",
+        "color": "🟢"
+      }
+    },
+    "templates": {
+      "readmission_high": {
+        "ar": [
+          "متابعة خلال 48 ساعة مع طبيبك المعالج",
+          "مراجعة الأدوية مع الصيدلي الإكلينيكي",
+          "قياس العلامات الحيوية يومياً في المنزل",
+          "الاتصال فوراً عند ظهور أعراض جديدة"
+        ],
+        "en": [
+          "Follow-up within 48 hours with your physician",
+          "Medication review with clinical pharmacist",
+          "Daily vital signs monitoring at home",
+          "Contact immediately if new symptoms appear"
+        ]
+      },
+      "readmission_medium": {
+        "ar": [
+          "متابعة خلال أسبوع",
+          "الالتزام بمواعيد الأدوية",
+          "مراقبة الأعراض وتسجيلها"
+        ],
+        "en": [
+          "Follow-up within one week",
+          "Adhere to medication schedule",
+          "Monitor and record symptoms"
+        ]
+      },
+      "readmission_low": {
+        "ar": [
+          "متابعة روتينية خلال شهر",
+          "الحفاظ على نمط حياة صحي",
+          "الالتزام بالعلاج الموصوف"
+        ],
+        "en": [
+          "Routine follow-up in one month",
+          "Maintain healthy lifestyle",
+          "Adhere to prescribed treatment"
+        ]
+      },
+      "los_long": {
+        "ar": [
+          "تجهيز خطة رعاية منزلية",
+          "ترتيب خدمات التمريض المنزلي",
+          "توفير المستلزمات الطبية اللازمة"
+        ],
+        "en": [
+          "Prepare home care plan",
+          "Arrange home nursing services",
+          "Provide necessary medical supplies"
+        ]
+      },
+      "los_medium": {
+        "ar": [
+          "تحضير خطة خروج مبكر",
+          "تثقيف المريض للعناية الذاتية",
+          "مراجعة الأدوية قبل الخروج"
+        ],
+        "en": [
+          "Prepare early discharge plan",
+          "Patient self-care education",
+          "Pre-discharge medication review"
+        ]
+      },
+      "los_short": {
+        "ar": [
+          "تجهيز تقرير الخروج",
+          "وصف الأدوية اللازمة",
+          "توجيهات للمتابعة المنزلية"
+        ],
+        "en": [
+          "Prepare discharge summary",
+          "Prescribe necessary medications",
+          "Home care instructions"
+        ]
+      }
+    }
+  },
+  "alert_rules": {
+    "emergency": {
+      "ar": "🚨 حالة طارئة - اتصل بالإسعاف فوراً",
+      "en": "🚨 Emergency - Call ambulance immediately",
+      "conditions": [
+        "chest_pain AND sweating",
+        "bleeding",
+        "loss_of_consciousness",
+        "severe_headache AND hypertension"
+      ]
+    },
+    "warning": {
+      "ar": "⚠️ علامات تحذيرية - استشر طبيبك",
+      "en": "⚠️ Warning signs - Consult your doctor",
+      "conditions": [
+        "fever > 38.5",
+        "heart_rate > 120",
+        "oxygen_saturation < 92",
+        "bp > 180/110"
+      ]
+    },
+    "info": {
+      "ar": "ℹ️ معلومات تثقيفية",
+      "en": "ℹ️ Educational information",
+      "topics": [
+        "medication_side_effects",
+        "diet_recommendations",
+        "activity_guidelines"
+      ]
+    }
+  },
+  "examples": {
+    "readmission_high_example": {
+      "patient": "مريض 75 سنة، عنده قصور قلب وأمراض كلوية، الشكوى: نهجان شديد",
+      "prediction": 0.85,
+      "explanation_ar": "🔴 احتمالية إعادة الدخول مرتفعة (85%). السبب الرئيسي: تقدم العمر مع وجود أمراض قلبية وكلوية. يوصى بمتابعة مكثفة ومراجعة الأدوية.",
+      "explanation_en": "🔴 Readmission probability is high (85%). Main reasons: advanced age with cardiac and renal diseases. Intensive follow-up and medication review recommended."
+    },
+    "los_long_example": {
+      "patient": "مريض 60 سنة، خضع لجراحة قلب مفتوح، عنده سكري",
+      "prediction": 14.5,
+      "explanation_ar": "🟠 مدة الإقامة المتوقعة 14.5 يوم (طويلة). الجراحة الكبرى مع السكري تطيل فترة النقاهة. يحتاج علاجاً طبيعياً مكثفاً.",
+      "explanation_en": "🟠 Expected LOS is 14.5 days (long). Major surgery with diabetes prolongs recovery. Needs intensive physical therapy."
+    }
+  },
+  "disclaimers": {
+    "general_ar": "هذا التحليل يستند إلى نماذج ذكاء اصطناعي متقدمة تم تدريبها على آلاف الحالات الطبية. جميع التنبؤات هي لأغراض مساعدة فقط ولا تغني عن الاستشارة الطبية المباشرة.",
+    "general_en": "This analysis is based on advanced AI models trained on thousands of medical cases. All predictions are for辅助 purposes only and do not substitute direct medical consultation.",
+    "accuracy_ar": "دقة النماذج: إعادة الدخول AUC 0.917, مدة الإقامة MAE 7.11 يوم",
+    "accuracy_en": "Model accuracy: Readmission AUC 0.917, LOS MAE 7.11 days",
+    "update_ar": "آخر تحديث: 2026-03-18",
+    "update_en": "Last updated: 2026-03-18"
+  }
+}
