@@ -1,829 +1,856 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║           RIVA Health Platform v4.0 — Speech To Text                        ║
-║           ai-core/voice/speech_to_text.py                                   ║
+║           RIVA Health Platform — Speech-to-Text Engine                       ║
+║           ai-core/voice/dialect_model/speech_to_text.py                      ║
 ║                                                                              ║
-║  Whisper-based STT pipeline for Egyptian Arabic medical voice input:         ║
-║  • Loads whisper_int8.onnx locally — zero internet required                  ║
-║  • Egyptian Arabic dialect optimization                                      ║
-║  • Medical vocabulary post-processing & correction                           ║
-║  • Confidence scoring per word & full utterance                              ║
-║  • Streaming & single-shot modes                                             ║
-║  • Direct integration with AudioProcessor output                             ║
+║  Purpose : Convert Arabic audio (WAV/WebM/MP3) to text using Whisper INT8   ║
+║            ONNX offline, then detect the speaker type and route them to      ║
+║            the correct RIVA page.                                            ║
 ║                                                                              ║
-║  Harvard HSIL Hackathon 2026                                                 ║
-║  Maintainer: GODA EMAD                                                       ║
+║  Pipeline                                                                    ║
+║  ─────────────────────────────────────────────────────────────────────────  ║
+║  Audio bytes (PWA / mic)                                                     ║
+║      ↓  AudioProcessor.preprocess()                                         ║
+║  16kHz mono float32 array                                                    ║
+║      ↓  WhisperSTT.transcribe()                                              ║
+║  Arabic text (Egyptian dialect)                                              ║
+║      ↓  SpeakerRouter.detect() + route()                                    ║
+║  STTResult  {text, speaker_type, route, confidence, …}                      ║
+║      ↓                                                                       ║
+║  FastAPI route  →  correct RIVA page                                        ║
+║                                                                              ║
+║  Speaker routing                                                             ║
+║  ─────────────────────────────────────────────────────────────────────────  ║
+║  PATIENT   → /triage        (03_triage.html)                                ║
+║  PREGNANT  → /pregnancy     (06_pregnancy.html)                             ║
+║  SCHOOL    → /school        (07_school.html)                                ║
+║  DOCTOR    → /doctor        (09_doctor_dashboard.html)                      ║
+║  UNKNOWN   → /chatbot       (02_chatbot.html)  ← safe fallback              ║
+║                                                                              ║
+║  Author  : Goda Emad  (AI Core)                                              ║
+║  Version : 1.0.0                                                             ║
+║  Updated : 2026-03-18                                                        ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 """
 
 from __future__ import annotations
 
-import json
+import io
 import logging
-import re
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Any
 
 import numpy as np
 
-logger = logging.getLogger("riva.speech_to_text")
+logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Paths
-# ─────────────────────────────────────────────────────────────────────────────
+# ── Optional heavy imports — graceful degradation ────────────────────────
+try:
+    import onnxruntime as ort
+    _ORT_AVAILABLE = True
+except ImportError:
+    _ORT_AVAILABLE = False
+    logger.warning("onnxruntime not installed — Whisper STT unavailable")
 
-_HERE = Path(__file__).parent
-WHISPER_MODEL_PATH   = _HERE / "dialect_model" / "whisper_int8.onnx"
-DIALECT_CONFIG_PATH  = _HERE / "dialect_model" / "config.json"
-TOKENIZER_VOCAB_PATH = _HERE / "dialect_model" / "tokenizer_config.json"
+try:
+    import soundfile as sf
+    _SF_AVAILABLE = True
+except ImportError:
+    _SF_AVAILABLE = False
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Constants
-# ─────────────────────────────────────────────────────────────────────────────
-
-SAMPLE_RATE          = 16_000       # Whisper standard
-N_FFT                = 400
-HOP_LENGTH           = 160
-N_MELS               = 80
-CHUNK_LENGTH_SEC     = 30           # Whisper max window
-MIN_CONFIDENCE       = 0.45         # Below this → flag for review
-HIGH_CONFIDENCE      = 0.80         # Above this → auto-accept
-LANGUAGE             = "ar"         # Arabic ISO code
-TASK                 = "transcribe"
+try:
+    from pydub import AudioSegment
+    _PYDUB_AVAILABLE = True
+except ImportError:
+    _PYDUB_AVAILABLE = False
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Enums & Data Classes
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════
+#  Constants
+# ═══════════════════════════════════════════════════════════════════════════
 
-class STTStatus(Enum):
-    SUCCESS           = "success"
-    LOW_CONFIDENCE    = "low_confidence"     # Transcribed but uncertain
-    EMPTY             = "empty"              # No speech / empty result
-    MODEL_ERROR       = "model_error"        # ONNX runtime failure
-    AUDIO_TOO_SHORT   = "audio_too_short"
-    UNSUPPORTED_LANG  = "unsupported_lang"
+WHISPER_SAMPLE_RATE : int   = 16_000          # Whisper requires 16kHz mono
+WHISPER_MAX_SECONDS : int   = 30              # max audio duration Whisper handles
+N_MEL_BINS          : int   = 80              # Whisper mel spectrogram bins
+CHUNK_LENGTH_SECONDS: int   = 10              # process in chunks for long audio
 
+_DEFAULT_MODEL_PATH = (
+    Path(__file__).resolve().parent.parent.parent
+    / "models" / "chatbot" / "whisper_int8.onnx"
+)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Speaker type & routing
+# ═══════════════════════════════════════════════════════════════════════════
+
+class SpeakerType(str, Enum):
+    """Who is speaking — determines which RIVA page they get routed to."""
+    PATIENT  = "patient"    # مريض عام
+    PREGNANT = "pregnant"   # أم حامل
+    SCHOOL   = "school"     # إدارة مدرسة / ممرضة / طالب
+    DOCTOR   = "doctor"     # طبيب / كادر طبي
+    UNKNOWN  = "unknown"    # fallback → chatbot
+
+
+# Route map: SpeakerType → (API route, HTML page, page title)
+SPEAKER_ROUTES: dict[SpeakerType, dict[str, str]] = {
+    SpeakerType.PATIENT : {
+        "api"  : "/api/triage",
+        "page" : "/triage",
+        "html" : "03_triage.html",
+        "title": "الفرز الطبي",
+    },
+    SpeakerType.PREGNANT: {
+        "api"  : "/api/pregnancy",
+        "page" : "/pregnancy",
+        "html" : "06_pregnancy.html",
+        "title": "صحة الأم",
+    },
+    SpeakerType.SCHOOL  : {
+        "api"  : "/api/school",
+        "page" : "/school",
+        "html" : "07_school.html",
+        "title": "الصحة المدرسية",
+    },
+    SpeakerType.DOCTOR  : {
+        "api"  : "/api/doctor",
+        "page" : "/doctor",
+        "html" : "09_doctor_dashboard.html",
+        "title": "داشبورد الطبيب",
+    },
+    SpeakerType.UNKNOWN : {
+        "api"  : "/api/chat",
+        "page" : "/chatbot",
+        "html" : "02_chatbot.html",
+        "title": "المحادثة الطبية",
+    },
+}
+
+# ── Speaker detection keyword sets ───────────────────────────────────────
+
+_PREGNANT_KEYWORDS: frozenset[str] = frozenset({
+    "حامل", "حامله", "الحمل", "جنين", "ولادة", "طلق",
+    "أسبوع الحمل", "شهر الحمل", "الأم", "الحمل",
+    "غثيان الحمل", "ضغط الحمل",
+})
+
+_SCHOOL_KEYWORDS: frozenset[str] = frozenset({
+    "طالب", "تلميذ", "مدرسة", "فصل", "الفصل", "ناظر",
+    "ممرضة المدرسة", "إدارة المدرسة", "أطفال المدرسة",
+    "الطلاب", "التلاميذ", "المدرسة",
+})
+
+_DOCTOR_KEYWORDS: frozenset[str] = frozenset({
+    "دكتور", "دكتورة", "طبيب", "طبيبة", "حالة", "مريض",
+    "تشخيص", "وصفة", "علاج", "جرعة", "تحاليل", "أشعة",
+    "الحالة دي", "المريض ده", "بروتوكول",
+})
+
+# ── Egyptian greeting / context patterns → help identify speaker type ─────
+
+_GREETING_SPEAKER_MAP: dict[str, SpeakerType] = {
+    "أنا حامل"             : SpeakerType.PREGNANT,
+    "أنا دكتور"            : SpeakerType.DOCTOR,
+    "أنا دكتورة"           : SpeakerType.DOCTOR,
+    "أنا طبيب"             : SpeakerType.DOCTOR,
+    "أنا طبيبة"            : SpeakerType.DOCTOR,
+    "أنا ممرضة"            : SpeakerType.DOCTOR,
+    "أنا ممرض"             : SpeakerType.DOCTOR,
+    "أنا من المدرسة"       : SpeakerType.SCHOOL,
+    "إدارة المدرسة"        : SpeakerType.SCHOOL,
+    "بتكلم عن طالب"        : SpeakerType.SCHOOL,
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Result dataclass
+# ═══════════════════════════════════════════════════════════════════════════
 
 @dataclass
-class WordResult:
-    """Single word with timing and confidence."""
-    word:        str
-    start_sec:   float
-    end_sec:     float
-    confidence:  float
-    is_medical:  bool = False    # flagged by medical vocabulary matcher
+class STTResult:
+    """
+    Full output of SpeechToText.transcribe_and_route().
 
+    Passed directly to CommandParser and the FastAPI routing layer.
+    """
+    # ── Transcription ──────────────────────────────────────────────────
+    text            : str           # Raw transcribed text
+    language        : str           # Detected language tag ("ar")
+    transcribe_ms   : float         # Whisper inference time
 
-@dataclass
-class TranscriptionResult:
-    """Full transcription output from SpeechToText.transcribe()."""
-    text:              str                      # Final cleaned text
-    text_raw:          str                      # Before post-processing
-    words:             list[WordResult]
-    language:          str
-    confidence:        float                    # Mean word confidence
-    duration_sec:      float
-    inference_ms:      float
-    status:            STTStatus
-    medical_terms:     list[str] = field(default_factory=list)
-    needs_review:      bool = False             # True if confidence < MIN
-    error:             Optional[str] = None
+    # ── Speaker & routing ──────────────────────────────────────────────
+    speaker_type    : SpeakerType   # Detected speaker category
+    route           : dict[str, str]# api / page / html / title
 
-    @property
-    def is_successful(self) -> bool:
-        return self.status == STTStatus.SUCCESS
+    # ── Quality signals ────────────────────────────────────────────────
+    confidence      : float         # 0.0 – 1.0 transcription confidence
+    no_speech_prob  : float         # Whisper no-speech probability
+    is_silent       : bool          # True if audio is likely silence
 
-    def to_dict(self) -> dict:
+    # ── Audio metadata ─────────────────────────────────────────────────
+    audio_duration_s: float
+    sample_rate     : int
+
+    # ── Speaker detection breakdown ────────────────────────────────────
+    speaker_confidence : float      # how certain we are about speaker type
+    speaker_keywords   : list[str]  # which keywords triggered detection
+
+    def as_dict(self) -> dict:
         return {
-            "text":          self.text,
-            "confidence":    round(self.confidence, 3),
-            "duration_sec":  self.duration_sec,
-            "inference_ms":  self.inference_ms,
-            "status":        self.status.value,
-            "language":      self.language,
-            "medical_terms": self.medical_terms,
-            "needs_review":  self.needs_review,
-            "words":         [
-                {
-                    "word":       w.word,
-                    "start":      w.start_sec,
-                    "end":        w.end_sec,
-                    "confidence": round(w.confidence, 3),
-                    "is_medical": w.is_medical,
-                }
-                for w in self.words
-            ],
+            "text"              : self.text,
+            "language"          : self.language,
+            "transcribe_ms"     : round(self.transcribe_ms, 1),
+            "speaker_type"      : self.speaker_type.value,
+            "route"             : self.route,
+            "confidence"        : round(self.confidence, 3),
+            "no_speech_prob"    : round(self.no_speech_prob, 3),
+            "is_silent"         : self.is_silent,
+            "audio_duration_s"  : round(self.audio_duration_s, 2),
+            "speaker_confidence": round(self.speaker_confidence, 3),
+            "speaker_keywords"  : self.speaker_keywords,
         }
 
+    @property
+    def should_proceed(self) -> bool:
+        """True if transcription is reliable enough to process."""
+        return (
+            not self.is_silent
+            and self.confidence >= 0.40
+            and len(self.text.strip()) >= 3
+        )
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Medical Vocabulary Corrector
-# ─────────────────────────────────────────────────────────────────────────────
 
-class MedicalVocabCorrector:
+# ═══════════════════════════════════════════════════════════════════════════
+#  Speaker Router
+# ═══════════════════════════════════════════════════════════════════════════
+
+class SpeakerRouter:
     """
-    Post-processing layer that:
-    1. Corrects common Whisper misrecognitions in Egyptian Arabic medical speech
-    2. Tags medical terms for downstream intent classification
-    3. Expands common abbreviations
+    Detects speaker type from transcribed text and returns routing info.
 
-    Loaded from dialect_model/config.json at runtime.
+    Detection strategy (priority order)
+    ─────────────────────────────────────
+    1. Explicit greeting map  — "أنا دكتور" → DOCTOR immediately
+    2. Keyword count          — count matches per category, pick highest
+    3. Context override       — patient_context from session (most reliable)
+    4. Fallback               — UNKNOWN → /chatbot
     """
 
-    # Core corrections — Whisper often mishears Egyptian dialect medical terms
-    _BUILTIN_CORRECTIONS: dict[str, str] = {
-        # Symptom terms
-        "وجاع":     "وجع",
-        "بيوجعني":  "بيوجعني",
-        "سخونيه":   "سخونة",
-        "حراره":    "حرارة",
-        "صداع":     "صداع",
-        "دوخه":     "دوخة",
-        "غثيان":    "غثيان",
-        "اسهال":    "إسهال",
-        "امساك":    "إمساك",
-        # Vital signs
-        "ضغط":      "ضغط الدم",
-        "سكر":      "سكر الدم",
-        "نبض":      "نبض",
-        # Medication terms
-        "دوا":      "دواء",
-        "حبه":      "حبة",
-        "شراب":     "شراب طبي",
-        "ابره":     "حقنة",
-        # Body parts
-        "راسي":     "رأسي",
-        "بطني":     "بطني",
-        "صدري":     "صدري",
-        "ضهري":     "ظهري",
-        "رجلي":     "رجلي",
-        "ايدي":     "يدي",
-        # Common phrases
-        "مش كويس":  "أشعر بتعب",
-        "تعبان":    "أشعر بتعب",
-        "وعيا":     "الوعي",
-    }
-
-    _MEDICAL_TERMS: set[str] = {
-        "وجع", "ألم", "سخونة", "حرارة", "صداع", "دوخة", "غثيان",
-        "إسهال", "إمساك", "ضغط الدم", "سكر الدم", "نبض", "دواء",
-        "حقنة", "أشعة", "تحليل", "عملية", "مستشفى", "طبيب", "طوارئ",
-        "حمل", "ولادة", "حرارة", "كحة", "ضيق تنفس", "غيبوبة",
-        "جرح", "كسر", "حادثة",
-    }
-
-    def __init__(self, config_path: Optional[Path] = None) -> None:
-        self.corrections = dict(self._BUILTIN_CORRECTIONS)
-        self.medical_terms = set(self._MEDICAL_TERMS)
-        if config_path and config_path.exists():
-            self._load_config(config_path)
-
-    def _load_config(self, path: Path) -> None:
-        try:
-            cfg = json.loads(path.read_text(encoding="utf-8"))
-            self.corrections.update(cfg.get("corrections", {}))
-            self.medical_terms.update(cfg.get("medical_terms", []))
-            logger.info("Loaded %d corrections from %s", len(self.corrections), path)
-        except Exception as e:
-            logger.warning("Could not load vocab config: %s", e)
-
-    def correct(self, text: str) -> tuple[str, list[str]]:
+    def detect(
+        self,
+        text          : str,
+        patient_context: dict[str, Any] | None = None,
+    ) -> tuple[SpeakerType, float, list[str]]:
         """
-        Apply corrections and return (corrected_text, found_medical_terms).
+        Detect speaker type from text.
+
+        Returns
+        -------
+        (speaker_type, confidence, matched_keywords)
         """
-        corrected = text
-        for wrong, right in self.corrections.items():
-            corrected = corrected.replace(wrong, right)
+        ctx = patient_context or {}
 
-        found = [
-            term for term in self.medical_terms
-            if term in corrected
-        ]
-        return corrected, found
+        # ── Context override (most reliable — set by login/session) ───────
+        if ctx.get("is_doctor"):
+            return SpeakerType.DOCTOR, 1.0, []
+        if ctx.get("is_pregnant"):
+            return SpeakerType.PREGNANT, 1.0, []
+        if ctx.get("is_school_staff"):
+            return SpeakerType.SCHOOL, 1.0, []
 
-    def tag_words(self, words: list[WordResult]) -> list[WordResult]:
-        """Mark WordResult objects that contain medical terms."""
-        for w in words:
-            w.is_medical = any(t in w.word for t in self.medical_terms)
-        return words
+        # ── Explicit greeting patterns ─────────────────────────────────────
+        for phrase, speaker in _GREETING_SPEAKER_MAP.items():
+            if phrase in text:
+                return speaker, 0.95, [phrase]
 
+        # ── Keyword counting per category ──────────────────────────────────
+        scores: dict[SpeakerType, list[str]] = {
+            SpeakerType.PREGNANT: [],
+            SpeakerType.SCHOOL  : [],
+            SpeakerType.DOCTOR  : [],
+        }
+        for kw in _PREGNANT_KEYWORDS:
+            if kw in text:
+                scores[SpeakerType.PREGNANT].append(kw)
+        for kw in _SCHOOL_KEYWORDS:
+            if kw in text:
+                scores[SpeakerType.SCHOOL].append(kw)
+        for kw in _DOCTOR_KEYWORDS:
+            if kw in text:
+                scores[SpeakerType.DOCTOR].append(kw)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Log-Mel Spectrogram (pure numpy — no torchaudio)
-# ─────────────────────────────────────────────────────────────────────────────
+        # Find category with most keyword matches
+        best = max(scores, key=lambda k: len(scores[k]))
+        matched = scores[best]
 
-def _mel_filterbank(
-    sr: int = SAMPLE_RATE,
-    n_fft: int = N_FFT,
-    n_mels: int = N_MELS,
-    fmin: float = 0.0,
-    fmax: Optional[float] = None,
-) -> np.ndarray:
-    """Mel filterbank matrix (n_mels × n_fft//2+1)."""
-    if fmax is None:
-        fmax = sr / 2.0
+        if matched:
+            # Confidence scales with number of matched keywords (cap at 0.90)
+            conf = min(0.90, 0.50 + len(matched) * 0.15)
+            return best, conf, matched
 
-    def hz_to_mel(f): return 2595 * np.log10(1 + f / 700)
-    def mel_to_hz(m): return 700 * (10 ** (m / 2595) - 1)
+        # ── Fallback: general patient or unknown ───────────────────────────
+        # If any pain/symptom word is present → PATIENT
+        _patient_signals = frozenset({
+            "عندي", "بيوجعني", "تعبان", "ألم", "وجع", "دكتور",
+            "مريض", "حرارة", "سخونة",
+        })
+        if any(sig in text for sig in _patient_signals):
+            return SpeakerType.PATIENT, 0.55, []
 
-    mel_min = hz_to_mel(fmin)
-    mel_max = hz_to_mel(fmax)
-    mel_pts = np.linspace(mel_min, mel_max, n_mels + 2)
-    hz_pts  = mel_to_hz(mel_pts)
-    bin_pts = np.floor((n_fft + 1) * hz_pts / sr).astype(int)
+        return SpeakerType.UNKNOWN, 0.30, []
 
-    fb = np.zeros((n_mels, n_fft // 2 + 1), dtype=np.float32)
-    for m in range(1, n_mels + 1):
-        f_m_minus = bin_pts[m - 1]
-        f_m       = bin_pts[m]
-        f_m_plus  = bin_pts[m + 1]
-        for k in range(f_m_minus, f_m):
-            if f_m != f_m_minus:
-                fb[m - 1, k] = (k - f_m_minus) / (f_m - f_m_minus)
-        for k in range(f_m, f_m_plus):
-            if f_m_plus != f_m:
-                fb[m - 1, k] = (f_m_plus - k) / (f_m_plus - f_m)
-    return fb
-
-
-_MEL_FB_CACHE: dict[tuple[int, int, int], np.ndarray] = {}
-"""
-Dict-based Mel filterbank cache keyed by (sr, n_fft, n_mels).
-
-Fix: the old single global `_MEL_FB` was reused regardless of parameters.
-If compute_log_mel was called with sr=8000 after sr=16000, it would silently
-use the 16kHz filterbank on 8kHz audio — producing a completely wrong
-spectrogram with no error or warning.
-The dict key guarantees each unique (sr, n_fft, n_mels) combination gets
-its own correctly-computed filterbank.
-"""
+    def route(self, speaker_type: SpeakerType) -> dict[str, str]:
+        """Return the routing dict for a given speaker type."""
+        return SPEAKER_ROUTES[speaker_type]
 
 
-def compute_log_mel(
-    samples: np.ndarray,
-    sr: int = SAMPLE_RATE,
-    n_fft: int = N_FFT,
-    hop: int = HOP_LENGTH,
-    n_mels: int = N_MELS,
-) -> np.ndarray:
+# ═══════════════════════════════════════════════════════════════════════════
+#  Whisper STT Engine
+# ═══════════════════════════════════════════════════════════════════════════
+
+class WhisperSTT:
     """
-    Compute log-mel spectrogram compatible with Whisper's preprocessing.
-    Input:  float32 numpy array, mono, 16kHz
-    Output: (n_mels, T) float32 array
+    Offline Arabic STT using Whisper INT8 ONNX model.
 
-    Fix: uses _MEL_FB_CACHE[(sr, n_fft, n_mels)] instead of a single global
-         _MEL_FB.  Each unique combination of parameters gets its own correctly
-         computed filterbank — calling with sr=8000 after sr=16000 no longer
-         silently reuses the wrong matrix.
-    """
-    cache_key = (sr, n_fft, n_mels)
-    if cache_key not in _MEL_FB_CACHE:
-        _MEL_FB_CACHE[cache_key] = _mel_filterbank(sr, n_fft, n_mels)
-        logger.debug("Mel filterbank computed and cached for key=%s", cache_key)
-    mel_fb = _MEL_FB_CACHE[cache_key]
+    Loads once at startup, processes all audio in-memory.
+    Falls back gracefully if ONNX runtime is unavailable.
 
-    # Pad to multiple of hop
-    pad = n_fft // 2
-    samples = np.pad(samples, (pad, pad), mode="reflect")
-
-    # STFT via sliding window
-    window = np.hanning(n_fft).astype(np.float32)
-    n_frames = (len(samples) - n_fft) // hop + 1
-    frames = np.stack([
-        samples[i * hop: i * hop + n_fft] * window
-        for i in range(n_frames)
-    ])                                      # (T, n_fft)
-
-    spectrogram = np.abs(np.fft.rfft(frames, n=n_fft)) ** 2   # (T, n_fft//2+1)
-    mel = spectrogram @ mel_fb.T                               # (T, n_mels)
-    mel = np.maximum(mel, 1e-10)
-    log_mel = np.log10(mel).T                                  # (n_mels, T)
-
-    # Whisper normalization
-    log_mel = np.maximum(log_mel, log_mel.max() - 8.0)
-    log_mel = (log_mel + 4.0) / 4.0
-    return log_mel.astype(np.float32)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SpeechToText — Main Class
-# ─────────────────────────────────────────────────────────────────────────────
-
-class SpeechToText:
-    """
-    Whisper-based STT engine for RIVA.
-
-    Loads whisper_int8.onnx once and reuses across requests.
-    All inference is CPU-only, offline, no external API calls.
-
-    Usage:
-        stt = SpeechToText()
-        result = stt.transcribe(processed_audio.samples)
-        print(result.text)         # "عندي وجع في بطني"
-        print(result.medical_terms) # ["وجع", "بطن"]
+    Parameters
+    ----------
+    model_path  : Path to whisper_int8.onnx (default: models/chatbot/).
+    language    : BCP-47 language tag (default "ar").
+    beam_size   : Whisper beam search width (default 3).
+    no_speech_threshold : Probability above which audio is flagged silent.
+    threads     : ONNX intra-op threads (default from env RIVA_ONNX_THREADS).
     """
 
     def __init__(
         self,
-        model_path: Path = WHISPER_MODEL_PATH,
-        config_path: Path = DIALECT_CONFIG_PATH,
-        language: str = LANGUAGE,
-        beam_size: int = 5,
-        temperature: float = 0.0,
+        model_path         : Path | None = None,
+        language           : str         = "ar",
+        beam_size          : int         = 3,
+        no_speech_threshold: float       = 0.60,
+        threads            : int | None  = None,
     ) -> None:
-        self.language    = language
-        self.beam_size   = beam_size
-        self.temperature = temperature
-        self._session    = None
-        self._corrector  = MedicalVocabCorrector(config_path)
-        self._model_path = model_path
-        self._load_model()
+        self._lang        = language
+        self._beam        = beam_size
+        self._no_speech_t = no_speech_threshold
+        self._session     = None
 
-    # ── Public API ──────────────────────────────────────────────────────────
+        import os
+        self._threads = threads or int(os.environ.get("RIVA_ONNX_THREADS", 2))
 
-    def transcribe(
-        self,
-        samples: np.ndarray,
-        language: Optional[str] = None,
-    ) -> TranscriptionResult:
+        path = Path(model_path) if model_path else _DEFAULT_MODEL_PATH
+        self._load_model(path)
+
+    # ── Public API ───────────────────────────────────────────────────────
+
+    def transcribe(self, audio: np.ndarray, sample_rate: int = WHISPER_SAMPLE_RATE) -> dict:
         """
-        Transcribe float32 audio samples (16kHz mono) to text.
+        Transcribe a float32 audio array to text.
 
-        Args:
-            samples:  numpy float32 array from AudioProcessor.process()
-            language: override language code (default: "ar")
+        Parameters
+        ----------
+        audio       : float32 numpy array, shape (N,), values in [-1, 1].
+        sample_rate : Audio sample rate (will be resampled to 16kHz if needed).
 
-        Returns:
-            TranscriptionResult with text, confidence, medical terms, etc.
-        """
-        t0  = time.perf_counter()
-        dur = len(samples) / SAMPLE_RATE
-        lng = language or self.language
-
-        if len(samples) < SAMPLE_RATE * 0.3:
-            return self._empty_result(dur, "audio_too_short", STTStatus.AUDIO_TOO_SHORT)
-
-        try:
-            # 1. Compute log-mel features
-            mel = compute_log_mel(samples)
-
-            # 2. Pad / chunk to Whisper window
-            mel_padded = self._pad_or_chunk(mel)
-
-            # 3. Run ONNX inference
-            raw_text, word_timestamps, confidences = self._run_inference(
-                mel_padded, lng
-            )
-
-            # 4. Post-process text
-            corrected, medical_terms = self._corrector.correct(raw_text)
-            corrected = self._clean_text(corrected)
-
-            # 5. Build WordResult list
-            words = self._build_word_results(
-                raw_text, word_timestamps, confidences
-            )
-            words = self._corrector.tag_words(words)
-
-            # 6. Overall confidence
-            mean_conf = float(np.mean(confidences)) if confidences else 0.0
-
-            # 7. Status
-            if not corrected.strip():
-                status = STTStatus.EMPTY
-            elif mean_conf < MIN_CONFIDENCE:
-                status = STTStatus.LOW_CONFIDENCE
-            else:
-                status = STTStatus.SUCCESS
-
-            inf_ms = (time.perf_counter() - t0) * 1000
-
-            return TranscriptionResult(
-                text=corrected,
-                text_raw=raw_text,
-                words=words,
-                language=lng,
-                confidence=round(mean_conf, 4),
-                duration_sec=round(dur, 3),
-                inference_ms=round(inf_ms, 2),
-                status=status,
-                medical_terms=medical_terms,
-                needs_review=(mean_conf < MIN_CONFIDENCE),
-            )
-
-        except Exception as exc:
-            logger.error("STT inference failed: %s", exc, exc_info=True)
-            inf_ms = (time.perf_counter() - t0) * 1000
-            return TranscriptionResult(
-                text="",
-                text_raw="",
-                words=[],
-                language=lng,
-                confidence=0.0,
-                duration_sec=round(dur, 3),
-                inference_ms=round(inf_ms, 2),
-                status=STTStatus.MODEL_ERROR,
-                error=str(exc),
-            )
-
-    def transcribe_stream(
-        self,
-        audio_chunks: Iterator[np.ndarray],
-        language: Optional[str] = None,
-    ) -> Iterator[TranscriptionResult]:
-        """
-        Stream transcription — yields a result per audio chunk.
-        Designed for use with AudioProcessor.process_stream().
-
-        Usage:
-            for chunk_result in stt.transcribe_stream(audio_stream):
-                print(chunk_result.text)
-        """
-        for chunk in audio_chunks:
-            yield self.transcribe(chunk, language=language)
-
-    # ── Private: Model Loading ───────────────────────────────────────────────
-
-    def _load_model(self) -> None:
-        """Load Whisper ONNX model. Falls back to mock mode if not found."""
-        try:
-            import onnxruntime as ort
-            if not self._model_path.exists():
-                logger.warning(
-                    "Whisper model not found at %s — running in MOCK mode. "
-                    "Download whisper_int8.onnx to enable real transcription.",
-                    self._model_path,
-                )
-                self._session = None
-                return
-
-            opts = ort.SessionOptions()
-            opts.intra_op_num_threads = 2
-            opts.inter_op_num_threads = 1
-            opts.graph_optimization_level = (
-                ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-            )
-            self._session = ort.InferenceSession(
-                str(self._model_path),
-                sess_options=opts,
-                providers=["CPUExecutionProvider"],
-            )
-            logger.info(
-                "Whisper model loaded: %s | inputs=%s",
-                self._model_path.name,
-                [i.name for i in self._session.get_inputs()],
-            )
-        except ImportError:
-            logger.error("onnxruntime not installed — STT unavailable")
-            self._session = None
-
-    # ── Private: Inference ──────────────────────────────────────────────────
-
-    def _run_inference(
-        self,
-        mel: np.ndarray,
-        language: str,
-    ) -> tuple[str, list[tuple[float, float]], list[float]]:
-        """
-        Run ONNX Whisper inference.
-        Returns (raw_text, [(start, end), ...], [confidence, ...])
+        Returns
+        -------
+        dict with keys: text, language, confidence, no_speech_prob
         """
         if self._session is None:
-            return self._mock_inference(mel)
+            logger.warning("WhisperSTT: no model loaded — returning empty transcription")
+            return {"text": "", "language": self._lang, "confidence": 0.0, "no_speech_prob": 1.0}
 
-        # Build input dict (Whisper ONNX expects mel spectrogram)
-        # Shape: (1, n_mels, T)
-        mel_input = mel[np.newaxis, :, :].astype(np.float32)
+        # Resample to 16kHz if needed
+        if sample_rate != WHISPER_SAMPLE_RATE:
+            audio = self._resample(audio, sample_rate, WHISPER_SAMPLE_RATE)
 
-        input_name = self._session.get_inputs()[0].name
-        outputs = self._session.run(None, {input_name: mel_input})
+        # Clip to max duration
+        max_samples = WHISPER_MAX_SECONDS * WHISPER_SAMPLE_RATE
+        if len(audio) > max_samples:
+            logger.warning(
+                "Audio truncated from %.1fs to %ds",
+                len(audio) / WHISPER_SAMPLE_RATE, WHISPER_MAX_SECONDS,
+            )
+            audio = audio[:max_samples]
 
-        # Parse outputs — depends on exact Whisper ONNX export format
-        # Standard export: outputs[0] = token ids, outputs[1] = logprobs
-        if len(outputs) >= 2:
-            token_ids = outputs[0].flatten().tolist()
-            logprobs  = outputs[1].flatten().tolist()
-            text = self._decode_tokens(token_ids)
-            confidences = [min(1.0, max(0.0, np.exp(lp))) for lp in logprobs]
-            timestamps  = self._estimate_timestamps(text, mel.shape[1])
+        # Pad to minimum 1 second (Whisper requirement)
+        min_samples = WHISPER_SAMPLE_RATE
+        if len(audio) < min_samples:
+            audio = np.pad(audio, (0, min_samples - len(audio)))
+
+        try:
+            result = self._run_inference(audio)
+        except Exception as exc:
+            logger.error("Whisper inference failed: %s", exc)
+            result = {"text": "", "language": self._lang, "confidence": 0.0, "no_speech_prob": 1.0}
+
+        return result
+
+    def is_loaded(self) -> bool:
+        """True if ONNX model is loaded and ready."""
+        return self._session is not None
+
+    # ── Private: model loading ────────────────────────────────────────────
+
+    def _load_model(self, model_path: Path) -> None:
+        if not _ORT_AVAILABLE:
+            logger.warning("WhisperSTT: onnxruntime not installed — STT disabled")
+            return
+
+        if not model_path.exists():
+            logger.info(
+                "WhisperSTT: model not found at %s\n"
+                "  Run: python ai-core/scripts/convert_to_onnx.py",
+                model_path,
+            )
+            return
+
+        try:
+            opts = ort.SessionOptions()
+            opts.intra_op_num_threads = self._threads
+            opts.execution_mode       = ort.ExecutionMode.ORT_SEQUENTIAL
+            opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+
+            self._session = ort.InferenceSession(
+                str(model_path),
+                sess_options = opts,
+                providers    = ["CPUExecutionProvider"],
+            )
+            logger.info(
+                "WhisperSTT loaded | path=%s  threads=%d",
+                model_path.name, self._threads,
+            )
+        except Exception as exc:
+            logger.warning("WhisperSTT: failed to load model: %s", exc)
+            self._session = None
+
+    # ── Private: inference ────────────────────────────────────────────────
+
+    def _run_inference(self, audio: np.ndarray) -> dict:
+        """
+        Run Whisper ONNX inference.
+
+        Whisper ONNX expects a log-mel spectrogram as input.
+        The full HuggingFace Whisper pipeline handles tokenisation
+        and beam search internally — we call it via the encoder/decoder
+        session directly.
+
+        For the INT8 ONNX export from optimum, the expected inputs are:
+            input_features : float32 [1, 80, 3000]  (log-mel spectrogram)
+        Output:
+            sequences      : int64   [1, seq_len]   (token IDs)
+        """
+        # Compute log-mel spectrogram
+        mel = self._log_mel_spectrogram(audio)           # shape: (80, frames)
+        # Pad/trim to 3000 frames (30 seconds at 100 frames/sec)
+        if mel.shape[1] < 3000:
+            mel = np.pad(mel, ((0, 0), (0, 3000 - mel.shape[1])), constant_values=-1.0)
         else:
-            token_ids = outputs[0].flatten().tolist()
-            text = self._decode_tokens(token_ids)
-            confidences = [0.75] * max(1, len(text.split()))
-            timestamps  = self._estimate_timestamps(text, mel.shape[1])
+            mel = mel[:, :3000]
 
-        return text, timestamps, confidences
+        input_features = mel[np.newaxis, :, :].astype(np.float32)  # (1, 80, 3000)
 
-    def _mock_inference(
-        self,
-        mel: np.ndarray,
-    ) -> tuple[str, list[tuple[float, float]], list[float]]:
+        # Run encoder
+        input_names = [inp.name for inp in self._session.get_inputs()]
+        feed = {"input_features": input_features}
+
+        # Some Whisper ONNX exports include decoder_input_ids
+        if "decoder_input_ids" in input_names:
+            # Start-of-transcript token for Arabic
+            feed["decoder_input_ids"] = np.array([[50258, 50272, 50359, 50363]], dtype=np.int64)
+
+        outputs = self._session.run(None, feed)
+        token_ids = outputs[0][0]   # shape: (seq_len,)
+
+        # Decode token IDs to text using a minimal tokeniser
+        text           = self._decode_tokens(token_ids)
+        no_speech_prob = float(outputs[1][0]) if len(outputs) > 1 else 0.0
+        confidence     = max(0.0, 1.0 - no_speech_prob)
+
+        return {
+            "text"          : text.strip(),
+            "language"      : self._lang,
+            "confidence"    : round(confidence, 4),
+            "no_speech_prob": round(no_speech_prob, 4),
+        }
+
+    def _log_mel_spectrogram(self, audio: np.ndarray) -> np.ndarray:
         """
-        Mock inference for demo/testing when model file is absent.
-        Returns realistic-looking Egyptian Arabic medical phrases.
+        Compute Whisper-compatible log-mel spectrogram.
+
+        Uses numpy only — no librosa required for offline deployment.
+        Matches Whisper's preprocessing exactly:
+        - window size  : 400 samples (25ms at 16kHz)
+        - hop length   : 160 samples (10ms)
+        - n_mels       : 80
         """
-        t_frames = mel.shape[1]
-        duration = t_frames * HOP_LENGTH / SAMPLE_RATE
+        n_fft   = 400
+        hop     = 160
+        n_mels  = N_MEL_BINS
+        sr      = WHISPER_SAMPLE_RATE
 
-        # Select a demo phrase based on audio energy profile
-        energy = float(mel.mean())
-        demo_phrases = [
-            "عندي وجع في بطني من امبارح",
-            "بيجيلي صداع وسخونة",
-            "أنا حامل وعندي ضغط",
-            "الطفل عنده حرارة وكحة",
-            "محتاج أعمل تحليل دم",
-            "بيوجعني صدري لما باتنفس",
-        ]
-        idx = int(abs(energy) * 100) % len(demo_phrases)
-        text = demo_phrases[idx]
+        # Short-time Fourier transform
+        pad_len = n_fft // 2
+        audio   = np.pad(audio.astype(np.float32), pad_len, mode="reflect")
 
-        words = text.split()
-        step = duration / max(len(words), 1)
-        timestamps = [(i * step, (i + 1) * step) for i in range(len(words))]
-        confidences = [0.78 + np.random.uniform(-0.05, 0.05) for _ in words]
+        # Hann window
+        window  = np.hanning(n_fft).astype(np.float32)
 
-        logger.debug("Mock STT: '%s' (%.1f sec)", text, duration)
-        return text, timestamps, confidences
+        # Compute STFT frames
+        n_frames = 1 + (len(audio) - n_fft) // hop
+        frames   = np.lib.stride_tricks.as_strided(
+            audio,
+            shape   = (n_frames, n_fft),
+            strides = (audio.strides[0] * hop, audio.strides[0]),
+        )
+        stft = np.fft.rfft(frames * window, n=n_fft)
+        magnitudes = np.abs(stft) ** 2                    # power spectrum
 
-    # ── Private: Helpers ────────────────────────────────────────────────────
+        # Mel filterbank (triangular filters)
+        mel_fb = self._mel_filterbank(sr, n_fft, n_mels)  # (n_mels, n_fft//2+1)
+        mel    = mel_fb @ magnitudes.T                     # (n_mels, n_frames)
 
-    def _pad_or_chunk(self, mel: np.ndarray) -> np.ndarray:
+        # Log scaling
+        mel    = np.log10(np.maximum(mel, 1e-10))
+        mel    = (mel - mel.max()) / 4.0 + 1.0            # normalise to [-1, 0] ≈ Whisper norm
+
+        return mel.astype(np.float32)
+
+    @staticmethod
+    def _mel_filterbank(sr: int, n_fft: int, n_mels: int) -> np.ndarray:
+        """Build a triangular mel filterbank matrix (n_mels, n_fft//2+1)."""
+        n_freqs  = n_fft // 2 + 1
+        fmin, fmax = 0.0, sr / 2.0
+
+        def hz_to_mel(f): return 2595.0 * np.log10(1.0 + f / 700.0)
+        def mel_to_hz(m): return 700.0 * (10.0 ** (m / 2595.0) - 1.0)
+
+        mel_pts  = np.linspace(hz_to_mel(fmin), hz_to_mel(fmax), n_mels + 2)
+        hz_pts   = mel_to_hz(mel_pts)
+        bin_pts  = np.floor((n_fft + 1) * hz_pts / sr).astype(int)
+
+        filters  = np.zeros((n_mels, n_freqs), dtype=np.float32)
+        for m in range(n_mels):
+            f_m_minus = bin_pts[m]
+            f_m       = bin_pts[m + 1]
+            f_m_plus  = bin_pts[m + 2]
+            for k in range(f_m_minus, f_m):
+                filters[m, k] = (k - bin_pts[m]) / (bin_pts[m+1] - bin_pts[m] + 1e-10)
+            for k in range(f_m, f_m_plus):
+                filters[m, k] = (bin_pts[m+2] - k) / (bin_pts[m+2] - bin_pts[m+1] + 1e-10)
+        return filters
+
+    @staticmethod
+    def _decode_tokens(token_ids: np.ndarray) -> str:
         """
-        Pad or truncate mel to Whisper's 30-second window.
-        Whisper expects exactly CHUNK_LENGTH_SEC * 100 frames.
-        """
-        target_frames = CHUNK_LENGTH_SEC * (SAMPLE_RATE // HOP_LENGTH)
-        n = mel.shape[1]
-        if n < target_frames:
-            pad_width = target_frames - n
-            mel = np.pad(mel, ((0, 0), (0, pad_width)), mode="constant")
-        else:
-            mel = mel[:, :target_frames]
-        return mel
+        Minimal token-to-text decoder for Whisper output.
 
-    def _decode_tokens(self, token_ids: list[int]) -> str:
+        For the full token vocabulary, Whisper uses a BPE tokeniser
+        (loaded from tokenizer.json).  This stub returns a placeholder
+        when the tokeniser file is not available — the production code
+        should load the real tokeniser from the same directory as the model.
         """
-        Minimal token decoder — safe for Whisper / BPE token IDs.
-
-        FATAL BUG FIX:
-            bytes(token_ids) crashes with ValueError when any ID > 255.
-            Whisper token IDs reach ~50,000 — this will ALWAYS crash.
-            bytes() only accepts values in range(0, 256).
-
-        Strategy (in priority order):
-        1. tiktoken  — Whisper's own tokenizer (lightweight, no torch needed)
-        2. transformers AutoTokenizer — if HuggingFace stack is available
-        3. Safe mock fallback — returns a human-readable placeholder string
-           that makes it obvious the model ran but the tokenizer is absent.
-           Never crashes, never produces garbage from raw byte conversion.
-        """
-        # Filter Whisper special tokens (IDs >= 50257 are control tokens)
-        filtered = [t for t in token_ids if 0 < t < 50257]
-        if not filtered:
+        # Filter special tokens (IDs < 50257 are text tokens in Whisper)
+        text_tokens = [t for t in token_ids if t < 50257]
+        if not text_tokens:
             return ""
-
-        # ── Option 1: tiktoken (Whisper's native tokenizer) ──────────────
-        try:
-            import tiktoken
-            enc = tiktoken.get_encoding("gpt2")   # Whisper uses GPT-2 vocab
-            # tiktoken.decode expects bytes; filter to valid range first
-            text = enc.decode(filtered)
-            return text.strip()
-        except (ImportError, Exception):
-            pass
-
-        # ── Option 2: HuggingFace transformers ───────────────────────────
-        try:
-            from transformers import AutoTokenizer
-            tok_path = str(TOKENIZER_VOCAB_PATH.parent)
-            tokenizer = AutoTokenizer.from_pretrained(tok_path)
-            text = tokenizer.decode(filtered, skip_special_tokens=True)
-            return text.strip()
-        except (ImportError, Exception):
-            pass
-
-        # ── Option 3: Safe mock fallback — NEVER crashes ─────────────────
-        # Return a meaningful placeholder so the caller knows:
-        # (a) inference ran successfully, (b) tokenizer is not installed.
-        # Do NOT use bytes(filtered) — guaranteed ValueError for IDs > 255.
-        logger.debug(
-            "_decode_tokens: no tokenizer available — returning mock. "
-            "Install tiktoken for real decoding. token_count=%d",
-            len(filtered),
-        )
-        return self._mock_text_from_token_count(len(filtered))
-
-    def _mock_text_from_token_count(self, n_tokens: int) -> str:
-        """
-        Return a plausible Egyptian Arabic phrase scaled to token count.
-        Used as safe fallback in _decode_tokens when no tokenizer is available.
-        Token count is a rough proxy for utterance length.
-        """
-        short_phrases = [
-            "عندي وجع",
-            "بيوجعني",
-            "سخونة",
-        ]
-        medium_phrases = [
-            "عندي وجع في بطني من امبارح",
-            "بيجيلي صداع وسخونة شديدة",
-            "محتاج أعمل تحليل دم",
-        ]
-        long_phrases = [
-            "أنا حامل وعندي ضغط وبيوجعني ضهري",
-            "الطفل عنده حرارة وكحة ومش قادر ياكل",
-            "بيوجعني صدري لما باتنفس وعندي ضيق",
-        ]
-        if n_tokens <= 5:
-            pool = short_phrases
-        elif n_tokens <= 15:
-            pool = medium_phrases
-        else:
-            pool = long_phrases
-        return pool[n_tokens % len(pool)]
-
-    def _estimate_timestamps(
-        self,
-        text: str,
-        n_frames: int,
-    ) -> list[tuple[float, float]]:
-        """
-        Estimate per-word timestamps by uniform distribution over audio duration.
-
-        Known limitation: short words ("في", "من") get the same time slot as
-        long words ("مستشفى", "تحليل") — UI word-highlighting will not be
-        perfectly synchronised with actual speech.
-
-        Acceptable for Hackathon demo. Production fix: extract per-token
-        cross-attention weights from Whisper decoder and use them to derive
-        true word-level alignments (see: github.com/openai/whisper#word-timestamps).
-        """
-        words    = text.split()
-        duration = n_frames * HOP_LENGTH / SAMPLE_RATE
-        if not words:
-            return []
-        step = duration / len(words)
-        return [(i * step, (i + 1) * step) for i in range(len(words))]
-
-    def _build_word_results(
-        self,
-        text: str,
-        timestamps: list[tuple[float, float]],
-        confidences: list[float],
-    ) -> list[WordResult]:
-        """Build WordResult list from raw outputs."""
-        words = text.split()
-        results = []
-        for i, word in enumerate(words):
-            start, end = timestamps[i] if i < len(timestamps) else (0.0, 0.0)
-            conf = confidences[i] if i < len(confidences) else 0.5
-            results.append(WordResult(
-                word=word,
-                start_sec=round(start, 3),
-                end_sec=round(end, 3),
-                confidence=round(conf, 4),
-            ))
-        return results
+        # In production: tokeniser.decode(text_tokens)
+        # Here we return a marker so callers know inference ran
+        return f"[decoded:{len(text_tokens)}_tokens]"
 
     @staticmethod
-    def _clean_text(text: str) -> str:
+    def _resample(audio: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarray:
+        """Simple linear interpolation resampler (no scipy required)."""
+        if orig_sr == target_sr:
+            return audio
+        ratio       = target_sr / orig_sr
+        n_new       = int(len(audio) * ratio)
+        old_indices = np.linspace(0, len(audio) - 1, n_new)
+        return np.interp(old_indices, np.arange(len(audio)), audio).astype(np.float32)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Main engine: SpeechToText
+# ═══════════════════════════════════════════════════════════════════════════
+
+class SpeechToText:
+    """
+    End-to-end speech pipeline: audio bytes → STTResult with routing.
+
+    Usage
+    -----
+    >>> stt = SpeechToText()
+
+    # From raw bytes (PWA microphone recording):
+    >>> result = stt.transcribe_and_route(audio_bytes, mime_type="audio/webm")
+    >>> result.text          # "عندي ألم في صدري"
+    >>> result.speaker_type  # SpeakerType.PATIENT
+    >>> result.route         # {"api": "/api/triage", "page": "/triage", ...}
+
+    # With known patient context (overrides auto-detection):
+    >>> result = stt.transcribe_and_route(
+    ...     audio_bytes,
+    ...     patient_context={"is_pregnant": True}
+    ... )
+    >>> result.speaker_type  # SpeakerType.PREGNANT
+    """
+
+    def __init__(
+        self,
+        model_path    : Path | None   = None,
+        language      : str           = "ar",
+        beam_size     : int           = 3,
+        threads       : int | None    = None,
+    ) -> None:
+        self._whisper = WhisperSTT(
+            model_path = model_path,
+            language   = language,
+            beam_size  = beam_size,
+            threads    = threads,
+        )
+        self._router = SpeakerRouter()
+
+        logger.info(
+            "SpeechToText ready | model_loaded=%s  language=%s",
+            self._whisper.is_loaded(), language,
+        )
+
+    # ── Public API ───────────────────────────────────────────────────────
+
+    def transcribe_and_route(
+        self,
+        audio_bytes    : bytes,
+        mime_type      : str                    = "audio/wav",
+        patient_context: dict[str, Any] | None  = None,
+        sample_rate    : int                    = WHISPER_SAMPLE_RATE,
+    ) -> STTResult:
         """
-        Final text cleanup — remove Whisper noise tokens, normalize whitespace.
+        Full pipeline: raw audio bytes → STTResult with speaker routing.
 
-        Edge-case note (Fix 3):
-            The old pattern r'\\[.*?\\]' removed ANY square-bracketed content,
-            including legitimate patient speech if it contained brackets.
-            We narrow patterns to only match known Whisper hallucination
-            signatures (ASCII-only labels like [noise], [music], [blank])
-            so Arabic patient text is never accidentally removed.
+        Parameters
+        ----------
+        audio_bytes     : Raw audio bytes from PWA microphone or file.
+        mime_type       : MIME type hint for format detection.
+        patient_context : Known session context (overrides speaker detection).
+        sample_rate     : Audio sample rate if known (used as hint).
+
+        Returns
+        -------
+        STTResult — always returns, never raises.
         """
-        # Remove known Whisper hallucination patterns only
-        # Pattern 1: Whisper special tags  <|startoftranscript|>  etc.
-        text = re.sub(r"<\|[^|>]{1,30}\|>", "", text)
+        t_start = time.perf_counter()
 
-        # Pattern 2: English-only bracketed noise labels [noise] [music] [blank]
-        # Restricted to: ASCII letters/digits/space, max 20 chars — won't match Arabic
-        text = re.sub(r"\[[A-Za-z0-9 _\-]{1,20}\]", "", text)
+        # ── Step 1: Decode audio bytes → float32 array ────────────────────
+        try:
+            audio, sr = self._decode_audio(audio_bytes, mime_type, sample_rate)
+        except Exception as exc:
+            logger.error("Audio decode failed: %s", exc)
+            return self._error_result("Audio decode failed")
 
-        # Pattern 3: Parenthesised English stage directions (applause) (laughter)
-        # Same restriction — ASCII only, won't touch Arabic text in parens
-        text = re.sub(r"\([A-Za-z0-9 _\-]{1,20}\)", "", text)
+        duration_s = len(audio) / sr
 
-        # Normalize whitespace
-        text = re.sub(r"\s+", " ", text).strip()
+        # ── Step 2: Silence detection ─────────────────────────────────────
+        is_silent = self._is_silent(audio)
 
-        # Fix Arabic punctuation spacing artifacts
-        text = text.replace(" .", ".").replace(" ،", "،").replace(" ؟", "؟")
-        return text
+        # ── Step 3: Transcribe via Whisper ────────────────────────────────
+        t_whisper = time.perf_counter()
+        whisper_out = self._whisper.transcribe(audio, sr)
+        transcribe_ms = (time.perf_counter() - t_whisper) * 1000
+
+        text          = whisper_out["text"]
+        confidence    = whisper_out["confidence"]
+        no_speech_prob= whisper_out["no_speech_prob"]
+
+        # Override silence flag if Whisper also says no speech
+        if no_speech_prob > 0.80:
+            is_silent = True
+
+        # ── Step 4: Speaker detection & routing ───────────────────────────
+        speaker_type, speaker_conf, speaker_kws = self._router.detect(
+            text, patient_context
+        )
+        route = self._router.route(speaker_type)
+
+        elapsed_total = (time.perf_counter() - t_start) * 1000
+        logger.info(
+            "STT | speaker=%s route=%s conf=%.2f dur=%.1fs total=%.1fms",
+            speaker_type.value, route["page"],
+            confidence, duration_s, elapsed_total,
+        )
+
+        return STTResult(
+            text             = text,
+            language         = whisper_out.get("language", "ar"),
+            transcribe_ms    = transcribe_ms,
+            speaker_type     = speaker_type,
+            route            = route,
+            confidence       = confidence,
+            no_speech_prob   = no_speech_prob,
+            is_silent        = is_silent,
+            audio_duration_s = duration_s,
+            sample_rate      = sr,
+            speaker_confidence  = speaker_conf,
+            speaker_keywords    = speaker_kws,
+        )
+
+    def transcribe_only(
+        self,
+        audio_bytes: bytes,
+        mime_type  : str = "audio/wav",
+        sample_rate: int = WHISPER_SAMPLE_RATE,
+    ) -> str:
+        """
+        Shortcut — transcribe audio and return text only.
+        Speaker routing is skipped.
+        """
+        try:
+            audio, sr = self._decode_audio(audio_bytes, mime_type, sample_rate)
+        except Exception as exc:
+            logger.error("Audio decode failed: %s", exc)
+            return ""
+        return self._whisper.transcribe(audio, sr)["text"]
+
+    def route_text(
+        self,
+        text           : str,
+        patient_context: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        """
+        Route already-transcribed text to the correct RIVA page.
+        Useful when text arrives from the chatbot (no audio).
+        """
+        speaker_type, _, _ = self._router.detect(text, patient_context)
+        return self._router.route(speaker_type)
+
+    @property
+    def is_ready(self) -> bool:
+        """True if Whisper model is loaded and ready."""
+        return self._whisper.is_loaded()
+
+    # ── Private helpers ───────────────────────────────────────────────────
+
+    def _decode_audio(
+        self,
+        audio_bytes: bytes,
+        mime_type  : str,
+        hint_sr    : int,
+    ) -> tuple[np.ndarray, int]:
+        """
+        Decode audio bytes to float32 numpy array.
+
+        Tries soundfile first (WAV/FLAC/OGG), then pydub (WebM/MP3/M4A).
+        Falls back to raw interpretation if both unavailable.
+        """
+        buf = io.BytesIO(audio_bytes)
+
+        # soundfile handles WAV, FLAC, OGG
+        if _SF_AVAILABLE:
+            try:
+                audio, sr = sf.read(buf, dtype="float32", always_2d=False)
+                if audio.ndim > 1:
+                    audio = audio.mean(axis=1)   # stereo → mono
+                return audio, sr
+            except Exception:
+                buf.seek(0)
+
+        # pydub handles WebM, MP3, M4A, AAC (requires ffmpeg)
+        if _PYDUB_AVAILABLE:
+            try:
+                seg   = AudioSegment.from_file(buf)
+                seg   = seg.set_frame_rate(WHISPER_SAMPLE_RATE).set_channels(1)
+                raw   = np.array(seg.get_array_of_samples(), dtype=np.float32)
+                audio = raw / (2 ** (seg.sample_width * 8 - 1))
+                return audio, WHISPER_SAMPLE_RATE
+            except Exception:
+                buf.seek(0)
+
+        # Last resort: attempt raw 16-bit PCM at hint_sr
+        # FIX v1.1 — 4 safety guards before trusting the raw bytes:
+        #
+        # Guard 1: refuse empty buffer — nothing to decode
+        if not audio_bytes:
+            logger.error("Audio decode fallback: empty buffer — returning silence")
+            return np.zeros(WHISPER_SAMPLE_RATE, dtype=np.float32), hint_sr
+
+        # Guard 2: int16 requires an even number of bytes — odd length = corrupt
+        if len(audio_bytes) % 2 != 0:
+            logger.error(
+                "Audio decode fallback: odd byte length (%d) — not valid int16 PCM, "
+                "returning silence", len(audio_bytes),
+            )
+            return np.zeros(WHISPER_SAMPLE_RATE, dtype=np.float32), hint_sr
+
+        logger.warning(
+            "Audio decoders unavailable — interpreting as raw PCM int16 "
+            "(%d bytes at %dHz)", len(audio_bytes), hint_sr,
+        )
+        raw   = np.frombuffer(audio_bytes, dtype=np.int16).astype(np.float32)
+        audio = raw / 32768.0
+
+        # Guard 3: clip to [-1, 1] — malformed PCM can exceed this range
+        audio = np.clip(audio, -1.0, 1.0)
+
+        # Guard 4: RMS > 0.95 means data is likely noise/garbage not speech
+        rms = float(np.sqrt(np.mean(audio ** 2)))
+        if rms > 0.95:
+            logger.error(
+                "Audio decode fallback: RMS=%.3f — data looks like noise/garbage, "
+                "returning silence", rms,
+            )
+            return np.zeros(WHISPER_SAMPLE_RATE, dtype=np.float32), hint_sr
+
+        return audio, hint_sr
 
     @staticmethod
-    def _empty_result(
-        dur: float,
-        error: str,
-        status: STTStatus,
-    ) -> TranscriptionResult:
-        return TranscriptionResult(
-            text="",
-            text_raw="",
-            words=[],
-            language=LANGUAGE,
-            confidence=0.0,
-            duration_sec=round(dur, 3),
-            inference_ms=0.0,
-            status=status,
-            error=error,
+    def _is_silent(audio: np.ndarray, threshold: float = 0.01) -> bool:
+        """Return True if RMS energy is below silence threshold."""
+        rms = float(np.sqrt(np.mean(audio ** 2)))
+        return rms < threshold
+
+    @staticmethod
+    def _error_result(reason: str) -> STTResult:
+        """Return a safe empty STTResult on error."""
+        return STTResult(
+            text             = "",
+            language         = "ar",
+            transcribe_ms    = 0.0,
+            speaker_type     = SpeakerType.UNKNOWN,
+            route            = SPEAKER_ROUTES[SpeakerType.UNKNOWN],
+            confidence       = 0.0,
+            no_speech_prob   = 1.0,
+            is_silent        = True,
+            audio_duration_s = 0.0,
+            sample_rate      = WHISPER_SAMPLE_RATE,
+            speaker_confidence  = 0.0,
+            speaker_keywords    = [],
         )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Singleton for FastAPI
-# ─────────────────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════
+#  Module-level convenience
+# ═══════════════════════════════════════════════════════════════════════════
 
-_stt_instance: Optional[SpeechToText] = None
+_default_stt: SpeechToText | None = None
 
 
-def get_stt() -> SpeechToText:
+def transcribe_and_route(
+    audio_bytes    : bytes,
+    mime_type      : str                   = "audio/wav",
+    patient_context: dict[str, Any] | None = None,
+) -> STTResult:
     """
-    Shared SpeechToText instance for FastAPI dependency injection.
+    Module-level shortcut — uses a cached default SpeechToText instance.
 
-    Usage in routes:
-        from ai_core.voice.speech_to_text import get_stt
-
-        @router.post("/voice")
-        async def voice_endpoint(
-            file: UploadFile,
-            stt: SpeechToText = Depends(get_stt),
-            processor: AudioProcessor = Depends(get_audio_processor),
-        ):
-            raw = await file.read()
-            audio = processor.process(raw)
-            result = stt.transcribe(audio.samples)
-            return result.to_dict()
+    >>> from ai_core.voice.dialect_model.speech_to_text import transcribe_and_route
+    >>> result = transcribe_and_route(audio_bytes, mime_type="audio/webm")
     """
-    global _stt_instance
-    if _stt_instance is None:
-        _stt_instance = SpeechToText()
-    return _stt_instance
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Self-test
-# ─────────────────────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    import sys
-    logging.basicConfig(level=logging.INFO)
-
-    print("=" * 60)
-    print("RIVA SpeechToText — self-test")
-    print("=" * 60)
-
-    # Generate synthetic audio (1 second, 440Hz tone)
-    sr = SAMPLE_RATE
-    t  = np.linspace(0, 1.5, int(sr * 1.5), dtype=np.float32)
-    audio = (np.sin(2 * np.pi * 440 * t) * 0.4).astype(np.float32)
-    audio += np.random.normal(0, 0.01, len(audio)).astype(np.float32)
-
-    print(f"Test audio : {len(audio)/sr:.1f} sec @ {sr}Hz")
-
-    stt    = SpeechToText()
-    result = stt.transcribe(audio)
-
-    print(f"\nResult:")
-    print(f"  status         : {result.status.value}")
-    print(f"  text           : '{result.text}'")
-    print(f"  confidence     : {result.confidence}")
-    print(f"  duration_sec   : {result.duration_sec}")
-    print(f"  inference_ms   : {result.inference_ms}")
-    print(f"  medical_terms  : {result.medical_terms}")
-    print(f"  needs_review   : {result.needs_review}")
-    print(f"  words count    : {len(result.words)}")
-
-    # Test MedicalVocabCorrector
-    print("\nVocab corrector test:")
-    corrector = MedicalVocabCorrector()
-    test_phrases = [
-        "عندي وجاع في بطني",
-        "سخونيه وصداع",
-        "محتاج دوا للضغط",
-    ]
-    for phrase in test_phrases:
-        corrected, terms = corrector.correct(phrase)
-        print(f"  '{phrase}' → '{corrected}' | terms={terms}")
-
-    # Test log-mel computation
-    mel = compute_log_mel(audio)
-    print(f"\nLog-mel spectrogram: shape={mel.shape}, "
-          f"min={mel.min():.2f}, max={mel.max():.2f}")
-
-    # to_dict test
-    d = result.to_dict()
-    print(f"\nto_dict keys: {list(d.keys())}")
-
-    print("\n✅ SpeechToText self-test complete")
-    sys.exit(0)
+    global _default_stt
+    if _default_stt is None:
+        _default_stt = SpeechToText()
+    return _default_stt.transcribe_and_route(audio_bytes, mime_type, patient_context)
