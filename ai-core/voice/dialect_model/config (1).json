@@ -1,0 +1,302 @@
+{
+  "_meta": {
+    "file"       : "ai-core/voice/dialect_model/config.json",
+    "project"    : "RIVA Health Platform v3.1",
+    "purpose"    : "Runtime configuration for the full RIVA voice pipeline — AudioProcessor, WhisperSTT, SpeakerRouter, CommandParser, ConfidenceScorer, AmbiguityHandler, SentimentAnalyzer, TextToSpeech",
+    "author"     : "Goda Emad (AI Core)",
+    "version"    : "3.1.0",
+    "updated"    : "2026-03-18",
+    "environment": "offline-first — all values must allow the system to run with ZERO network access",
+    "note"       : "Keys prefixed with _ are documentation-only and ignored by the loader",
+    "changelog"  : {
+      "3.1.0": [
+        "ADD audio_processor section (VAD+ZCR, noise gate 1024-bin, async workers)",
+        "ADD speaker_routing section (5-page route map + confidence thresholds)",
+        "CHG confidence_scorer: positive weights sum 1.0 (FIX v1.2), ambiguity external",
+        "ADD confidence_scorer: speaker_confidence (0.07) + speech_ratio (0.04)",
+        "CHG whisper: path → models/chatbot/, tokenizer_dir, mime types",
+        "CHG sentiment_analyzer: ONNX path + blend weights",
+        "CHG performance: per-stage latency targets"
+      ],
+      "2.2.0": [
+        "ADD command_parser: Arabic word numerals duration, negation-aware symptoms",
+        "ADD ambiguity_handler: 7 types, priority ordering, substring matching"
+      ]
+    }
+  },
+
+  "audio_processor": {
+    "_note"                : "AudioProcessor v1.1 — first stage in pipeline, runs before WhisperSTT",
+    "target_sample_rate_hz": 16000,
+    "max_duration_seconds" : 30,
+    "chunk_overlap_seconds": 0.5,
+    "silence_threshold_rms": 0.01,
+    "vad": {
+      "_note"        : "Voice Activity Detection — RMS + ZCR (v1.1 fix: catches whispered consonants)",
+      "frame_ms"     : 20,
+      "pad_ms"       : 200,
+      "zcr_threshold": 0.10,
+      "_zcr_note"    : "ZCR > 0.10 detects س، ش، ف — low amplitude but high zero-crossing rate"
+    },
+    "normalisation": {
+      "enable"   : true,
+      "peak_dbfs": -3.0
+    },
+    "noise_gate": {
+      "enable"   : true,
+      "cutoff_hz": 80,
+      "fft_size" : 1024,
+      "_fft_note": "v1.1: 1024 bins → 15.6Hz resolution (was 31.25Hz at 512) — sharper HP filter"
+    },
+    "async": {
+      "workers"  : 4,
+      "env_var"  : "RIVA_AUDIO_WORKERS",
+      "_note"    : "ThreadPoolExecutor — CPU-bound FFT/VAD runs off FastAPI event loop"
+    },
+    "raw_pcm_fallback": {
+      "enable"           : true,
+      "min_length_bytes" : 3200,
+      "max_rms_noise"    : 0.90,
+      "_note"            : "4 safety guards: empty / odd-length / clip / RMS sanity check"
+    }
+  },
+
+  "whisper": {
+    "_note"                     : "WhisperSTT v1.1 — offline INT8 ONNX, graceful degradation",
+    "model_path"                : "ai-core/models/chatbot/whisper_int8.onnx",
+    "tokenizer_dir"             : "ai-core/models/chatbot",
+    "language"                  : "ar",
+    "task"                      : "transcribe",
+    "beam_size"                 : 3,
+    "temperature"               : 0.0,
+    "no_speech_threshold"       : 0.60,
+    "silence_rms_threshold"     : 0.01,
+    "max_audio_duration_seconds": 30,
+    "sample_rate_hz"            : 16000,
+    "onnx_threads"              : 2,
+    "_onnx_threads_note"        : "Override via RIVA_ONNX_THREADS env var",
+    "supported_mime_types"      : [
+      "audio/wav", "audio/webm", "audio/mp3",
+      "audio/m4a", "audio/ogg",  "audio/pcm"
+    ],
+    "decoder_input_ids": {
+      "_note"              : "Whisper forced-tokens for Arabic — injected into decoder feed",
+      "start_of_transcript": 50258,
+      "arabic_token"       : 50272,
+      "transcribe_token"   : 50359,
+      "no_timestamps_token": 50363
+    }
+  },
+
+  "speaker_routing": {
+    "_note"                : "SpeakerRouter v1.0 — detects speaker type, routes to correct RIVA page",
+    "min_context_confidence": 0.60,
+    "greeting_pattern_conf" : 0.95,
+    "keyword_base_conf"     : 0.50,
+    "keyword_conf_per_match": 0.15,
+    "max_keyword_conf"      : 0.90,
+    "patient_signal_conf"   : 0.55,
+    "unknown_conf"          : 0.30,
+    "routes": {
+      "patient" : { "api": "/api/triage",    "page": "/triage",    "html": "03_triage.html",           "title": "الفرز الطبي"      },
+      "pregnant": { "api": "/api/pregnancy", "page": "/pregnancy", "html": "06_pregnancy.html",        "title": "صحة الأم"         },
+      "school"  : { "api": "/api/school",    "page": "/school",    "html": "07_school.html",           "title": "الصحة المدرسية"   },
+      "doctor"  : { "api": "/api/doctor",    "page": "/doctor",    "html": "09_doctor_dashboard.html", "title": "داشبورد الطبيب"   },
+      "unknown" : { "api": "/api/chat",      "page": "/chatbot",   "html": "02_chatbot.html",          "title": "المحادثة الطبية"  }
+    }
+  },
+
+  "command_parser": {
+    "_note"                      : "CommandParser v3.1 — text + audio, Egyptian Arabic NLP",
+    "min_confidence"             : 0.35,
+    "negation_window_tokens"     : 4,
+    "max_symptoms_for_full_score": 3,
+    "dialect"                    : "ar-EG",
+    "normalise_diacritics"       : true,
+    "longest_match_first"        : true,
+    "batch_max_size"             : 32,
+    "arabic_word_numerals": {
+      "_note" : "Spoken Arabic numerals → integers for duration parsing (v3.1 FIX)",
+      "واحد"  : 1,  "يومين" : 2,
+      "تلاتة" : 3,  "تلات"  : 3,  "ثلاثة": 3, "ثلاث" : 3,
+      "اربعة" : 4,  "اربع"  : 4,  "أربعة": 4, "أربع" : 4,
+      "خمسة"  : 5,  "خمس"   : 5,
+      "ستة"   : 6,  "ست"    : 6,
+      "سبعة"  : 7,  "سبع"   : 7,
+      "تمانية": 8,  "تمن"   : 8,  "ثمانية": 8,
+      "تسعة"  : 9,  "تسع"   : 9,
+      "عشرة"  : 10, "عشر"   : 10
+    }
+  },
+
+  "confidence_scorer": {
+    "_note": "ConfidenceScorer v1.2 — positive weights sum to 1.0; ambiguity is external deduction",
+    "weights": {
+      "_note"             : "POSITIVE components only — must sum to 1.0. Ambiguity penalty excluded.",
+      "intent_confidence" : 0.44,
+      "symptom_evidence"  : 0.24,
+      "duration_bonus"    : 0.09,
+      "urgency_adjustment": 0.12,
+      "speaker_confidence": 0.07,
+      "speech_ratio"      : 0.04
+    },
+    "penalties": {
+      "_note"          : "Subtracted AFTER base score — ambiguity can push score below thresholds",
+      "ambiguity_normal": 0.10,
+      "ambiguity_severe": 0.20
+    },
+    "thresholds": {
+      "_note"   : "routing_decision() gates — EMERGENCY bypasses these",
+      "act"     : 0.70,
+      "clarify" : 0.45,
+      "fallback": 0.30
+    },
+    "urgency_adjustments": {
+      "_note"    : "Multiplied by w_urgency (0.12) and added to base score",
+      "emergency":  1.00,
+      "high"     :  0.80,
+      "medium"   :  0.30,
+      "low"      : -0.20
+    },
+    "speech_ratio_formula": {
+      "_note"        : "component = w_speech × clamp(2×ratio − 0.9, −1, +1)",
+      "neutral_ratio": 0.45,
+      "noise_below"  : 0.10,
+      "clear_above"  : 0.80
+    },
+    "emergency_routing_override" : true,
+    "_emergency_note"            : "EMERGENCY urgency → routing_decision always returns 'act'",
+    "min_score"                  : 0.10,
+    "max_symptoms_for_full_score": 3
+  },
+
+  "ambiguity_handler": {
+    "_note"                      : "AmbiguityHandler v1.1 — 7 types, priority-ordered, substring matching",
+    "min_confidence_for_no_check": 0.75,
+    "max_clarification_questions": 2,
+    "severe_ambiguity_threshold" : 0.65,
+    "check_priority_order": [
+      "conflicting", "low_confidence", "no_symptoms",
+      "vague_complaint", "missing_location",
+      "missing_duration", "intent_mismatch"
+    ],
+    "severity_scores": {
+      "conflicting"    : 0.70,
+      "low_confidence" : "dynamic: max(0, 1 − conf × 2)",
+      "no_symptoms"    : 0.75,
+      "vague_complaint": 0.50,
+      "missing_location": 0.55,
+      "missing_duration": 0.35,
+      "intent_mismatch": 0.45
+    },
+    "confidence_penalties": {
+      "conflicting"    : 0.20,
+      "low_confidence" : 0.15,
+      "no_symptoms"    : 0.25,
+      "vague_complaint": 0.10,
+      "missing_location": 0.10,
+      "missing_duration": 0.05,
+      "intent_mismatch": 0.10
+    }
+  },
+
+  "sentiment_analyzer": {
+    "_note"               : "SentimentAnalyzer v2.1 — Hybrid ONNX INT8 + Egyptian Arabic lexicon",
+    "onnx_model_path"     : "ai-core/models/chatbot/model_int8.onnx",
+    "onnx_blend_weight"   : 0.70,
+    "lexicon_blend_weight": 0.30,
+    "onnx_threads"        : 2,
+    "_mode_note"          : "Falls back to lexicon-only if model not found — zero-latency, always offline",
+    "distress_threshold"  : -0.50,
+    "calm_threshold"      :  0.50,
+    "emergency_override"  : true,
+    "_emergency_note"     : "Emergency terms force score to −1.0 if not negated",
+    "labels": {
+      "range_-1.00_-0.75": "ضائقة شديدة",
+      "range_-0.75_-0.50": "قلق",
+      "range_-0.50_-0.10": "انزعاج خفيف",
+      "range_-0.10_+0.10": "محايد",
+      "range_+0.10_+0.50": "مطمئن نسبياً",
+      "range_+0.50_+1.00": "مطمئن"
+    }
+  },
+
+  "text_to_speech": {
+    "_note"        : "TextToSpeech v1.1 — Egyptian Arabic audio response to user",
+    "engine"       : "pyttsx3",
+    "language"     : "ar",
+    "rate_wpm"     : 145,
+    "volume"       : 0.90,
+    "pitch"        : 1.0,
+    "fallback_chain": ["pyttsx3", "gtts_disk_cache", "browser_web_speech", "silent"],
+    "_fallback_note": "Each engine tried in order — silent is always available offline"
+  },
+
+  "routing": {
+    "_note"                : "Maps TargetModel enum values → FastAPI route prefixes",
+    "triage_engine"        : "/api/triage",
+    "pregnancy_risk"       : "/api/pregnancy",
+    "school_health"        : "/api/school",
+    "readmission_predictor": "/api/readmission",
+    "los_predictor"        : "/api/los",
+    "medical_chatbot"      : "/api/chat",
+    "navigation_handler"   : "/api/navigate",
+    "system_handler"       : "/api/system"
+  },
+
+  "urgency_escalation": {
+    "_note"                  : "Triggered when urgency=EMERGENCY — bypasses confidence scoring",
+    "skip_clarification"     : true,
+    "force_route_to_triage"  : true,
+    "alert_doctor_dashboard" : true,
+    "log_level"              : "CRITICAL",
+    "response_max_latency_ms": 800
+  },
+
+  "offline": {
+    "_note"                     : "All models must run with ZERO network access",
+    "enabled"                   : true,
+    "cache_parsed_commands"     : true,
+    "cache_ttl_seconds"         : 300,
+    "sync_on_reconnect"         : true,
+    "background_sync_interval_s": 60,
+    "max_cached_commands"       : 200,
+    "storage_key_prefix"        : "riva_voice_"
+  },
+
+  "security": {
+    "_note"                : "Security settings for the voice pipeline",
+    "encrypt_transcriptions": true,
+    "encryption_algorithm" : "AES-256-GCM",
+    "sign_parsed_commands" : true,
+    "pii_scrub_before_log" : true,
+    "pii_patterns"         : [
+      "\\d{14}",
+      "01[0-2,5]{1}[0-9]{8}",
+      "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+    ],
+    "_pii_note": "Patterns: Egyptian national ID (14 digits), mobile (01x), email"
+  },
+
+  "logging": {
+    "level"                 : "INFO",
+    "log_parse_time_ms"     : true,
+    "log_score_breakdown"   : false,
+    "_score_note"           : "Set true in dev to see full ScoreBreakdown per command",
+    "log_negated_symptoms"  : true,
+    "max_text_length_in_log": 120
+  },
+
+  "performance": {
+    "_note"                       : "Per-stage latency targets — middleware alerts if exceeded",
+    "target_audio_preprocess_ms"  : 100,
+    "target_whisper_latency_ms"   : 1500,
+    "target_speaker_detect_ms"    : 5,
+    "target_parse_latency_ms"     : 50,
+    "target_sentiment_latency_ms" : 10,
+    "target_end_to_end_latency_ms": 2000,
+    "warm_up_on_startup"          : true,
+    "warm_up_text"                : "عندي ألم في صدري بقالي يومين",
+    "warm_up_audio_seconds"       : 2
+  }
+}
