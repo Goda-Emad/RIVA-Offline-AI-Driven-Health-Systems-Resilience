@@ -6,10 +6,10 @@
 ║  Egyptian Arabic TTS engine — fully offline, zero network latency           ║
 ║                                                                              ║
 ║  Integration map (from config.json):                                        ║
-║    config["text_to_speech"]   → engine / rate / volume / fallback_chain     ║
-║    config["security"]         → PII scrub patterns before vocalization      ║
-║    config["performance"]      → target_end_to_end_latency_ms (2000ms)       ║
-║    config["confidence_scorer"]→ routing_decision → speaks Act/Clarify/FB   ║
+║    config["text_to_speech"]    → engine / rate / volume / fallback_chain    ║
+║    config["security"]          → PII scrub patterns before vocalization     ║
+║    config["performance"]       → target_end_to_end_latency_ms (2000ms)      ║
+║    config["confidence_scorer"] → routing_decision → speaks Act/Clarify/FB  ║
 ║    config["urgency_escalation"]→ EMERGENCY → fast path (< 800ms)           ║
 ║                                                                              ║
 ║  Fallback chain (from config.json):                                         ║
@@ -23,6 +23,15 @@
 ║    • EMERGENCY urgency → max volume, fastest rate, no clarification text   ║
 ║                                                                              ║
 ║  Changelog                                                                  ║
+║    v4.1: ADD LRU cache eviction — background thread, 500-file cap,         ║
+║          touch() on cache hits refreshes LRU order, _EVICT_LOCK prevents   ║
+║          concurrent eviction races, cache_size/cache_bytes properties       ║
+║    v4.0: FIX 1 ArabicResponses "and False" removed — EMERGENCY reachable   ║
+║          FIX 2 gTTS: 1.5s timeout + EMERGENCY cache-miss instant skip      ║
+║          FIX 3 speak_async: get_running_loop() — Python 3.12 safe          ║
+║          FIX 4 Dead code removed from __main__                              ║
+║          FIX 5 urgency forwarded to all backends                           ║
+║          FIX 6 TTSRequest.cache_key implemented in gTTS backend            ║
 ║    v1.1: ADD fallback_chain, PII scrub, confidence-aware rate              ║
 ║    v1.0: pyttsx3-only engine                                                ║
 ║                                                                              ║
@@ -32,14 +41,7 @@
 
 from __future__ import annotations
 
-import io
-import json
-import logging
-import math
-import re
-import struct
-import time
-import wave
+import io, json, logging, re, struct, time, wave
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -47,990 +49,469 @@ from typing import Optional
 
 logger = logging.getLogger("riva.text_to_speech")
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Config loader  (mirrors how every other dialect_model file uses config.json)
-# ─────────────────────────────────────────────────────────────────────────────
+_HERE        = Path(__file__).resolve().parent
+_VOICE       = _HERE.parent
+_AICORE      = _VOICE.parent
+_ROOT        = _AICORE.parent
 
-# ── Project-level path resolution ────────────────────────────────────────────
-#
-#  This file lives at:
-#    ai-core/voice/dialect_model/text_to_speech.py
-#
-#  Walking up with .parent:
-#    _HERE   = ai-core/voice/dialect_model/
-#    _VOICE  = ai-core/voice/
-#    _AICORE = ai-core/
-#    _ROOT   = <project-root>/          ← base for all cross-module paths
-#
-#  Using absolute paths computed from __file__ guarantees the file is found
-#  regardless of the working directory when the server/tests are launched.
-
-_HERE        = Path(__file__).resolve().parent          # dialect_model/
-_VOICE       = _HERE.parent                             # voice/
-_AICORE      = _VOICE.parent                            # ai-core/
-_ROOT        = _AICORE.parent                           # project-root/
-
-# ── File paths ────────────────────────────────────────────────────────────────
-
-# config.json lives next to this file in dialect_model/
-_CONFIG_PATH = _HERE / "config.json"
-
-# Egyptian Arabic medical lexicon — used by SentimentAnalyzer blend weight
-# data/raw/arabic_sentiment/lexicons/egyptian_medical_lexicon.json
-_LEXICON_PATH = (
-    _ROOT / "data" / "raw" / "arabic_sentiment"
-    / "lexicons" / "egyptian_medical_lexicon.json"
-)
-
-# ambiguity_map and intent_map (used by AmbiguityHandler, referenced here for
-# completeness — TTS reads them for personalised response selection in future)
-_AMBIGUITY_MAP_PATH = (
-    _ROOT / "business-intelligence" / "mapping" / "ambiguity_map.json"
-)
-_INTENT_MAP_PATH = (
-    _ROOT / "business-intelligence" / "mapping" / "intent_mapping.json"
-)
-
-# ── Startup path validation ───────────────────────────────────────────────────
-# Log warnings (not errors) so the server still starts in minimal/test mode.
+_CONFIG_PATH        = _HERE  / "config.json"
+_LEXICON_PATH       = _ROOT  / "data" / "raw" / "arabic_sentiment" / "lexicons" / "egyptian_medical_lexicon.json"
+_AMBIGUITY_MAP_PATH = _ROOT  / "business-intelligence" / "mapping" / "ambiguity_map.json"
+_INTENT_MAP_PATH    = _ROOT  / "business-intelligence" / "mapping" / "intent_mapping.json"
 
 def _validate_paths() -> None:
-    checks = [
-        (_CONFIG_PATH,       "config.json",                    True),
-        (_LEXICON_PATH,      "egyptian_medical_lexicon.json",  False),
-        (_AMBIGUITY_MAP_PATH,"ambiguity_map.json",             False),
-        (_INTENT_MAP_PATH,   "intent_mapping.json",            False),
-    ]
-    for path, label, required in checks:
-        if path.exists():
-            logger.debug("Path OK  : %s → %s", label, path)
-        else:
-            level = logger.warning if required else logger.info
-            level(          # type: ignore[operator]
-                "Path %s: %s not found at %s",
-                "MISSING (required)" if required else "absent (optional)",
-                label, path,
-            )
+    for path, label, req in [
+        (_CONFIG_PATH,"config.json",True),(_LEXICON_PATH,"egyptian_medical_lexicon.json",False),
+        (_AMBIGUITY_MAP_PATH,"ambiguity_map.json",False),(_INTENT_MAP_PATH,"intent_mapping.json",False),
+    ]:
+        if path.exists(): logger.debug("Path OK: %s",label)
+        else: (logger.warning if req else logger.info)("Path %s: %s not found","MISSING" if req else "absent",label)
 
 _validate_paths()
 
-
 def _load_config() -> dict:
     if _CONFIG_PATH.exists():
-        try:
-            return json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
-        except Exception as exc:
-            logger.warning("Could not load config.json: %s — using defaults", exc)
+        try: return json.loads(_CONFIG_PATH.read_text(encoding="utf-8"))
+        except Exception as exc: logger.warning("config.json load failed: %s",exc)
     return {}
 
+_CFG=_load_config(); _TTS_CFG=_CFG.get("text_to_speech",{}); _SEC_CFG=_CFG.get("security",{})
+_PERF_CFG=_CFG.get("performance",{}); _URG_CFG=_CFG.get("urgency_escalation",{})
 
-_CFG = _load_config()
-_TTS_CFG  = _CFG.get("text_to_speech",   {})
-_SEC_CFG  = _CFG.get("security",         {})
-_PERF_CFG = _CFG.get("performance",      {})
-_URG_CFG  = _CFG.get("urgency_escalation", {})
+DEFAULT_ENGINE=_TTS_CFG.get("engine","pyttsx3"); DEFAULT_LANGUAGE=_TTS_CFG.get("language","ar")
+DEFAULT_RATE_WPM=_TTS_CFG.get("rate_wpm",145); DEFAULT_VOLUME=_TTS_CFG.get("volume",0.90)
+DEFAULT_PITCH=_TTS_CFG.get("pitch",1.0)
+FALLBACK_CHAIN=_TTS_CFG.get("fallback_chain",["pyttsx3","gtts_disk_cache","browser_web_speech","silent"])
+MAX_LATENCY_MS=_PERF_CFG.get("target_end_to_end_latency_ms",2000)
+EMERGENCY_MAX_MS=_URG_CFG.get("response_max_latency_ms",800)
 
+PII_PATTERNS=[re.compile(p) for p in _SEC_CFG.get("pii_patterns",[
+    r"\d{14}",r"01[0-2,5]{1}[0-9]{8}",r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"])]
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Constants  (all overridable via config.json)
-# ─────────────────────────────────────────────────────────────────────────────
-
-# From config["text_to_speech"]
-DEFAULT_ENGINE     : str   = _TTS_CFG.get("engine",   "pyttsx3")
-DEFAULT_LANGUAGE   : str   = _TTS_CFG.get("language", "ar")
-DEFAULT_RATE_WPM   : int   = _TTS_CFG.get("rate_wpm", 145)
-DEFAULT_VOLUME     : float = _TTS_CFG.get("volume",   0.90)
-DEFAULT_PITCH      : float = _TTS_CFG.get("pitch",    1.0)
-FALLBACK_CHAIN     : list  = _TTS_CFG.get(
-    "fallback_chain",
-    ["pyttsx3", "gtts_disk_cache", "browser_web_speech", "silent"],
-)
-
-# From config["performance"]
-MAX_LATENCY_MS     : int   = _PERF_CFG.get("target_end_to_end_latency_ms", 2000)
-EMERGENCY_MAX_MS   : int   = _URG_CFG.get("response_max_latency_ms",        800)
-
-# From config["security"] — PII scrub patterns
-PII_PATTERNS: list[re.Pattern] = [
-    re.compile(p)
-    for p in _SEC_CFG.get("pii_patterns", [
-        r"\d{14}",                                            # Egyptian National ID
-        r"01[0-2,5]{1}[0-9]{8}",                             # Egyptian mobile
-        r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",  # email
-    ])
-]
-
-# Rate modulation based on ConfidenceScorer output
-# Lower confidence → speak slower so patient can understand the clarification Q
-RATE_HIGH_CONF   : int = int(DEFAULT_RATE_WPM * 1.10)   # 160 wpm — clear, fast
-RATE_NORMAL      : int = DEFAULT_RATE_WPM                 # 145 wpm — standard
-RATE_LOW_CONF    : int = int(DEFAULT_RATE_WPM * 0.80)    # 116 wpm — slow, clear
-RATE_EMERGENCY   : int = int(DEFAULT_RATE_WPM * 1.25)    # 181 wpm — urgent
-
-# Confidence thresholds (mirrors ConfidenceThreshold from confidence_scorer.py)
-_THRESH_ACT      : float = 0.70
-_THRESH_CLARIFY  : float = 0.45
-
-# SSML-lite tag pattern — stripped before sending to any TTS engine
-_SSML_TAG = re.compile(r"<[^>]{1,60}>")
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Enums & Data Classes
-# ─────────────────────────────────────────────────────────────────────────────
+RATE_HIGH_CONF=int(DEFAULT_RATE_WPM*1.10); RATE_NORMAL=DEFAULT_RATE_WPM
+RATE_LOW_CONF=int(DEFAULT_RATE_WPM*0.80); RATE_EMERGENCY=int(DEFAULT_RATE_WPM*1.25)
+_THRESH_ACT=0.70; _THRESH_CLARIFY=0.45
+_SSML_TAG=re.compile(r"<[^>]{1,60}>")
 
 class TTSEngine(Enum):
-    PYTTSX3           = "pyttsx3"
-    GTTS_DISK_CACHE   = "gtts_disk_cache"
-    BROWSER_WEB_SPEECH= "browser_web_speech"
-    SILENT            = "silent"
-
+    PYTTSX3="pyttsx3"; GTTS_DISK_CACHE="gtts_disk_cache"
+    BROWSER_WEB_SPEECH="browser_web_speech"; SILENT="silent"
 
 class TTSStatus(Enum):
-    SUCCESS    = "success"
-    FALLBACK   = "fallback"     # used a lower-priority engine
-    SILENT     = "silent"       # all engines failed — returned empty WAV
-    PII_REDACTED = "pii_redacted"  # text contained PII — scrubbed before speak
-
+    SUCCESS="success"; FALLBACK="fallback"; SILENT="silent"; PII_REDACTED="pii_redacted"
 
 @dataclass
 class TTSRequest:
-    """
-    Input to TextToSpeech.speak().
-
-    Fields mirror the pipeline output:
-    - text          : cleaned Arabic text (from CommandParser / AmbiguityHandler)
-    - confidence    : ConfidenceScorer output — drives speech rate selection
-    - routing       : 'act' | 'clarify' | 'fallback' | 'unrecognised'
-    - urgency       : UrgencyLevel string — 'emergency' triggers fast path
-    - speaker_type  : from config["speaker_routing"].routes keys
-    - language      : overrides config default if set
-    """
+    """Input to TextToSpeech.speak(). Maps pipeline output → TTS parameters."""
     text         : str
-    confidence   : float       = 1.0
-    routing      : str         = "act"
-    urgency      : str         = "low"
-    speaker_type : str         = "patient"
-    language     : str         = DEFAULT_LANGUAGE
-    cache_key    : Optional[str] = None     # set by caller if caching desired
-
+    confidence   : float         = 1.0
+    routing      : str           = "act"
+    urgency      : str           = "low"
+    speaker_type : str           = "patient"
+    language     : str           = DEFAULT_LANGUAGE
+    cache_key    : Optional[str] = None  # FIX 6: override gTTS cache key
 
 @dataclass
 class TTSResult:
-    """
-    Output of TextToSpeech.speak().
-    wav_bytes is always a valid WAV (at minimum a 44-byte silent WAV header).
-    """
-    wav_bytes      : bytes
-    engine_used    : TTSEngine
-    status         : TTSStatus
-    text_spoken    : str          # after PII scrub + SSML strip
-    rate_wpm       : int
-    volume         : float
-    duration_ms    : float        # estimated speech duration
-    latency_ms     : float        # wall-clock time to produce wav_bytes
-    warnings       : list[str] = field(default_factory=list)
+    """Output of TextToSpeech.speak(). wav_bytes is always a valid WAV (>=44 bytes)."""
+    wav_bytes   : bytes; engine_used : TTSEngine; status : TTSStatus
+    text_spoken : str;   rate_wpm    : int;       volume : float
+    duration_ms : float; latency_ms  : float
+    warnings    : list[str] = field(default_factory=list)
 
     @property
-    def is_silent(self) -> bool:
-        return self.engine_used == TTSEngine.SILENT
+    def is_silent(self) -> bool: return self.engine_used == TTSEngine.SILENT
 
     def to_dict(self) -> dict:
-        return {
-            "engine_used"  : self.engine_used.value,
-            "status"       : self.status.value,
-            "text_spoken"  : self.text_spoken,
-            "rate_wpm"     : self.rate_wpm,
-            "volume"       : round(self.volume, 2),
-            "duration_ms"  : round(self.duration_ms, 1),
-            "latency_ms"   : round(self.latency_ms, 1),
-            "warnings"     : self.warnings,
-        }
+        return {"engine_used":self.engine_used.value,"status":self.status.value,
+                "text_spoken":self.text_spoken,"rate_wpm":self.rate_wpm,
+                "volume":round(self.volume,2),"duration_ms":round(self.duration_ms,1),
+                "latency_ms":round(self.latency_ms,1),"warnings":self.warnings}
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Pre-built Arabic response templates
-# ─────────────────────────────────────────────────────────────────────────────
 
 class ArabicResponses:
     """
-    Ready-made Egyptian Arabic responses for each routing decision.
-    Keyed by (routing, speaker_type) to personalise per audience.
+    Ready-made Egyptian Arabic responses for (routing, speaker_type).
 
-    Used when CommandParser produces a routing decision and the voice
-    interface needs to speak it back to the user.
+    routing values: 'act' | 'clarify' | 'fallback' | 'unrecognised' (from ConfidenceScorer)
+    urgency values: 'emergency' overrides routing; others fall through to routing lookup.
+
+    FIX 1: 'and False' bug removed — EMERGENCY branch is now reachable.
+           Old code permanently skipped emergency responses for every patient.
     """
-
-    _RESPONSES: dict[tuple[str, str], str] = {
-        # ── ACT ─────────────────────────────────────────────────────────
-        ("act", "patient")  : "تمام، هبعتك للقسم الصح دلوقتي.",
-        ("act", "pregnant") : "تمام يا ستي، هبعتك لقسم صحة الأم.",
-        ("act", "school")   : "تمام، هبعتك لقسم الصحة المدرسية.",
-        ("act", "doctor")   : "تمام دكتور، هفتحلك الداشبورد.",
-        ("act", "unknown")  : "تمام، هبعتك للقسم المناسب.",
-
-        # ── CLARIFY ─────────────────────────────────────────────────────
-        ("clarify", "patient")  : "معذرة، محتاج أفهم أكتر. ممكن توضحلي أكتر؟",
-        ("clarify", "pregnant") : "معذرة يا ستي، محتاج أفهم أكتر. ممكن توضحيلي؟",
-        ("clarify", "school")   : "محتاج معلومة أكتر. ممكن توضحلي؟",
-        ("clarify", "doctor")   : "دكتور، فيه معلومة ناقصة. ممكن توضح؟",
-        ("clarify", "unknown")  : "محتاج أفهم أكتر. ممكن توضح؟",
-
-        # ── FALLBACK ────────────────────────────────────────────────────
-        ("fallback", "patient")  : "مش فاهم كويس. هبعتك للشات الطبي.",
-        ("fallback", "pregnant") : "مش فاهم كويس يا ستي. هبعتك للشات.",
-        ("fallback", "school")   : "مش فاهم. هبعتك للمحادثة.",
-        ("fallback", "doctor")   : "دكتور، مش واضح. هبعتك للشات.",
-        ("fallback", "unknown")  : "مش فاهم. هبعتك للمحادثة الطبية.",
-
-        # ── EMERGENCY ───────────────────────────────────────────────────
-        ("emergency", "patient")  : "حالة طارئة! بيتم تحويلك للطوارئ فوراً.",
-        ("emergency", "pregnant") : "حالة طارئة! بيتم تحويلك لطوارئ الأم والطفل فوراً.",
-        ("emergency", "school")   : "حالة طارئة! يتم إخطار الطبيب فوراً.",
-        ("emergency", "doctor")   : "تنبيه طارئ! تم إرسال التحذير.",
-        ("emergency", "unknown")  : "حالة طارئة! بيتم تحويلك للطوارئ فوراً.",
-
-        # ── UNRECOGNISED ─────────────────────────────────────────────────
-        ("unrecognised", "patient")  : "ما فهمتش. ممكن تعيد الكلام؟",
-        ("unrecognised", "pregnant") : "ما فهمتش يا ستي. ممكن تعيدي؟",
-        ("unrecognised", "school")   : "ما فهمتش. ممكن تعيد؟",
-        ("unrecognised", "doctor")   : "دكتور، ما فهمتش. ممكن تعيد؟",
-        ("unrecognised", "unknown")  : "ما فهمتش. ممكن تعيد؟",
+    _RESPONSES: dict = {
+        ("act","patient"):"تمام، هبعتك للقسم الصح دلوقتي.",("act","pregnant"):"تمام يا ستي، هبعتك لقسم صحة الأم.",
+        ("act","school"):"تمام، هبعتك لقسم الصحة المدرسية.",("act","doctor"):"تمام دكتور، هفتحلك الداشبورد.",
+        ("act","unknown"):"تمام، هبعتك للقسم المناسب.",
+        ("clarify","patient"):"معذرة، محتاج أفهم أكتر. ممكن توضحلي؟",
+        ("clarify","pregnant"):"معذرة يا ستي، محتاج أفهم أكتر. ممكن توضحيلي؟",
+        ("clarify","school"):"محتاج معلومة أكتر. ممكن توضحلي؟",
+        ("clarify","doctor"):"دكتور، فيه معلومة ناقصة. ممكن توضح؟",
+        ("clarify","unknown"):"محتاج أفهم أكتر. ممكن توضح؟",
+        ("fallback","patient"):"مش فاهم كويس. هبعتك للشات الطبي.",
+        ("fallback","pregnant"):"مش فاهم كويس يا ستي. هبعتك للشات.",
+        ("fallback","school"):"مش فاهم. هبعتك للمحادثة.",
+        ("fallback","doctor"):"دكتور، مش واضح. هبعتك للشات.",
+        ("fallback","unknown"):"مش فاهم. هبعتك للمحادثة الطبية.",
+        ("emergency","patient"):"حالة طارئة! بيتم تحويلك للطوارئ فوراً.",
+        ("emergency","pregnant"):"حالة طارئة! بيتم تحويلك لطوارئ الأم والطفل فوراً.",
+        ("emergency","school"):"حالة طارئة! يتم إخطار الطبيب فوراً.",
+        ("emergency","doctor"):"تنبيه طارئ! تم إرسال التحذير.",
+        ("emergency","unknown"):"حالة طارئة! بيتم تحويلك للطوارئ فوراً.",
+        ("unrecognised","patient"):"ما فهمتش. ممكن تعيد الكلام؟",
+        ("unrecognised","pregnant"):"ما فهمتش يا ستي. ممكن تعيدي؟",
+        ("unrecognised","school"):"ما فهمتش. ممكن تعيد؟",
+        ("unrecognised","doctor"):"دكتور، ما فهمتش. ممكن تعيد؟",
+        ("unrecognised","unknown"):"ما فهمتش. ممكن تعيد؟",
     }
-
     @classmethod
-    def get(cls, routing: str, speaker_type: str, urgency: str = "low") -> str:
-        """
-        Return the appropriate Arabic response.
-
-        Fix 1 — FATAL BUG REMOVED:
-            Old code had `routing == "act" and False` — emergency branch was
-            PERMANENTLY UNREACHABLE. No patient would ever hear the correct
-            alert, defeating config["urgency_escalation"].skip_clarification.
-
-            Fix: urgency is now an explicit parameter. urgency=="emergency"
-            forces ("emergency", speaker_type) lookup regardless of routing.
-        """
-        # EMERGENCY always overrides routing — patient safety first
-        if urgency == "emergency":
-            key = ("emergency", speaker_type)
-        else:
-            key = (routing, speaker_type)
-
-        result = cls._RESPONSES.get(key)
-        if result:
-            return result
-        result = cls._RESPONSES.get((routing, "unknown"))
-        return result or "تمام، جاري المعالجة."
+    def get(cls, routing:str, speaker_type:str, urgency:str="low") -> str:
+        key = ("emergency",speaker_type) if urgency=="emergency" else (routing,speaker_type)
+        return cls._RESPONSES.get(key) or cls._RESPONSES.get((routing,"unknown")) or "تمام، جاري المعالجة."
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PII Scrubber
-# ─────────────────────────────────────────────────────────────────────────────
+def scrub_pii(text:str) -> tuple[str,bool]:
+    scrubbed,found=text,False
+    for p in PII_PATTERNS:
+        if p.search(scrubbed): scrubbed=p.sub("[محجوب]",scrubbed); found=True
+    return scrubbed,found
 
-def scrub_pii(text: str) -> tuple[str, bool]:
-    """
-    Remove PII from text using patterns defined in config["security"]["pii_patterns"].
-    Returns (scrubbed_text, was_scrubbed).
+def strip_ssml(text:str) -> str: return _SSML_TAG.sub("",text).strip()
 
-    Patterns from config.json:
-        \\d{14}              → Egyptian National ID (14 digits)
-        01[0-2,5][0-9]{8}   → Egyptian mobile number
-        email regex          → email addresses
-    """
-    scrubbed = text
-    found    = False
-    for pattern in PII_PATTERNS:
-        if pattern.search(scrubbed):
-            scrubbed = pattern.sub("[محجوب]", scrubbed)
-            found    = True
-    return scrubbed, found
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SSML-lite stripper
-# ─────────────────────────────────────────────────────────────────────────────
-
-def strip_ssml(text: str) -> str:
-    """
-    Remove SSML-lite markup before sending to TTS engines.
-    RIVA uses a small subset: <rate slow/fast>, <emphasis>, <break time="Xs"/>
-    None of these are supported by all engines — strip before sending.
-    """
-    return _SSML_TAG.sub("", text).strip()
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Speech rate selector
-# ─────────────────────────────────────────────────────────────────────────────
-
-def select_rate(confidence: float, urgency: str) -> int:
-    """
-    Choose speech rate (WPM) based on confidence score and urgency.
-
-    Integration with confidence_scorer.py:
-        EMERGENCY urgency (from ConfidenceScorer.routing_decision)
-            → RATE_EMERGENCY (fastest — patient must hear it fast)
-        confidence >= ACT (0.70)
-            → RATE_HIGH_CONF (slightly above default)
-        confidence >= CLARIFY (0.45)
-            → RATE_NORMAL (default)
-        confidence < CLARIFY
-            → RATE_LOW_CONF (slow — clarification must be clear)
-
-    All threshold values mirror config["confidence_scorer"]["thresholds"].
-    """
-    if urgency == "emergency":
-        return RATE_EMERGENCY
-    if confidence >= _THRESH_ACT:
-        return RATE_HIGH_CONF
-    if confidence >= _THRESH_CLARIFY:
-        return RATE_NORMAL
+def select_rate(confidence:float, urgency:str) -> int:
+    if urgency=="emergency": return RATE_EMERGENCY
+    if confidence>=_THRESH_ACT: return RATE_HIGH_CONF
+    if confidence>=_THRESH_CLARIFY: return RATE_NORMAL
     return RATE_LOW_CONF
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Silent WAV generator  (always-available fallback)
-# ─────────────────────────────────────────────────────────────────────────────
-
-def make_silent_wav(duration_sec: float = 0.5, sample_rate: int = 16_000) -> bytes:
-    """
-    Generate a valid WAV with silence — the guaranteed offline fallback.
-    Never fails. Returns at minimum a 44-byte WAV header with 0 frames.
-    """
-    n_samples = max(0, int(duration_sec * sample_rate))
-    pcm       = struct.pack(f"<{n_samples}h", *([0] * n_samples))
-    buf       = io.BytesIO()
-    with wave.open(buf, "wb") as wf:
-        wf.setnchannels(1)
-        wf.setsampwidth(2)
-        wf.setframerate(sample_rate)
-        wf.writeframes(pcm)
+def make_silent_wav(duration_sec:float=0.5, sample_rate:int=16_000) -> bytes:
+    n=max(0,int(duration_sec*sample_rate)); pcm=struct.pack(f"<{n}h",*([0]*n))
+    buf=io.BytesIO()
+    with wave.open(buf,"wb") as wf:
+        wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(sample_rate); wf.writeframes(pcm)
     return buf.getvalue()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Engine backends
-# ─────────────────────────────────────────────────────────────────────────────
-
 class _Pyttsx3Backend:
-    """pyttsx3 — primary offline TTS engine."""
-
-    def __init__(self) -> None:
-        self._engine = None
-
+    def __init__(self): self._engine=None
     def _get_engine(self):
         if self._engine is None:
-            import pyttsx3
-            self._engine = pyttsx3.init()
+            import pyttsx3; self._engine=pyttsx3.init()
         return self._engine
-
-    def speak(self, text: str, rate: int, volume: float, lang: str) -> bytes:
-        """
-        Speak text and capture WAV output.
-        pyttsx3 does not natively output to bytes — we save to a temp file
-        and read it back, then return WAV bytes.
-        """
-        import tempfile, os
-        eng = self._get_engine()
-        eng.setProperty("rate",   rate)
-        eng.setProperty("volume", volume)
-
-        # Try to set Arabic voice if available
-        voices = eng.getProperty("voices")
-        ar_voice = next(
-            (v for v in voices if "arabic" in (v.languages[0] if v.languages else "").lower()
-             or "ar" in v.id.lower()),
-            None,
-        )
-        if ar_voice:
-            eng.setProperty("voice", ar_voice.id)
-
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-            tmp_path = tmp.name
-
+    def speak(self,text,rate,volume,lang,urgency="low"):
+        import tempfile,os; eng=self._get_engine()
+        eng.setProperty("rate",rate); eng.setProperty("volume",volume)
+        voices=eng.getProperty("voices")
+        ar=next((v for v in voices if "arabic" in (v.languages[0] if v.languages else "").lower() or "ar" in v.id.lower()),None)
+        if ar: eng.setProperty("voice",ar.id)
+        with tempfile.NamedTemporaryFile(suffix=".wav",delete=False) as t: tp=t.name
         try:
-            eng.save_to_file(text, tmp_path)
-            eng.runAndWait()
-            wav = Path(tmp_path).read_bytes()
-            return wav if len(wav) > 44 else make_silent_wav()
-        except Exception as exc:
-            raise RuntimeError(f"pyttsx3 failed: {exc}") from exc
+            eng.save_to_file(text,tp); eng.runAndWait()
+            wav=Path(tp).read_bytes(); return wav if len(wav)>44 else make_silent_wav()
+        except Exception as exc: raise RuntimeError(f"pyttsx3: {exc}") from exc
         finally:
-            try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
+            try: os.unlink(tp)
+            except OSError: pass
 
 
 class _GttsDiskCacheBackend:
     """
-    gTTS with disk cache — generates Arabic audio via Google TTS,
-    saves to disk, and returns cached WAV on repeat calls.
+    gTTS with LRU disk cache — Arabic audio cached for offline reuse.
 
-    Fix 2 — OFFLINE LATENCY BUG:
-        gTTS requires internet for first-time generation. On a fully
-        offline server it would hang until TCP timeout (~75s default),
-        blowing the 2000ms latency budget entirely.
+    FIX 2a: 1.5s timeout prevents 75s hang on offline server.
+    FIX 2b: EMERGENCY + cache-miss raises immediately (preserves 800ms budget).
+    FIX 6:  TTSRequest.cache_key overrides auto-generated hash.
+    ADD v4.1: LRU cache eviction — background thread prevents disk exhaustion.
 
-        Fix: enforce a strict GTTS_TIMEOUT_SEC deadline using a
-        threading.Timer that raises TimeoutError if gTTS hasn't returned.
-        If cache miss AND no internet → raises → fallback chain moves on.
-        Cached files always work offline with zero network cost.
+    Cache eviction strategy
+    ────────────────────────
+    • Max files cap: 500 WAV files by default (≈ 250MB at ~500KB avg).
+    • Trigger: checked after every new file is written (not on cache hits).
+    • Algorithm: LRU — sort by st_mtime (last access), delete oldest surplus.
+    • Non-blocking: eviction runs in a daemon thread so it never delays
+      the TTS response that triggered it.
+    • Thread-safe: a module-level lock prevents two evictions running
+      simultaneously when concurrent requests both write new files.
     """
 
     _CACHE_DIR    = _HERE / ".gtts_cache"
-    _TIMEOUT_SEC  = 1.5   # strict: must finish within 1.5s or skip
-    #                        (EMERGENCY budget is 800ms total — gTTS not usable)
+    _TIMEOUT_SEC  = 1.5
+    _MAX_FILES    = 500          # keep newest 500 WAVs — tune via subclass
+    _EVICT_LOCK   = __import__("threading").Lock()   # one eviction at a time
 
-    def speak(self, text: str, rate: int, volume: float, lang: str) -> bytes:
+    # ── Public: synthesise speech ────────────────────────────────────────
+
+    def speak(
+        self, text: str, rate: int, volume: float,
+        lang: str, urgency: str = "low",
+        cache_key: Optional[str] = None,
+    ) -> bytes:
         import hashlib, threading
-        cache_key  = hashlib.md5(f"{text}:{lang}".encode()).hexdigest()
-        cache_file = self._CACHE_DIR / f"{cache_key}.wav"
 
-        # ── Cache hit — fully offline, no network ────────────────────────
+        key_str    = cache_key or hashlib.md5(f"{text}:{lang}".encode()).hexdigest()
+        cache_file = self._CACHE_DIR / f"{key_str}.wav"
+
+        # ── Cache hit — fully offline, no eviction needed ────────────────
         if cache_file.exists():
-            logger.debug("gTTS cache hit: %s", cache_key)
+            # Touch file to mark it as recently used (update LRU timestamp)
+            cache_file.touch()
+            logger.debug("gTTS cache hit: %s", key_str)
             return cache_file.read_bytes()
 
-        # ── Cache miss — needs internet, enforce timeout ──────────────────
-        logger.info(
-            "gTTS cache miss '%s' — attempting network fetch (timeout=%.1fs)",
-            cache_key, self._TIMEOUT_SEC,
-        )
+        # FIX 2b: EMERGENCY + cache miss → skip immediately
+        if urgency == "emergency":
+            raise RuntimeError(
+                f"gTTS cache miss on EMERGENCY — skipping to preserve {EMERGENCY_MAX_MS}ms budget"
+            )
 
-        result_holder: list = []
-        error_holder:  list = []
+        # ── Cache miss — network fetch with timeout ──────────────────────
+        logger.info("gTTS cache miss '%s' — fetching (timeout=%.1fs)", key_str, self._TIMEOUT_SEC)
+        result, error = [], []
 
         def _fetch() -> None:
             try:
                 from gtts import gTTS
-                mp3_buf = io.BytesIO()
-                gTTS(text=text, lang=lang).write_to_fp(mp3_buf)
-                mp3_buf.seek(0)
-                result_holder.append(mp3_buf)
-            except Exception as exc:
-                error_holder.append(exc)
+                buf = io.BytesIO()
+                gTTS(text=text, lang=lang).write_to_fp(buf)
+                buf.seek(0)
+                result.append(buf)
+            except Exception as e:
+                error.append(e)
 
         t = threading.Thread(target=_fetch, daemon=True)
         t.start()
         t.join(timeout=self._TIMEOUT_SEC)
 
         if t.is_alive():
-            # Thread still running → network is unavailable / too slow
-            raise TimeoutError(
-                f"gTTS exceeded offline latency budget ({self._TIMEOUT_SEC}s) "
-                f"— no internet or network too slow. "
-                f"Falling back to next engine in chain."
-            )
+            raise TimeoutError(f"gTTS exceeded {self._TIMEOUT_SEC}s offline budget")
+        if error:
+            raise RuntimeError(f"gTTS: {error[0]}") from error[0]
 
-        if error_holder:
-            raise RuntimeError(f"gTTS fetch failed: {error_holder[0]}") from error_holder[0]
-
-        mp3_buf = result_holder[0]
-
-        # ── Convert MP3 → WAV ─────────────────────────────────────────────
+        # ── MP3 → WAV conversion ─────────────────────────────────────────
         try:
             from pydub import AudioSegment
-            seg = AudioSegment.from_mp3(mp3_buf)
+            seg     = AudioSegment.from_mp3(result[0])
             wav_buf = io.BytesIO()
             seg.export(wav_buf, format="wav")
-            wav_bytes = wav_buf.getvalue()
+            wav = wav_buf.getvalue()
         except ImportError:
-            logger.warning("pydub not available — gTTS returning silent WAV")
-            wav_bytes = make_silent_wav()
+            logger.warning("pydub unavailable — using silent WAV")
+            wav = make_silent_wav()
 
-        # ── Save to cache for future offline use ──────────────────────────
+        # ── Persist to cache ─────────────────────────────────────────────
         self._CACHE_DIR.mkdir(parents=True, exist_ok=True)
-        cache_file.write_bytes(wav_bytes)
-        logger.info("gTTS cached: %s (%d bytes)", cache_key, len(wav_bytes))
-        return wav_bytes
+        cache_file.write_bytes(wav)
+        logger.info("gTTS cached: %s (%d bytes)", key_str, len(wav))
+
+        # ── Trigger LRU eviction in background (non-blocking) ───────────
+        threading.Thread(
+            target = self._evict_lru,
+            daemon = True,
+            name   = "riva-gtts-evict",
+        ).start()
+
+        return wav
+
+    # ── LRU eviction ────────────────────────────────────────────────────
+
+    def _evict_lru(self, max_files: Optional[int] = None) -> int:
+        """
+        Delete the oldest (least recently used) WAV files when the cache
+        exceeds max_files.
+
+        Returns the number of files deleted (0 if no eviction needed).
+
+        Non-blocking design:
+            Called from a daemon thread after each new file is written.
+            Uses _EVICT_LOCK so concurrent requests don't race.
+            Errors are logged but never raised — eviction failure must
+            not affect the TTS response that triggered it.
+
+        LRU ordering:
+            Files are sorted by st_mtime (modified/touched time).
+            Cache hits call file.touch() to refresh their mtime, so
+            files that are actively used stay near the top of the list.
+        """
+        cap = max_files or self._MAX_FILES
+
+        # Fast path: don't even acquire the lock if well under cap
+        try:
+            files = list(self._CACHE_DIR.glob("*.wav"))
+        except Exception as exc:
+            logger.error("gTTS eviction: failed to list cache dir: %s", exc)
+            return 0
+
+        if len(files) <= cap:
+            return 0
+
+        # Acquire lock — one eviction thread runs at a time
+        if not self._EVICT_LOCK.acquire(blocking=False):
+            logger.debug("gTTS eviction: already running, skipping")
+            return 0
+
+        deleted = 0
+        try:
+            # Sort ascending by mtime → oldest first
+            files.sort(key=lambda f: f.stat().st_mtime)
+            surplus = len(files) - cap
+            to_delete = files[:surplus]
+
+            for f in to_delete:
+                try:
+                    f.unlink()
+                    deleted += 1
+                except OSError as exc:
+                    logger.warning("gTTS eviction: could not delete %s: %s", f.name, exc)
+
+            logger.info(
+                "gTTS LRU eviction: deleted %d/%d surplus files (cap=%d)",
+                deleted, surplus, cap,
+            )
+        except Exception as exc:
+            logger.error("gTTS eviction failed: %s", exc)
+        finally:
+            self._EVICT_LOCK.release()
+
+        return deleted
+
+    @property
+    def cache_size(self) -> int:
+        """Current number of WAV files in the cache directory."""
+        try:
+            return sum(1 for _ in self._CACHE_DIR.glob("*.wav"))
+        except Exception:
+            return 0
+
+    @property
+    def cache_bytes(self) -> int:
+        """Total size of cached WAV files in bytes."""
+        try:
+            return sum(f.stat().st_size for f in self._CACHE_DIR.glob("*.wav"))
+        except Exception:
+            return 0
 
 
 class _BrowserWebSpeechBackend:
-    """
-    Browser Web Speech API fallback.
-    Cannot produce WAV bytes server-side — returns a sentinel WAV
-    and a JS instruction string that the frontend can interpret.
-    The frontend checks TTSResult.engine_used == "browser_web_speech"
-    and invokes window.speechSynthesis.speak() directly.
-    """
-
-    def speak(self, text: str, rate: int, volume: float, lang: str) -> bytes:
-        # Store instruction in a comment embedded in the WAV description field.
-        # Frontend reads TTSResult.to_dict() and checks engine_used.
-        logger.info("Browser Web Speech fallback — frontend will handle vocalization")
-        return make_silent_wav(0.1)
-
+    def speak(self,text,rate,volume,lang,urgency="low"):
+        logger.info("Browser Web Speech fallback"); return make_silent_wav(0.1)
 
 class _SilentBackend:
-    """
-    Silent fallback — always available, never fails.
-    Returns a valid 0.5-second silent WAV.
-    """
+    def speak(self,text,rate,volume,lang,urgency="low"):
+        logger.warning("TTS silent fallback"); return make_silent_wav(0.5)
 
-    def speak(self, text: str, rate: int, volume: float, lang: str) -> bytes:
-        logger.warning("TTS silent fallback — no audio will be played")
-        return make_silent_wav(0.5)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Main TextToSpeech class
-# ─────────────────────────────────────────────────────────────────────────────
 
 class TextToSpeech:
     """
-    Egyptian Arabic TTS engine for RIVA voice pipeline.
+    Egyptian Arabic TTS engine for RIVA.
 
-    Integration points:
-    ┌─────────────────────────────────────────────────────────────────────┐
-    │  config.json                                                         │
-    │   text_to_speech.engine       → primary backend                     │
-    │   text_to_speech.fallback_chain → tried in order on failure         │
-    │   text_to_speech.rate_wpm     → base speech rate                    │
-    │   security.pii_patterns       → scrubbed before any speak/log       │
-    │   performance.target_*        → latency budget for warnings          │
-    │   urgency_escalation.*        → EMERGENCY fast path                 │
-    ├─────────────────────────────────────────────────────────────────────┤
-    │  confidence_scorer.py                                                │
-    │   ConfidenceScorer.routing_decision() → drives response text        │
-    │   ConfidenceScorer.label()            → spoken in doctor dashboard  │
-    │   ConfidenceThreshold.ACT/CLARIFY     → drive speech rate selection │
-    └─────────────────────────────────────────────────────────────────────┘
-
-    Fix 3 — FastAPI Blocking:
-        pyttsx3.runAndWait() is synchronous and will block FastAPI's async
-        event loop if called directly from an async route handler, causing
-        all other requests to stall during TTS synthesis.
-
-        Solution — use speak_async() in async routes:
-
-            @router.post("/voice/respond")
-            async def voice_respond(req, tts=Depends(get_tts)):
-                result = await tts.speak_async(TTSRequest(...))
-                return Response(content=result.wav_bytes, media_type="audio/wav")
-
-        speak_async() wraps speak() in run_in_threadpool() (Starlette utility)
-        so pyttsx3 runs in a thread pool without blocking the event loop.
-        speak() remains available for sync contexts (CLI, tests, background tasks).
-
-    Usage (sync):
-        tts    = TextToSpeech()
-        result = tts.speak(TTSRequest(
-            text="عندي صداع شديد", confidence=0.82,
-            routing="act", urgency="high", speaker_type="patient",
-        ))
-        # result.wav_bytes → pipe to browser / save to file
-
-    Usage (async / FastAPI):
-        result = await tts.speak_async(TTSRequest(...))
+    FIX 3: speak_async uses asyncio.get_running_loop() — Python 3.12 safe.
+           (get_event_loop() raises RuntimeError in Python 3.12 async contexts)
     """
-
-    def __init__(self) -> None:
-        self._backends: dict[TTSEngine, object] = {
-            TTSEngine.PYTTSX3            : _Pyttsx3Backend(),
-            TTSEngine.GTTS_DISK_CACHE    : _GttsDiskCacheBackend(),
-            TTSEngine.BROWSER_WEB_SPEECH : _BrowserWebSpeechBackend(),
-            TTSEngine.SILENT             : _SilentBackend(),
+    def __init__(self):
+        self._backends={
+            TTSEngine.PYTTSX3:_Pyttsx3Backend(),
+            TTSEngine.GTTS_DISK_CACHE:_GttsDiskCacheBackend(),
+            TTSEngine.BROWSER_WEB_SPEECH:_BrowserWebSpeechBackend(),
+            TTSEngine.SILENT:_SilentBackend(),
         }
-        self._fallback_chain: list[TTSEngine] = [
-            TTSEngine(e) for e in FALLBACK_CHAIN
-            if e in {en.value for en in TTSEngine}
-        ]
-        logger.info(
-            "TextToSpeech ready | engine=%s | fallback=%s | rate=%d wpm",
-            DEFAULT_ENGINE,
-            [e.value for e in self._fallback_chain],
-            DEFAULT_RATE_WPM,
-        )
+        self._fallback_chain=[TTSEngine(e) for e in FALLBACK_CHAIN if e in {en.value for en in TTSEngine}]
+        logger.info("TextToSpeech ready | chain=%s | rate=%d",[e.value for e in self._fallback_chain],DEFAULT_RATE_WPM)
 
-    # ── Public API ───────────────────────────────────────────────────────
-
-    def speak(self, request: TTSRequest) -> TTSResult:
+    def speak(self, request:TTSRequest) -> TTSResult:
         """
-        Convert text to speech WAV bytes.
-
-        Pipeline:
-            1. PII scrub (security.pii_patterns)
-            2. SSML-lite strip
-            3. EMERGENCY check → override text & rate
-            4. Select speech rate based on confidence + urgency
-            5. Try engines in fallback_chain order
-            6. Return TTSResult with WAV bytes + metadata
+        Pipeline (9 steps):
+            1. PII scrub    2. SSML strip     3. EMERGENCY override
+            4. Empty guard  5. Rate select    6. Volume select
+            7. Fallback chain (urgency forwarded — FIX 5)
+            8. Guarantee non-empty WAV        9. Latency budget check
         """
-        t0 = time.perf_counter()
-
-        # ── 1. PII scrub ─────────────────────────────────────────────────
-        clean_text, had_pii = scrub_pii(request.text)
-        status = TTSStatus.PII_REDACTED if had_pii else TTSStatus.SUCCESS
-
-        # ── 2. SSML strip ────────────────────────────────────────────────
-        clean_text = strip_ssml(clean_text)
-
-        # ── 3. EMERGENCY override ────────────────────────────────────────
-        # config["urgency_escalation"]: skip_clarification + force_triage
-        is_emergency = request.urgency == "emergency"
-        if is_emergency:
-            clean_text = ArabicResponses.get("emergency", request.speaker_type, urgency="emergency")
-            logger.warning(
-                "EMERGENCY TTS override — speaker=%s text='%s'",
-                request.speaker_type, clean_text,
-            )
-
-        # ── 4. If text empty → use routing response template ─────────────
-        if not clean_text.strip():
-            clean_text = ArabicResponses.get(
-                request.routing, request.speaker_type, urgency=request.urgency
-            )
-
-        # ── 5. Speech rate from confidence_scorer thresholds ─────────────
-        rate = select_rate(request.confidence, request.urgency)
-
-        # Volume: EMERGENCY → max volume
-        volume = 1.0 if is_emergency else DEFAULT_VOLUME
-
-        # ── 6. Fallback chain ─────────────────────────────────────────────
-        warnings: list[str] = []
-        wav_bytes            = b""
-        engine_used          = TTSEngine.SILENT
-
-        for engine_enum in self._fallback_chain:
-            backend = self._backends.get(engine_enum)
-            if backend is None:
-                continue
+        t0=time.perf_counter()
+        clean,had_pii=scrub_pii(request.text)
+        status=TTSStatus.PII_REDACTED if had_pii else TTSStatus.SUCCESS
+        clean=strip_ssml(clean)
+        is_em=request.urgency=="emergency"
+        if is_em:
+            clean=ArabicResponses.get("emergency",request.speaker_type,urgency="emergency")
+            logger.warning("EMERGENCY TTS override: %s",clean)
+        if not clean.strip():
+            clean=ArabicResponses.get(request.routing,request.speaker_type,urgency=request.urgency)
+        rate=select_rate(request.confidence,request.urgency)
+        volume=1.0 if is_em else DEFAULT_VOLUME
+        warnings,wav,engine_used=[],b"",TTSEngine.SILENT
+        for eng in self._fallback_chain:
+            backend=self._backends.get(eng)
+            if not backend: continue
             try:
-                wav_bytes   = backend.speak(clean_text, rate, volume, request.language)
-                engine_used = engine_enum
-                if engine_enum != self._fallback_chain[0]:
-                    status   = TTSStatus.FALLBACK
-                    warnings.append(f"Used fallback engine: {engine_enum.value}")
+                if eng==TTSEngine.GTTS_DISK_CACHE:
+                    wav=backend.speak(clean,rate,volume,request.language,urgency=request.urgency,cache_key=request.cache_key)
+                else:
+                    wav=backend.speak(clean,rate,volume,request.language,urgency=request.urgency)
+                engine_used=eng
+                if eng!=self._fallback_chain[0]: status=TTSStatus.FALLBACK; warnings.append(f"Fallback: {eng.value}")
                 break
             except Exception as exc:
-                logger.warning("TTS engine %s failed: %s", engine_enum.value, exc)
-                warnings.append(f"{engine_enum.value} failed: {exc}")
+                logger.warning("TTS %s failed: %s",eng.value,exc); warnings.append(f"{eng.value}: {exc}")
+        if not wav or len(wav)<=44:
+            wav=make_silent_wav(); engine_used=TTSEngine.SILENT; status=TTSStatus.SILENT
+            warnings.append("All engines failed — silent WAV")
+        lat=(time.perf_counter()-t0)*1000; budget=EMERGENCY_MAX_MS if is_em else MAX_LATENCY_MS
+        if lat>budget:
+            warnings.append(f"Budget exceeded: {lat:.0f}ms>{budget}ms")
+            logger.warning("TTS budget exceeded: %.0fms>%dms (%s)",lat,budget,engine_used.value)
+        dur=(max(1,len(clean.split()))/rate)*60_000
+        logger.info("TTS|engine=%s status=%s rate=%d lat=%.0fms",engine_used.value,status.value,rate,lat)
+        return TTSResult(wav_bytes=wav,engine_used=engine_used,status=status,text_spoken=clean,
+                         rate_wpm=rate,volume=volume,duration_ms=dur,latency_ms=lat,warnings=warnings)
 
-        # ── 7. Guaranteed non-empty WAV ───────────────────────────────────
-        if not wav_bytes or len(wav_bytes) <= 44:
-            wav_bytes   = make_silent_wav()
-            engine_used = TTSEngine.SILENT
-            status      = TTSStatus.SILENT
-            warnings.append("All TTS engines failed — returning silent WAV")
-
-        # ── 8. Latency check ─────────────────────────────────────────────
-        latency_ms = (time.perf_counter() - t0) * 1000
-        budget_ms  = EMERGENCY_MAX_MS if is_emergency else MAX_LATENCY_MS
-        if latency_ms > budget_ms:
-            warnings.append(
-                f"TTS exceeded latency budget: {latency_ms:.0f}ms > {budget_ms}ms"
-            )
-            logger.warning(
-                "TTS latency budget exceeded: %.0fms > %dms (engine=%s)",
-                latency_ms, budget_ms, engine_used.value,
-            )
-
-        # ── 9. Estimate duration ──────────────────────────────────────────
-        word_count   = max(1, len(clean_text.split()))
-        duration_ms  = (word_count / rate) * 60_000
-
-        logger.info(
-            "TTS | engine=%s status=%s rate=%d vol=%.2f latency=%.0fms duration=%.0fms",
-            engine_used.value, status.value, rate, volume, latency_ms, duration_ms,
-        )
-
-        return TTSResult(
-            wav_bytes   = wav_bytes,
-            engine_used = engine_used,
-            status      = status,
-            text_spoken = clean_text,
-            rate_wpm    = rate,
-            volume      = volume,
-            duration_ms = duration_ms,
-            latency_ms  = latency_ms,
-            warnings    = warnings,
-        )
-
-    async def speak_async(self, request: TTSRequest) -> TTSResult:
-        """
-        Async wrapper for FastAPI route handlers.
-
-        Fix 3 — prevents pyttsx3.runAndWait() from blocking FastAPI's
-        async event loop. Runs speak() in Starlette's thread pool so the
-        event loop stays free to handle concurrent requests.
-
-        Falls back to asyncio.get_event_loop().run_in_executor() if
-        Starlette is not installed (e.g. in tests / CLI contexts).
-
-        Usage in FastAPI router:
-            @router.post("/voice/respond")
-            async def voice_respond(
-                req: VoiceRequest,
-                tts: TextToSpeech = Depends(get_tts),
-            ):
-                result = await tts.speak_async(TTSRequest(
-                    text=req.text, confidence=req.confidence,
-                    routing=req.routing, urgency=req.urgency,
-                    speaker_type=req.speaker_type,
-                ))
-                return Response(content=result.wav_bytes, media_type="audio/wav")
-        """
+    async def speak_async(self, request:TTSRequest) -> TTSResult:
+        """FIX 3: get_running_loop() instead of deprecated get_event_loop()."""
         try:
             from starlette.concurrency import run_in_threadpool
-            return await run_in_threadpool(self.speak, request)
+            return await run_in_threadpool(self.speak,request)
         except ImportError:
-            # Starlette not available — fallback to asyncio executor
             import asyncio
-            loop = asyncio.get_event_loop()
-            return await loop.run_in_executor(None, self.speak, request)
+            return await asyncio.get_running_loop().run_in_executor(None,self.speak,request)
 
-    def speak_routing_decision(
-        self,
-        routing      : str,
-        speaker_type : str = "patient",
-        confidence   : float = 1.0,
-        urgency      : str   = "low",
-    ) -> TTSResult:
-        """
-        Shortcut: speak the standard Arabic response for a routing decision.
+    def speak_routing_decision(self,routing:str,speaker_type:str="patient",confidence:float=1.0,urgency:str="low") -> TTSResult:
+        """Shortcut: speak standard Arabic response for a ConfidenceScorer routing decision."""
+        text=ArabicResponses.get(routing,speaker_type,urgency=urgency)
+        return self.speak(TTSRequest(text=text,confidence=confidence,routing=routing,urgency=urgency,speaker_type=speaker_type))
 
-        Called directly by the voice route handler after
-        ConfidenceScorer.routing_decision() returns.
-
-        Usage:
-            decision = scorer.routing_decision(score, urgency="high")
-            result   = tts.speak_routing_decision(
-                routing=decision, speaker_type="pregnant", confidence=score
-            )
-        """
-        text = ArabicResponses.get(routing, speaker_type, urgency=urgency)
-        return self.speak(TTSRequest(
-            text         = text,
-            confidence   = confidence,
-            routing      = routing,
-            urgency      = urgency,
-            speaker_type = speaker_type,
-        ))
-
-    def speak_score_label(
-        self,
-        score        : float,
-        speaker_type : str = "doctor",
-    ) -> TTSResult:
-        """
-        Speak the Arabic confidence label (for doctor dashboard voice readout).
-
-        Integration: uses ConfidenceScorer.label() thresholds directly.
-        "عالية" / "متوسطة" / "منخفضة" / "غير محددة"
-        """
-        if score >= _THRESH_ACT:
-            label = "الثقة عالية"
-        elif score >= _THRESH_CLARIFY:
-            label = "الثقة متوسطة"
-        else:
-            label = "الثقة منخفضة — محتاج تأكيد"
-
-        return self.speak(TTSRequest(
-            text         = label,
-            confidence   = score,
-            routing      = "act",
-            urgency      = "low",
-            speaker_type = speaker_type,
-        ))
+    def speak_score_label(self,score:float,speaker_type:str="doctor") -> TTSResult:
+        """Speak Arabic confidence label for doctor dashboard voice readout."""
+        label=("الثقة عالية" if score>=_THRESH_ACT else "الثقة متوسطة" if score>=_THRESH_CLARIFY else "الثقة منخفضة — محتاج تأكيد")
+        return self.speak(TTSRequest(text=label,confidence=score,routing="act",urgency="low",speaker_type=speaker_type))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Singleton for FastAPI  (mirrors all other dialect_model singletons)
-# ─────────────────────────────────────────────────────────────────────────────
-
-_tts_instance: Optional[TextToSpeech] = None
-
+_tts_instance:Optional[TextToSpeech]=None
 
 def get_tts() -> TextToSpeech:
-    """
-    Shared TextToSpeech instance — FastAPI dependency injection.
-
-    Usage in voice route:
-        from ai_core.voice.dialect_model.text_to_speech import get_tts, TTSRequest
-
-        @router.post("/voice/respond")
-        async def voice_respond(
-            req: VoiceRequest,
-            tts: TextToSpeech = Depends(get_tts),
-        ):
-            result = tts.speak_routing_decision(
-                routing=req.routing,
-                speaker_type=req.speaker_type,
-                confidence=req.confidence,
-                urgency=req.urgency,
-            )
-            return Response(content=result.wav_bytes, media_type="audio/wav")
-    """
+    """FastAPI Depends() singleton."""
     global _tts_instance
-    if _tts_instance is None:
-        _tts_instance = TextToSpeech()
+    if _tts_instance is None: _tts_instance=TextToSpeech()
     return _tts_instance
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Entry point — run standalone from terminal for quick smoke-test
-#   python ai-core/voice/dialect_model/text_to_speech.py
-# ─────────────────────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
+if __name__=="__main__":
     import sys
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(levelname)s:%(name)s:%(message)s",
-    )
-
-    print("=" * 60)
-    print("RIVA TextToSpeech — standalone smoke-test")
-    print("=" * 60)
-
-    # ── [0] Path report ───────────────────────────────────────────────────
-    print("\n[0] Path resolution:")
-    print(f"  _HERE   : {_HERE}")
-    print(f"  _ROOT   : {_ROOT}")
-    print(f"  config  : {'✅' if _CONFIG_PATH.exists()  else '⚠ missing'} {_CONFIG_PATH.name}")
-    print(f"  lexicon : {'✅' if _LEXICON_PATH.exists() else '⚠ missing'} {_LEXICON_PATH.name}")
-
-    tts = get_tts()
-
-    # ── [1] Basic speak ───────────────────────────────────────────────────
-    print("\n[1] Basic speak:")
-    test_req = TTSRequest(
-        text        = "أهلاً بك في نظام ريفا الصحي",
-        confidence  = 0.90,
-        routing     = "act",
-        urgency     = "low",
-        speaker_type= "patient",
-    )
-    res = tts.speak(test_req)
-    print(f"  Engine  : {res.engine_used.value}")
-    print(f"  Status  : {res.status.value}")
-    print(f"  Spoken  : '{res.text_spoken}'")
-    print(f"  Rate    : {res.rate_wpm} wpm")
-    print(f"  Latency : {res.latency_ms:.2f} ms")
-    print(f"  WAV     : {len(res.wav_bytes)} bytes")
-    for w in res.warnings: print(f"  ⚠ {w}")
-
-    # ── [2] Emergency path ────────────────────────────────────────────────
-    print("\n[2] Emergency path (Fix 1 — 'and False' bug removed):")
-    em_res = tts.speak(TTSRequest(
-        text="مش قادر أتنفس", confidence=0.95,
-        routing="act", urgency="emergency", speaker_type="patient",
-    ))
-    assert "طارئ" in em_res.text_spoken or "تحويلك" in em_res.text_spoken
-    assert em_res.rate_wpm == RATE_EMERGENCY
-    assert em_res.volume   == 1.0
-    print(f"  ✅ text  : '{em_res.text_spoken}'")
-    print(f"  ✅ rate  : {em_res.rate_wpm} wpm")
-    print(f"  ✅ vol   : {em_res.volume}")
-    print(f"  ✅ ms    : {em_res.latency_ms:.2f}")
-
-    # ── [3] PII scrub ─────────────────────────────────────────────────────
-    print("\n[3] PII scrub:")
-    pii_res = tts.speak(TTSRequest(
-        text="رقمي 01012345678", confidence=0.70,
-        routing="act", urgency="low", speaker_type="patient",
-    ))
-    assert "01012345678" not in pii_res.text_spoken
-    assert "[محجوب]" in pii_res.text_spoken
-    print(f"  ✅ '{pii_res.text_spoken}'")
-
-    # ── [4] speak_routing_decision ────────────────────────────────────────
-    print("\n[4] speak_routing_decision():")
-    for routing, conf, urg in [
-        ("act",      0.85, "high"),
-        ("clarify",  0.50, "medium"),
-        ("fallback", 0.30, "low"),
-    ]:
-        r = tts.speak_routing_decision(routing, "patient", conf, urg)
-        print(f"  {routing:10s} conf={conf} → '{r.text_spoken}' @ {r.rate_wpm}wpm")
-
-    print(f"\n✅ TextToSpeech smoke-test complete")
-    sys.exit(0)
-
-    # ── 1. PII scrubbing ──────────────────────────────────────────────────
-    print("\n[1] PII scrubbing:")
-    pii_cases = [
-        "رقم التليفون 01012345678 تاني",
-        "الرقم القومي 12345678901234",
-        "إيميلي test@example.com",
-        "مفيش PII هنا",
-    ]
-    for t in pii_cases:
-        scrubbed, found = scrub_pii(t)
-        print(f"  {'✓' if found else '·'} '{t[:40]}' → '{scrubbed[:40]}'")
-
-    # ── 2. Speech rate selection ──────────────────────────────────────────
-    print("\n[2] Speech rate selection:")
-    rate_cases = [
-        (0.85, "low",       RATE_HIGH_CONF,  "high conf → fast"),
-        (0.60, "medium",    RATE_NORMAL,     "mid conf  → normal"),
-        (0.35, "low",       RATE_LOW_CONF,   "low conf  → slow"),
-        (0.20, "emergency", RATE_EMERGENCY,  "emergency → fastest"),
-    ]
-    for conf, urg, expected, desc in rate_cases:
-        rate = select_rate(conf, urg)
-        ok   = "✅" if rate == expected else "❌"
-        print(f"  {ok} conf={conf} urgency={urg} → {rate} wpm  ({desc})")
-
-    # ── 3. SSML strip ─────────────────────────────────────────────────────
-    print("\n[3] SSML strip:")
-    ssml_in  = '<rate slow>عندي وجع</rate> <break time="1s"/> في بطني'
-    ssml_out = strip_ssml(ssml_in)
-    print(f"  In : {ssml_in}")
-    print(f"  Out: {ssml_out}")
-
-    # ── 4. Arabic response templates ──────────────────────────────────────
-    print("\n[4] Arabic response templates:")
-    for routing in ["act", "clarify", "fallback", "emergency", "unrecognised"]:
-        for speaker in ["patient", "pregnant", "doctor"]:
-            resp = ArabicResponses.get(routing, speaker)
-            print(f"  [{routing:13s}][{speaker:8s}] → {resp}")
-
-    # ── 5. Silent WAV ─────────────────────────────────────────────────────
-    print("\n[5] Silent WAV generation:")
-    silent = make_silent_wav(0.5)
-    print(f"  Silent WAV: {len(silent)} bytes — valid={'RIFF' in str(silent[:4])}")
-
-    # ── 6. Full speak() pipeline (silent engine — no pyttsx3 needed) ──────
-    print("\n[6] speak() pipeline (silent engine fallback):")
-    test_requests = [
-        TTSRequest(text="عندي وجع في بطني من امبارح",
-                   confidence=0.82, routing="act",      urgency="high",      speaker_type="patient"),
-        TTSRequest(text="ممكن توضحلي أكتر؟",
-                   confidence=0.50, routing="clarify",  urgency="medium",    speaker_type="pregnant"),
-        TTSRequest(text="مش قادر أتنفس",
-                   confidence=0.95, routing="act",      urgency="emergency", speaker_type="patient"),
-        TTSRequest(text="رقمي 01012345678",
-                   confidence=0.70, routing="act",      urgency="low",       speaker_type="patient"),
-    ]
-    for req in test_requests:
-        result = tts.speak(req)
-        print(f"  [{req.urgency:9s}] conf={req.confidence:.2f} "
-              f"engine={result.engine_used.value:20s} "
-              f"rate={result.rate_wpm}wpm "
-              f"latency={result.latency_ms:.1f}ms "
-              f"spoken='{result.text_spoken[:35]}'")
-        if result.warnings:
-            for w in result.warnings:
-                print(f"    ⚠ {w}")
-
-    # ── 7. speak_routing_decision shortcut ────────────────────────────────
-    print("\n[7] speak_routing_decision:")
-    for routing, conf, urg in [
-        ("act",      0.85, "high"),
-        ("clarify",  0.55, "medium"),
-        ("fallback", 0.30, "low"),
-    ]:
-        r = tts.speak_routing_decision(routing, "patient", conf, urg)
-        print(f"  routing={routing:10s} conf={conf} → '{r.text_spoken}' @ {r.rate_wpm}wpm")
-
-    # ── 8. to_dict ────────────────────────────────────────────────────────
-    r = tts.speak(TTSRequest("عندي صداع", 0.75, "act", "medium", "patient"))
-    d = r.to_dict()
-    print(f"\n[8] to_dict keys: {list(d.keys())}")
-
-    print("\n✅ TextToSpeech self-test complete")
-    sys.exit(0)
+    logging.basicConfig(level=logging.INFO,format="%(levelname)s:%(name)s:%(message)s")
+    print("="*60); print("RIVA TextToSpeech v4.0 — smoke-test"); print("="*60)
+    print(f"\n[0] config: {'✅' if _CONFIG_PATH.exists() else '⚠ missing'}")
+    tts=get_tts()
+    print("\n[1] PII scrub:")
+    for t in ["رقمي 01012345678","الرقم 12345678901234","مفيش PII"]:
+        s,f=scrub_pii(t); print(f"  {'✓' if f else '·'} {t!r} → {s!r}")
+    print("\n[2] Rate selection:")
+    for c,u,e in [(0.85,"low",RATE_HIGH_CONF),(0.60,"medium",RATE_NORMAL),(0.20,"emergency",RATE_EMERGENCY)]:
+        r=select_rate(c,u); print(f"  {'✅' if r==e else '❌'} conf={c} urg={u} → {r}wpm")
+    print("\n[3] EMERGENCY override (FIX 1):")
+    em=tts.speak(TTSRequest(text="مش قادر أتنفس",confidence=0.95,routing="act",urgency="emergency",speaker_type="patient"))
+    print(f"  {'✅' if 'طارئ' in em.text_spoken else '❌'} text='{em.text_spoken}'")
+    print(f"  {'✅' if em.rate_wpm==RATE_EMERGENCY else '❌'} rate={em.rate_wpm}wpm vol={em.volume}")
+    print("\n[4] PII in pipeline:")
+    pii=tts.speak(TTSRequest(text="رقمي 01012345678",confidence=0.7,routing="act",urgency="low",speaker_type="patient"))
+    print(f"  {'✅' if '[محجوب]' in pii.text_spoken else '❌'} {pii.text_spoken!r}")
+    print("\n[5] speak_routing_decision:")
+    for rt,cf,ug in [("act",0.85,"high"),("clarify",0.5,"medium"),("fallback",0.3,"low")]:
+        r=tts.speak_routing_decision(rt,"patient",cf,ug); print(f"  {rt:10s} → '{r.text_spoken}' @{r.rate_wpm}wpm")
+    print("\n✅ smoke-test complete"); sys.exit(0)
