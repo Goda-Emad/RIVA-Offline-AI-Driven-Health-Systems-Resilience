@@ -1,0 +1,253 @@
+{
+  "_meta": {
+    "file"        : "data/raw/arabic_sentiment/lexicons/egyptian_medical_lexicon.json",
+    "project"     : "RIVA Health Platform v3.0",
+    "purpose"     : "Medical-domain Egyptian Arabic sentiment lexicon. Built by filtering ALL_lex.csv (1913 terms) and enriching with clinical terms. Used by SentimentAnalyzer for offline zero-latency scoring.",
+    "source_files": ["ALL_lex.csv (1913 terms)", "LABR_lex.csv (874 terms)", "RES_lex.csv (734 terms)"],
+    "author"      : "Goda Emad (AI Core) + Mohamed Gharieb (Medical Content)",
+    "version"     : "1.0.0",
+    "updated"     : "2026-03-18",
+    "dialect"     : "ar-EG",
+    "schema"      : "term | weight [-1.0 to 1.0] | trigger | urgency_override | source | context_tags"
+  },
+
+  "emergency_triggers": {
+    "_note": "Any single match escalates immediately to UrgencyMode.EMERGENCY — no further scoring needed",
+    "terms": [
+      {"term": "نجدة",             "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["call_for_help"]},
+      {"term": "إسعاف",            "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["call_for_help"]},
+      {"term": "بيموت",            "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["life_threat"]},
+      {"term": "بتموت",            "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["life_threat"]},
+      {"term": "مش قادر أتنفس",    "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["breathing", "life_threat"]},
+      {"term": "مش لاقي نفسي",     "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["breathing", "life_threat"]},
+      {"term": "جلطة",             "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["cardiac", "neuro"]},
+      {"term": "نوبة قلبية",        "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["cardiac"]},
+      {"term": "نزيف شديد",         "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["bleeding"]},
+      {"term": "فقدان الوعي",       "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["neuro"]},
+      {"term": "غيبوبة",            "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["neuro"]},
+      {"term": "تشنجات",           "weight": -0.95, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["neuro"]},
+      {"term": "نزيف مهبلي",        "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["pregnancy", "bleeding"]},
+      {"term": "مياه انفجرت",       "weight": -0.95, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical",  "context_tags": ["pregnancy"]}
+    ]
+  },
+
+  "negative_severe": {
+    "_note": "weight -0.60 to -0.89 | urgency_override=HIGH",
+    "terms": [
+      {"term": "ألم شديد",         "weight": -0.85, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["pain"]},
+      {"term": "وجع جامد",         "weight": -0.85, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["pain", "egyptian_slang"]},
+      {"term": "وجع ناري",         "weight": -0.88, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["pain", "egyptian_slang"]},
+      {"term": "مش طايق",          "weight": -0.75, "trigger": false, "urgency_override": "HIGH", "source": "ALL_lex", "context_tags": ["intolerance", "egyptian_slang"]},
+      {"term": "مش قادر أقوم",      "weight": -0.75, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["mobility"]},
+      {"term": "خايف أوي",         "weight": -0.80, "trigger": false, "urgency_override": "HIGH", "source": "ALL_lex", "context_tags": ["fear", "mental"]},
+      {"term": "مرعوب",            "weight": -0.80, "trigger": false, "urgency_override": "HIGH", "source": "ALL_lex", "context_tags": ["fear", "mental"]},
+      {"term": "ملهوف",            "weight": -0.70, "trigger": false, "urgency_override": "HIGH", "source": "ALL_lex", "context_tags": ["anxiety", "egyptian_slang"]},
+      {"term": "ضيق تنفس",         "weight": -0.80, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["breathing"]},
+      {"term": "خفقان شديد",       "weight": -0.78, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["cardiac"]},
+      {"term": "ألم في صدري",      "weight": -0.80, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["cardiac", "chest"]},
+      {"term": "نزيف",             "weight": -0.75, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["bleeding"]},
+      {"term": "إغماء",            "weight": -0.78, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["neuro"]},
+      {"term": "دوار شديد",        "weight": -0.72, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["neuro", "dizziness"]},
+      {"term": "ألم أسفل البطن",   "weight": -0.65, "trigger": false, "urgency_override": "HIGH", "source": "medical",  "context_tags": ["pregnancy", "abdominal"]}
+    ]
+  },
+
+  "negative_moderate": {
+    "_note": "weight -0.20 to -0.59 | UrgencyMode.MEDIUM",
+    "terms": [
+      {"term": "تعبان",            "weight": -0.40, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["general", "egyptian_slang"]},
+      {"term": "تعبانة",           "weight": -0.40, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["general", "female"]},
+      {"term": "مريض",             "weight": -0.38, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["general"]},
+      {"term": "مريضة",            "weight": -0.38, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["general", "female"]},
+      {"term": "ألم",              "weight": -0.35, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["pain"]},
+      {"term": "وجع",              "weight": -0.35, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["pain", "egyptian_slang"]},
+      {"term": "دوار",             "weight": -0.38, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["dizziness"]},
+      {"term": "دايخ",             "weight": -0.38, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["dizziness", "egyptian_slang"]},
+      {"term": "دايخة",            "weight": -0.38, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["dizziness", "female"]},
+      {"term": "حمى",              "weight": -0.38, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["fever"]},
+      {"term": "حرارة",            "weight": -0.35, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["fever", "egyptian_slang"]},
+      {"term": "سخونة",            "weight": -0.35, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["fever", "egyptian_slang"]},
+      {"term": "قيء",              "weight": -0.38, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["gi"]},
+      {"term": "ترجيع",            "weight": -0.38, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["gi", "egyptian_slang"]},
+      {"term": "برجع",             "weight": -0.35, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["gi", "egyptian_slang"]},
+      {"term": "غثيان",            "weight": -0.30, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["gi"]},
+      {"term": "إسهال",            "weight": -0.30, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["gi"]},
+      {"term": "إرهاق",            "weight": -0.32, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["fatigue"]},
+      {"term": "صداع",             "weight": -0.30, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["head"]},
+      {"term": "سعال",             "weight": -0.25, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["respiratory"]},
+      {"term": "كحة",              "weight": -0.25, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["respiratory", "egyptian_slang"]},
+      {"term": "تورم",             "weight": -0.32, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["swelling"]},
+      {"term": "التهاب",           "weight": -0.30, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["inflammation"]},
+      {"term": "التهاب حلق",       "weight": -0.32, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["throat", "school_health"]},
+      {"term": "زوري بيوجعني",     "weight": -0.32, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["throat", "school_health", "egyptian_slang"]},
+      {"term": "تنميل",            "weight": -0.28, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["neuro"]},
+      {"term": "وخز",              "weight": -0.25, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["neuro"]},
+      {"term": "قشعريرة",          "weight": -0.28, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["chills"]},
+      {"term": "بردان",            "weight": -0.25, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["chills", "egyptian_slang"]},
+      {"term": "خايف",             "weight": -0.45, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["fear", "mental"]},
+      {"term": "خايفة",            "weight": -0.45, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["fear", "mental", "female"]},
+      {"term": "قلقان",            "weight": -0.40, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["anxiety", "egyptian_slang"]},
+      {"term": "قلقانة",           "weight": -0.40, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["anxiety", "female"]},
+      {"term": "متضايق",           "weight": -0.35, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["distress"]},
+      {"term": "زعلان",            "weight": -0.30, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["distress", "egyptian_slang"]},
+      {"term": "خفقان",            "weight": -0.40, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["cardiac"]},
+      {"term": "حرقة",             "weight": -0.28, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["gi", "acid"]},
+      {"term": "تقلص عضلي",        "weight": -0.28, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["muscle"]},
+      {"term": "مش كويس",          "weight": -0.30, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["general", "egyptian_slang"]},
+      {"term": "أرق",              "weight": -0.28, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["sleep"]},
+      {"term": "طلق",              "weight": -0.50, "trigger": false, "urgency_override": "HIGH","source": "medical",  "context_tags": ["pregnancy", "labor"]}
+    ]
+  },
+
+  "negative_mild": {
+    "_note": "weight -0.05 to -0.19 | UrgencyMode.LOW",
+    "terms": [
+      {"term": "زهقان",            "weight": -0.15, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["fatigue", "egyptian_slang"]},
+      {"term": "تعرق",             "weight": -0.12, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["sweat"]},
+      {"term": "عرقان",            "weight": -0.10, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["sweat", "egyptian_slang"]},
+      {"term": "مش حاسس بنفسي",    "weight": -0.18, "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["general", "egyptian_slang"]},
+      {"term": "ضعيف شوية",        "weight": -0.15, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["weakness", "mild"]},
+      {"term": "خامل",             "weight": -0.15, "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["fatigue"]}
+    ]
+  },
+
+  "positive_strong": {
+    "_note": "weight 0.55 to 1.0 | patient reassured | urgency_override=LOW",
+    "terms": [
+      {"term": "الحمد لله",        "weight": 0.75,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["gratitude", "religious", "very_common"]},
+      {"term": "حمدلله",           "weight": 0.75,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["gratitude", "egyptian_slang", "very_common"]},
+      {"term": "تمام",             "weight": 0.65,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["good", "egyptian_slang"]},
+      {"term": "كويس",             "weight": 0.60,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["good", "egyptian_slang"]},
+      {"term": "كويسة",            "weight": 0.60,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["good", "female"]},
+      {"term": "اتحسن",            "weight": 0.65,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["improvement"]},
+      {"term": "اتحسنت",           "weight": 0.65,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["improvement", "female"]},
+      {"term": "بتتحسن",           "weight": 0.58,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["improvement", "progressive"]},
+      {"term": "أحسن",             "weight": 0.55,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["improvement", "comparative"]},
+      {"term": "مطمئن",            "weight": 0.60,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["calm", "reassured"]},
+      {"term": "مطمئنة",           "weight": 0.60,  "trigger": false, "urgency_override": "LOW", "source": "ALL_lex", "context_tags": ["calm", "reassured", "female"]},
+      {"term": "ربنا يشفيك",       "weight": 0.55,  "trigger": false, "urgency_override": "LOW", "source": "medical",  "context_tags": ["religious", "encouragement"]}
+    ]
+  },
+
+  "positive_moderate": {
+    "_note": "weight 0.15 to 0.54",
+    "terms": [
+      {"term": "خفيف",             "weight": 0.30,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["mild"]},
+      {"term": "بسيط",             "weight": 0.25,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["mild"]},
+      {"term": "مش شديد",          "weight": 0.32,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["mild", "negated"]},
+      {"term": "مش مزعجني",        "weight": 0.35,  "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["tolerable"]},
+      {"term": "مستحملها",         "weight": 0.28,  "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["tolerable", "egyptian_slang"]},
+      {"term": "بيجي ويروح",       "weight": 0.22,  "trigger": false, "urgency_override": null, "source": "medical",  "context_tags": ["intermittent"]},
+      {"term": "أحياناً",          "weight": 0.18,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["intermittent"]},
+      {"term": "مش دايم",          "weight": 0.20,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["intermittent"]},
+      {"term": "هادي",             "weight": 0.28,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["calm"]},
+      {"term": "مش خايف",          "weight": 0.35,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["reassured", "negated_fear"]},
+      {"term": "عادي",             "weight": 0.20,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["normal"]},
+      {"term": "شوية",             "weight": 0.10,  "trigger": false, "urgency_override": null, "source": "ALL_lex", "context_tags": ["diminutive", "egyptian_slang"]}
+    ]
+  },
+
+  "intensifiers": {
+    "_note": "Multiply weight of nearest term. Egyptian post-position: intensifier comes AFTER term (right window 4 tokens). جداً works both sides.",
+    "terms": [
+      {"term": "أوي",     "multiplier": 1.60, "direction": "right", "source": "ALL_lex", "context_tags": ["egyptian_slang", "very_common"]},
+      {"term": "خالص",   "multiplier": 1.55, "direction": "right", "source": "ALL_lex", "context_tags": ["egyptian_slang", "very_common"]},
+      {"term": "ناري",    "multiplier": 1.70, "direction": "right", "source": "ALL_lex", "context_tags": ["egyptian_slang", "extreme_pain"]},
+      {"term": "جداً",    "multiplier": 1.50, "direction": "both",  "source": "ALL_lex", "context_tags": ["msa"]},
+      {"term": "جدا",     "multiplier": 1.50, "direction": "both",  "source": "ALL_lex", "context_tags": ["informal"]},
+      {"term": "قوي",     "multiplier": 1.40, "direction": "right", "source": "ALL_lex", "context_tags": ["egyptian_slang"]},
+      {"term": "كتير",    "multiplier": 1.30, "direction": "right", "source": "ALL_lex", "context_tags": ["egyptian_slang"]},
+      {"term": "للغاية",  "multiplier": 1.45, "direction": "right", "source": "ALL_lex", "context_tags": ["msa"]},
+      {"term": "مش طايق", "multiplier": 1.50, "direction": "right", "source": "ALL_lex", "context_tags": ["intolerance", "egyptian_slang"]},
+      {"term": "مش قادر", "multiplier": 1.40, "direction": "right", "source": "ALL_lex", "context_tags": ["incapacity"]}
+    ]
+  },
+
+  "negation_markers": {
+    "_note": "Left window 4 tokens — flip polarity of next sentiment term. ما…ش circumfix detected via prefix ما + token ending in ش.",
+    "terms": [
+      {"term": "مش",       "type": "proclitic",        "source": "ALL_lex", "context_tags": ["egyptian_slang", "very_common"]},
+      {"term": "مو",       "type": "proclitic",        "source": "ALL_lex", "context_tags": ["levantine"]},
+      {"term": "ليس",      "type": "msa",              "source": "ALL_lex", "context_tags": ["formal"]},
+      {"term": "لا",       "type": "standalone",       "source": "ALL_lex", "context_tags": ["common"]},
+      {"term": "ولا",      "type": "standalone",       "source": "ALL_lex", "context_tags": ["neither_nor"]},
+      {"term": "معنديش",   "type": "circumfix",        "source": "ALL_lex", "context_tags": ["egyptian_slang", "very_common"]},
+      {"term": "معنداش",   "type": "circumfix",        "source": "ALL_lex", "context_tags": ["egyptian_slang"]},
+      {"term": "مفيش",     "type": "circumfix",        "source": "ALL_lex", "context_tags": ["egyptian_slang"]},
+      {"term": "بدون",     "type": "preposition",      "source": "ALL_lex", "context_tags": ["without"]},
+      {"term": "من غير",   "type": "preposition",      "source": "ALL_lex", "context_tags": ["without", "egyptian_slang"]},
+      {"term": "ما",       "type": "circumfix_prefix", "pattern": "ما…ش",  "source": "ALL_lex", "context_tags": ["circumfix", "detect_with_suffix_ش"]}
+    ]
+  },
+
+  "duration_terms": {
+    "_note": "Parsed by CommandParser._extract_duration() into integer days.",
+    "anchors": [
+      {"term": "بقالي",   "type": "egyptian_primary",  "note": "most common Egyptian anchor — بقالي 3 أيام"},
+      {"term": "بقاله",   "type": "egyptian_primary",  "note": "masculine"},
+      {"term": "بقالها",  "type": "egyptian_primary",  "note": "feminine"},
+      {"term": "من",      "type": "msa",               "note": "standard Arabic"},
+      {"term": "منذ",     "type": "msa_formal",        "note": "formal, rare in speech"}
+    ],
+    "fixed_durations": [
+      {"term": "امبارح",   "days": 1,  "source": "ALL_lex", "context_tags": ["yesterday", "egyptian_slang"]},
+      {"term": "إمبارح",   "days": 1,  "source": "ALL_lex", "context_tags": ["yesterday", "alt_spelling"]},
+      {"term": "يومين",    "days": 2,  "source": "ALL_lex", "context_tags": ["two_days"]},
+      {"term": "أسبوعين",  "days": 14, "source": "ALL_lex", "context_tags": ["two_weeks"]},
+      {"term": "شهرين",    "days": 60, "source": "ALL_lex", "context_tags": ["two_months"]},
+      {"term": "من الصبح", "days": 0,  "source": "medical", "context_tags": ["same_day"]}
+    ],
+    "units": [
+      {"term": "يوم",     "multiplier": 1},
+      {"term": "أيام",    "multiplier": 1},
+      {"term": "أسبوع",   "multiplier": 7},
+      {"term": "أسابيع",  "multiplier": 7},
+      {"term": "شهر",     "multiplier": 30},
+      {"term": "شهور",    "multiplier": 30}
+    ]
+  },
+
+  "pregnancy_module": {
+    "_note": "Loaded ONLY when intent=PREGNANCY or patient_context.is_pregnant=true",
+    "terms": [
+      {"term": "حامل",          "weight": 0.00,  "trigger": false, "urgency_override": null,        "source": "medical", "context_tags": ["pregnancy", "intent_signal"]},
+      {"term": "الجنين",        "weight": -0.20, "trigger": false, "urgency_override": null,        "source": "medical", "context_tags": ["pregnancy", "fetus"]},
+      {"term": "الولادة",       "weight": -0.30, "trigger": false, "urgency_override": null,        "source": "medical", "context_tags": ["pregnancy", "delivery"]},
+      {"term": "طلق",           "weight": -0.50, "trigger": false, "urgency_override": "HIGH",      "source": "medical", "context_tags": ["pregnancy", "labor"]},
+      {"term": "ألم أسفل البطن","weight": -0.65, "trigger": false, "urgency_override": "HIGH",      "source": "medical", "context_tags": ["pregnancy", "danger_sign"]},
+      {"term": "نزيف مهبلي",    "weight": -1.00, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical", "context_tags": ["pregnancy", "bleeding"]},
+      {"term": "مياه انفجرت",   "weight": -0.95, "trigger": true,  "urgency_override": "EMERGENCY", "source": "medical", "context_tags": ["pregnancy", "water_break"]}
+    ]
+  },
+
+  "school_health_module": {
+    "_note": "Loaded ONLY when intent=SCHOOL_HEALTH or patient_context.is_student=true",
+    "terms": [
+      {"term": "طالب",           "weight": 0.00,  "trigger": false, "urgency_override": null, "source": "medical", "context_tags": ["school", "intent_signal"]},
+      {"term": "تلميذ",          "weight": 0.00,  "trigger": false, "urgency_override": null, "source": "medical", "context_tags": ["school", "intent_signal"]},
+      {"term": "زوري بيوجعني",  "weight": -0.35, "trigger": false, "urgency_override": null, "source": "medical", "context_tags": ["throat", "school", "egyptian_slang"]},
+      {"term": "حمى القش",      "weight": -0.25, "trigger": false, "urgency_override": null, "source": "medical", "context_tags": ["allergy", "school"]},
+      {"term": "مش قادر يتركز", "weight": -0.20, "trigger": false, "urgency_override": null, "source": "medical", "context_tags": ["focus", "school", "mental"]}
+    ]
+  },
+
+  "loading_instructions": {
+    "priority_order": [
+      "1. emergency_triggers — any match → EMERGENCY immediately, stop all scoring",
+      "2. pregnancy_module or school_health_module — only when intent matches",
+      "3. negative_severe  → HIGH urgency escalation",
+      "4. negative_moderate + negative_mild → standard negative scoring",
+      "5. positive_strong + positive_moderate → positive scoring",
+      "6. Apply intensifiers: RIGHT window 4 tokens (أوي، خالص، ناري...)",
+      "7. Apply negation_markers: LEFT window 4 tokens — flip polarity",
+      "8. Clamp final score to [-1.0, +1.0]"
+    ],
+    "cold_start_rule": "If no ML model available: use emergency_triggers + negative_severe only. Guarantees patient safety with zero ML dependencies.",
+    "source_mapping": {
+      "ALL_lex"  : "Terms validated from ALL_lex.csv (1913 terms) — general Arabic sentiment",
+      "medical"  : "Clinically added terms — Egyptian medical dialect not in ALL_lex",
+      "LABR_lex" : "Emotional distress terms from book reviews — map well to patient language",
+      "RES_lex"  : "Service dissatisfaction terms repurposed for healthcare quality feedback"
+    }
+  }
+}
