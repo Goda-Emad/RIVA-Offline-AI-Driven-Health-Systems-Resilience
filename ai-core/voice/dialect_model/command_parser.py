@@ -10,7 +10,7 @@
 ║            Readmission / LOS / Chatbot engines                               ║
 ║                                                                              ║
 ║  Author  : Goda Emad  (AI Core)                                              ║
-║  Version : 2.2.0                                                             ║
+║  Version : 3.1.0                                                             ║
 ║  Updated : 2026-03-18                                                        ║
 ║                                                                              ║
 ║  Changelog v2.2.0                                                            ║
@@ -34,9 +34,17 @@ from enum import Enum
 from typing import Any
 
 # ── Internal imports ────────────────────────────────────────────────────────
-from .confidence_scorer import ConfidenceScorer
-from .ambiguity_handler import AmbiguityHandler
+from .confidence_scorer  import ConfidenceScorer
+from .ambiguity_handler  import AmbiguityHandler
 from .sentiment_analyzer import SentimentAnalyzer
+
+# Audio pipeline — imported lazily to avoid heavy deps on text-only usage
+try:
+    from .audio_processor import AudioProcessor, ProcessedAudio, preprocess_async
+    from .speech_to_text  import SpeechToText, STTResult, SpeakerType, SPEAKER_ROUTES
+    _AUDIO_AVAILABLE = True
+except ImportError:
+    _AUDIO_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +130,12 @@ class ParsedCommand:
     is_ambiguous   : bool          = False
     ambiguity_reason: str          = ""
     clarification_needed: list[str]= field(default_factory=list)
+
+    # ── Speaker routing (from SpeechToText) ─────────────────────────────
+    speaker_type    : str          = "unknown"
+    page_route      : dict         = field(default_factory=dict)
+    audio_duration_s: float        = 0.0
+    speech_ratio    : float        = 0.0
 
     # ── Meta ──────────────────────────────────────────────────────────────
     language_detected: str         = "ar-EG"
@@ -325,10 +339,35 @@ _INTENT_PATTERNS: list[tuple[re.Pattern, Intent, float]] = [
 #   "من يومين"              → 2
 #   "منذ أسبوعين"           → 14
 
+# FIX v3.1: Pre-sort dialect map once at module load — O(n log n) once
+# instead of O(n log n) on every single parse() call.
+# Longest phrases must be replaced before their substrings to avoid partial hits.
+_SORTED_DIALECT_MAP: list[tuple[str, str]] = sorted(
+    _DIALECT_MAP.items(), key=lambda x: -len(x[0])
+)
+
+# FIX v3.1: Arabic word numerals — Whisper STT and patients often say
+# "بقالي تلات أيام" not "بقالي 3 أيام".  We capture both digit and word forms.
+_ARABIC_NUM_MAP: dict[str, int] = {
+    "واحد": 1,  "يوم واحد": 1,
+    "يومين": 2,
+    "تلاتة": 3,  "تلات": 3,   "ثلاثة": 3,  "ثلاث": 3,
+    "اربعة": 4,  "اربع": 4,   "أربعة": 4,  "أربع": 4,
+    "خمسة": 5,   "خمس": 5,
+    "ستة": 6,    "ست": 6,
+    "سبعة": 7,   "سبع": 7,
+    "تمانية": 8, "تمن": 8,    "ثمانية": 8,
+    "تسعة": 9,   "تسع": 9,
+    "عشرة": 10,  "عشر": 10,
+}
+
 _DURATION_PATTERN = re.compile(
     r"(?:بقال[يهاة]\s+|من\s+|منذ\s+)"        # anchor: بقالي / من / منذ
     r"(?:"
-        r"(?P<num>\d+)\s*(?P<unit>يوم|أيام|أسبوع|أسابيع|شهر|شهور)"
+        # digit OR Arabic word numeral + unit
+        r"(?P<num>\d+|واحد|يوم واحد|تلاتة|تلات|ثلاثة|ثلاث|اربعة|اربع|أربعة|أربع"
+        r"|خمسة|خمس|ستة|ست|سبعة|سبع|تمانية|تمن|ثمانية|تسعة|تسع|عشرة|عشر)"
+        r"\s*(?P<unit>يوم|أيام|أسبوع|أسابيع|شهر|شهور)"
         r"|(?P<word>يومين|أسبوعين|شهرين)"
     r")",
     re.UNICODE,
@@ -407,6 +446,8 @@ class CommandParser:
         confidence_scorer : ConfidenceScorer  | None = None,
         ambiguity_handler : AmbiguityHandler  | None = None,
         sentiment_analyzer: SentimentAnalyzer | None = None,
+        audio_processor   : Any | None = None,
+        stt_engine        : Any | None = None,
         min_confidence    : float = 0.35,
     ) -> None:
         self._confidence  = confidence_scorer  or ConfidenceScorer()
@@ -414,9 +455,16 @@ class CommandParser:
         self._sentiment   = sentiment_analyzer or SentimentAnalyzer()
         self._min_conf    = min_confidence
 
+        if _AUDIO_AVAILABLE:
+            self._audio = audio_processor or AudioProcessor()
+            self._stt   = stt_engine      or SpeechToText()
+        else:
+            self._audio = None
+            self._stt   = None
+
         logger.info(
-            "CommandParser initialised (min_confidence=%.2f, offline=True)",
-            min_confidence,
+            "CommandParser ready | audio=%s min_confidence=%.2f",
+            "enabled" if _AUDIO_AVAILABLE else "disabled", min_confidence,
         )
 
     # ── Public API ───────────────────────────────────────────────────────
@@ -497,6 +545,87 @@ class CommandParser:
             parse_time_ms       = elapsed_ms,
         )
 
+    def parse_audio(
+        self,
+        audio_bytes    : bytes,
+        mime_type      : str                   = "audio/wav",
+        sample_rate    : int                   = 16_000,
+        patient_context: dict[str, Any] | None = None,
+    ) -> "ParsedCommand":
+        # Full audio pipeline: raw bytes -> ParsedCommand
+        # AudioProcessor -> WhisperSTT -> SpeakerRouter -> CommandParser.parse
+        context = patient_context or {}
+
+        if not _AUDIO_AVAILABLE or self._audio is None or self._stt is None:
+            logger.warning("Audio pipeline unavailable")
+            return self.parse("", context)
+
+        processed = self._audio.preprocess(audio_bytes, mime_type, sample_rate)
+
+        if not processed.should_transcribe:
+            cmd = self.parse("", context)
+            return self._attach_audio_meta(cmd, processed, None)
+
+        texts    = []
+        last_stt = None
+        for chunk in processed.chunks:
+            chunk_bytes = (chunk * 32767).astype("int16").tobytes()
+            stt_result  = self._stt.transcribe_and_route(
+                chunk_bytes, "audio/pcm", context, processed.sample_rate
+            )
+            if stt_result.text.strip():
+                texts.append(stt_result.text.strip())
+            last_stt = stt_result
+
+        combined = " ".join(texts).strip()
+        if last_stt and not context.get("speaker_type"):
+            context = {**context, "speaker_type": last_stt.speaker_type.value}
+
+        cmd = self.parse(combined, context)
+        return self._attach_audio_meta(cmd, processed, last_stt)
+
+    async def parse_audio_async(
+        self,
+        audio_bytes    : bytes,
+        mime_type      : str                   = "audio/wav",
+        sample_rate    : int                   = 16_000,
+        patient_context: dict[str, Any] | None = None,
+    ) -> "ParsedCommand":
+        # Non-blocking async version of parse_audio() for FastAPI
+        if not _AUDIO_AVAILABLE:
+            return self.parse("", patient_context or {})
+
+        import asyncio
+        context  = patient_context or {}
+        processed = await preprocess_async(audio_bytes, mime_type, sample_rate)
+
+        if not processed.should_transcribe:
+            cmd = self.parse("", context)
+            return self._attach_audio_meta(cmd, processed, None)
+
+        loop     = asyncio.get_running_loop()
+        texts    = []
+        last_stt = None
+
+        for chunk in processed.chunks:
+            cb = (chunk * 32767).astype("int16").tobytes()
+            stt_result = await loop.run_in_executor(
+                None,
+                lambda b=cb: self._stt.transcribe_and_route(
+                    b, "audio/pcm", context, processed.sample_rate
+                ),
+            )
+            if stt_result.text.strip():
+                texts.append(stt_result.text.strip())
+            last_stt = stt_result
+
+        combined = " ".join(texts).strip()
+        if last_stt and not context.get("speaker_type"):
+            context = {**context, "speaker_type": last_stt.speaker_type.value}
+
+        cmd = self.parse(combined, context)
+        return self._attach_audio_meta(cmd, processed, last_stt)
+
     def batch_parse(
         self,
         texts   : list[str],
@@ -507,6 +636,21 @@ class CommandParser:
         return [self.parse(t, c) for t, c in zip(texts, ctxs)]
 
     # ── Private helpers ──────────────────────────────────────────────────
+
+    @staticmethod
+    def _attach_audio_meta(
+        cmd      : "ParsedCommand",
+        processed: Any,
+        stt      : Any | None,
+    ) -> "ParsedCommand":
+        # Attach audio metadata to ParsedCommand (dataclass not frozen)
+        if processed is not None:
+            cmd.audio_duration_s = processed.original_duration_s
+            cmd.speech_ratio     = processed.speech_ratio
+        if stt is not None:
+            cmd.speaker_type = stt.speaker_type.value
+            cmd.page_route   = stt.route
+        return cmd
 
     def _normalise(self, text: str) -> str:
         """
@@ -519,7 +663,8 @@ class CommandParser:
         text = re.sub(r"[\u064B-\u065F\u0670]", "", text)
 
         # Apply dialect map (longest match first to avoid partial replacements)
-        for colloquial, standard in sorted(_DIALECT_MAP.items(), key=lambda x: -len(x[0])):
+        # FIX v3.1: use pre-sorted list — no sort on every call
+        for colloquial, standard in _SORTED_DIALECT_MAP:
             text = text.replace(colloquial, standard)
 
         # Collapse multiple spaces
@@ -603,29 +748,44 @@ class CommandParser:
 
         def _is_negated(term: str) -> bool:
             """
-            Return True if `term` is preceded by a negation marker within
-            the left-context window of _NEGATION_WINDOW tokens.
+            FIX v3.1 — Double-mention bug fixed.
 
-            Also catches Arabic circumfix negation ما…ش by checking if the
-            token immediately before the term ends with 'ش'.
+            Old logic: return True at first negated occurrence → wrong for:
+              "أنا مكنتش بكح.. بس دلوقتي بكح دم"
+              (first "بكح" negated → old code says no cough at all)
+
+            New logic: scan ALL occurrences.  Return True ONLY if EVERY
+            occurrence is negated.  One confirmed (un-negated) mention
+            means the symptom is present.
+
+            This matches clinical reality:
+              • 2 negated + 1 confirmed  → symptom IS present
+              • 3 negated + 0 confirmed  → symptom is absent
             """
-            # Find position of term in token list (search all occurrences)
             term_tokens = term.split()
             term_len    = len(term_tokens)
+            found_any   = False   # did we find at least one occurrence?
 
-            for i, tok in enumerate(tokens):
-                # Check if tokens[i : i+term_len] match the term
-                if tokens[i : i + term_len] == term_tokens:
-                    window_start = max(0, i - _NEGATION_WINDOW)
-                    left_window  = tokens[window_start : i]
+            for i in range(len(tokens) - term_len + 1):
+                if tokens[i : i + term_len] != term_tokens:
+                    continue
 
-                    for w in left_window:
-                        if w in _NEGATION_PREFIXES:
-                            return True
-                        # ما…ش circumfix: token ending in 'ش' and starting 'ما'
-                        if w.startswith("ما") and w.endswith("ش"):
-                            return True
-            return False
+                found_any    = True
+                left_window  = tokens[max(0, i - _NEGATION_WINDOW) : i]
+
+                this_negated = any(
+                    w in _NEGATION_PREFIXES
+                    or (w.startswith("ما") and w.endswith("ش"))
+                    for w in left_window
+                )
+
+                if not this_negated:
+                    return False   # confirmed positive — NOT negated overall
+
+            # If we never found the term, treat as absent (not negated per se,
+            # but the caller checks `if raw_term in text` first so this path
+            # is only reached when the term IS in text.
+            return found_any   # all occurrences were negated
 
         # ── Check standalone symptom terms ────────────────────────────────
         for raw_term, canonical in symptom_terms.items():
@@ -671,8 +831,13 @@ class CommandParser:
             return None
         if m.group("word"):
             return _DURATION_WORD_MAP.get(m.group("word"))
-        num  = int(m.group("num"))
-        unit = m.group("unit")
+        raw_num = m.group("num")
+        unit    = m.group("unit")
+        # FIX v3.1: convert Arabic word numeral → int if not a digit string
+        if raw_num.isdigit():
+            num = int(raw_num)
+        else:
+            num = _ARABIC_NUM_MAP.get(raw_num, 1)
         return num * _DURATION_UNIT_MAP.get(unit, 1)
 
     def _detect_urgency(self, text: str, intent: Intent) -> UrgencyLevel:
@@ -712,19 +877,38 @@ class CommandParser:
 _default_parser: CommandParser | None = None
 
 
+def _get_parser() -> CommandParser:
+    global _default_parser
+    if _default_parser is None:
+        _default_parser = CommandParser()
+    return _default_parser
+
+
 def parse_command(
     text   : str,
     context: dict[str, Any] | None = None,
 ) -> ParsedCommand:
-    """
-    Module-level shortcut — uses a cached default CommandParser instance.
+    """Module-level shortcut — text -> ParsedCommand."""
+    return _get_parser().parse(text, context)
 
-    Suitable for single-call usage without managing parser lifecycle.
 
-    >>> from ai_core.voice.dialect_model.command_parser import parse_command
-    >>> cmd = parse_command("عندي ألم في صدري من امبارح")
-    """
-    global _default_parser
-    if _default_parser is None:
-        _default_parser = CommandParser()
-    return _default_parser.parse(text, context)
+def parse_voice(
+    audio_bytes    : bytes,
+    mime_type      : str                   = "audio/wav",
+    sample_rate    : int                   = 16_000,
+    patient_context: dict[str, Any] | None = None,
+) -> ParsedCommand:
+    """Module-level shortcut — raw audio -> ParsedCommand (full pipeline)."""
+    return _get_parser().parse_audio(audio_bytes, mime_type, sample_rate, patient_context)
+
+
+async def parse_voice_async(
+    audio_bytes    : bytes,
+    mime_type      : str                   = "audio/wav",
+    sample_rate    : int                   = 16_000,
+    patient_context: dict[str, Any] | None = None,
+) -> ParsedCommand:
+    """Non-blocking async shortcut for FastAPI — raw audio -> ParsedCommand."""
+    return await _get_parser().parse_audio_async(
+        audio_bytes, mime_type, sample_rate, patient_context
+    )
