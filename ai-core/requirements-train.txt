@@ -1,1 +1,54 @@
+# ============================================================
+# RIVA Health Platform — Training Requirements
+# ai-core/requirements-train.txt
+# ============================================================
+# بيئة التدريب المحلية / Google Colab — تشمل torch
+# لا تُستخدم في النشر على Vercel
+#
+# التثبيت:
+#   uv pip install -r requirements-train.txt
+#   أو:
+#   pip install -r requirements-train.txt
+# ============================================================
 
+# ── يشمل كل مكتبات الـ Production أولاً ──────────────────────
+-r requirements-prod.txt
+
+# ── PyTorch (Training + ONNX Export) ─────────────────────────
+# ~700MB — لا تُضاف لـ requirements-prod.txt أبداً
+torch==2.2.2
+torchvision==0.17.2          # مطلوب لبعض pipelines
+
+# ── ONNX Export + Quantisation ───────────────────────────────
+onnxruntime-tools==1.7.0
+onnxmltools==1.12.0
+
+# ── Model training ───────────────────────────────────────────
+optuna==3.6.1                # hyperparameter tuning
+mlflow==2.13.0               # experiment tracking
+
+# ── Data analysis ────────────────────────────────────────────
+matplotlib==3.9.0
+seaborn==0.13.2
+jupyter==1.0.0
+ipykernel==6.29.4
+
+# ── Arabic NLP ───────────────────────────────────────────────
+pyarabic==0.6.15             # Arabic text processing
+camel-tools==1.5.2           # Egyptian dialect NLP
+
+# ── Medical datasets ─────────────────────────────────────────
+pydicom==2.4.4               # DICOM medical images
+python-fhir==0.0.5           # FHIR dataset utilities
+
+# ── Code quality (CI) ────────────────────────────────────────
+bandit==1.7.9                # security linting
+pylint==3.2.3
+black==24.4.2
+isort==5.13.2
+
+# ── Testing ──────────────────────────────────────────────────
+pytest==8.2.2
+pytest-asyncio==0.23.7
+pytest-cov==5.0.0
+httpx==0.27.0                # test client for FastAPI
