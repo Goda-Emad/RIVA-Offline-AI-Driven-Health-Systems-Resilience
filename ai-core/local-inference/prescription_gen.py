@@ -49,6 +49,23 @@ def _anonymize(patient_id: str) -> str:
 
 # ─── Default interactions ─────────────────────────────────────────────────────
 
+# ─── Interaction alternatives (مراجعة طبية — RIVA Team) ─────────────────────
+# لكل تعارض خطير، بديل آمن موصى به طبياً
+# يظهر في warnings بجانب التحذير ليساعد الدكتور مباشرة
+
+_INTERACTION_ALTERNATIVES: dict[str, str] = {
+    "warfarin+aspirin":       "استخدم clopidogrel بجرعة أقل بإشراف طبي",
+    "warfarin+ibuprofen":     "استبدل ibuprofen بـ paracetamol بجرعة 500mg",
+    "warfarin+paracetamol":   "قلل جرعة paracetamol لأقل من 2g/يوم وراقب INR",
+    "ibuprofen+captopril":    "استبدل ibuprofen بـ paracetamol لمرضى الضغط",
+    "digoxin+amiodarone":     "قلل جرعة digoxin 50% وراقب مستواه في الدم",
+    "simvastatin+amlodipine": "حول simvastatin لـ rosuvastatin 10mg",
+    "ciprofloxacin+warfarin": "استخدم amoxicillin بديلاً وراقب INR يومياً",
+    "metformin+contrast":     "أوقف metformin 48 ساعة قبل الصبغة وبعدها",
+    "insulin+alcohol":        "تجنب الكحول كلياً مع الإنسولين — هبوط سكر مفاجئ",
+}
+
+
 _DEFAULT_RISKY_PAIRS = [
     ["warfarin",    "aspirin"],
     ["warfarin",    "ibuprofen"],
@@ -196,6 +213,9 @@ class PrescriptionGenerator:
         if warnings:
             log.warning("[PrescriptionGen] WARNINGS: %s", warnings)
 
+        # Store in audit trail for pattern analysis (17_sustainability.html)
+        _store_audit(rx)
+
         return rx
 
     # ── Interaction check (smart) ─────────────────────────────────────────────
@@ -266,7 +286,10 @@ class PrescriptionGenerator:
         for pair in self.risky_pairs:
             a, b = pair[0].lower(), pair[1].lower()
             if a in names and b in names:
+                alt = _INTERACTION_ALTERNATIVES.get(f"{a}+{b}") or                       _INTERACTION_ALTERNATIVES.get(f"{b}+{a}", "")
                 msg = f"تعارض دوائي: {a} + {b}"
+                if alt:
+                    msg += f" | البديل: {alt}"
                 if msg not in warnings:
                     warnings.append(msg)
         return warnings
@@ -480,6 +503,33 @@ class PrescriptionGenerator:
             rx["valid_until"]
         ).date()
 
+    def is_unfilled_alert(self, rx: dict) -> bool:
+        """
+        Returns True if the prescription was issued 48+ hours ago
+        and status is still "active" (not dispensed).
+
+        Triggers a patient reminder in 04_result.html and background-sync.js:
+            if (rx.is_unfilled_alert) {
+                sendReminder(rx.patient_id_hash, "روشتتك لسه ما اتصرفتش — روح الصيدلية!")
+            }
+        """
+        if rx.get("status") in ("dispensed", "expired", "cancelled"):
+            return False
+        try:
+            issued = datetime.fromisoformat(rx["issued_at"])
+            hours_passed = (datetime.now(timezone.utc) - issued).total_seconds() / 3600
+            return hours_passed >= 48
+        except Exception:
+            return False
+
+    def mark_dispensed(self, rx: dict) -> dict:
+        """Marks prescription as dispensed — called by pharmacy QR scan."""
+        rx["status"]       = "dispensed"
+        rx["dispensed_at"] = datetime.now(timezone.utc).isoformat()
+        rx["hash"]         = self._rx_hash(rx)
+        log.info("[PrescriptionGen] RX=%s marked dispensed", rx.get("rx_id"))
+        return rx
+
     def get_status(self, rx: dict) -> dict:
         return {
             "rx_id":    rx["rx_id"],
@@ -489,6 +539,98 @@ class PrescriptionGenerator:
             "status":   "expired" if self.is_expired(rx) else rx.get("status", "active"),
             "meds_ar":  rx.get("medications_ar", []),
         }
+
+
+# ─── Audit trail ─────────────────────────────────────────────────────────────
+
+def _store_audit(rx: dict) -> None:
+    """
+    Stores prescription hash in SQLite for Prescription Pattern Analysis.
+    Used in 17_sustainability.html to show prescribing trends.
+
+    Table: prescription_audit
+        rx_id, patient_hash, doctor_id, diagnosis, med_count,
+        warning_count, issued_at, hash, status
+    """
+    try:
+        import sqlite3
+        db_path = _BASE / "data/databases/prescriptions_audit.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        con = sqlite3.connect(str(db_path))
+        cur = con.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS prescription_audit (
+                rx_id         TEXT PRIMARY KEY,
+                patient_hash  TEXT,
+                doctor_id     TEXT,
+                diagnosis     TEXT,
+                med_count     INTEGER,
+                warning_count INTEGER,
+                issued_at     TEXT,
+                hash          TEXT,
+                status        TEXT
+            )
+        """)
+        cur.execute("""
+            INSERT OR REPLACE INTO prescription_audit VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            rx["rx_id"],
+            rx["patient_id_hash"],
+            rx["doctor_id"],
+            rx["diagnosis"],
+            len(rx.get("medications", [])),
+            len(rx.get("warnings", [])),
+            rx["issued_at"],
+            rx["hash"],
+            rx.get("status", "active"),
+        ))
+        con.commit()
+        con.close()
+        log.info("[PrescriptionGen] audit stored: %s", rx["rx_id"])
+    except Exception as e:
+        log.warning("[PrescriptionGen] audit store failed: %s", e)
+
+
+def get_prescription_analytics() -> dict:
+    """
+    Returns prescribing pattern analytics for 17_sustainability.html.
+    Shows most prescribed drugs, warning frequency, and doctor patterns.
+    """
+    try:
+        import sqlite3
+        db_path = _BASE / "data/databases/prescriptions_audit.db"
+        if not db_path.exists():
+            return {"total": 0, "message": "لا يوجد بيانات بعد"}
+
+        con = sqlite3.connect(str(db_path))
+        cur = con.cursor()
+
+        total         = cur.execute("SELECT COUNT(*) FROM prescription_audit").fetchone()[0]
+        with_warnings = cur.execute(
+            "SELECT COUNT(*) FROM prescription_audit WHERE warning_count > 0"
+        ).fetchone()[0]
+        top_diagnoses = cur.execute(
+            "SELECT diagnosis, COUNT(*) as n FROM prescription_audit "
+            "GROUP BY diagnosis ORDER BY n DESC LIMIT 5"
+        ).fetchall()
+        dispensed = cur.execute(
+            "SELECT COUNT(*) FROM prescription_audit WHERE status='dispensed'"
+        ).fetchone()[0]
+
+        con.close()
+
+        return {
+            "total_prescriptions":   total,
+            "with_warnings":         with_warnings,
+            "warning_rate_pct":      round(with_warnings / max(total, 1) * 100, 1),
+            "dispensed":             dispensed,
+            "dispensed_rate_pct":    round(dispensed / max(total, 1) * 100, 1),
+            "top_diagnoses":         [{"diagnosis": r[0], "count": r[1]} for r in top_diagnoses],
+        }
+    except Exception as e:
+        log.warning("[PrescriptionGen] analytics failed: %s", e)
+        return {"error": str(e)}
 
 
 # ─── Singleton ────────────────────────────────────────────────────────────────
@@ -552,3 +694,20 @@ def check_ai_drug(
 ) -> dict:
     """Hallucination guard — verifies any AI-suggested drug is safe."""
     return generator.verify_ai_suggestion(drug, current_meds, clinical_profile)
+
+
+def is_unfilled_alert(rx: dict) -> bool:
+    """Returns True if prescription unfilled after 48 hours."""
+    return generator.is_unfilled_alert(rx)
+
+
+def mark_dispensed(rx: dict) -> dict:
+    """Marks prescription as dispensed by pharmacy."""
+    dispensed = generator.mark_dispensed(rx)
+    _store_audit(dispensed)   # update audit record
+    return dispensed
+
+
+def get_analytics() -> dict:
+    """Prescription pattern analytics for 17_sustainability.html."""
+    return get_prescription_analytics()
