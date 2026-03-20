@@ -1,0 +1,508 @@
+{
+  "source": "RIVA Drug Interaction Database",
+  "version": "1.0",
+  "last_updated": "2026-03",
+  "total_interactions": 50,
+  "conflicts": [
+    {
+      "id": "INT001",
+      "drug_a": "warfarin",
+      "drug_b": "aspirin",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "خطر نزيف داخلي شديد",
+      "mechanism": "كلاهما يمنع تخثر الدم",
+      "recommendation_ar": "تجنب الجمع فوراً"
+    },
+    {
+      "id": "INT002",
+      "drug_a": "warfarin",
+      "drug_b": "ibuprofen",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "زيادة خطر النزيف",
+      "mechanism": "إيبوبروفين يزيد مفعول وارفارين",
+      "recommendation_ar": "استخدم باراسيتامول بدلاً منه"
+    },
+    {
+      "id": "INT003",
+      "drug_a": "warfarin",
+      "drug_b": "paracetamol",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "تعزيز مفعول وارفارين",
+      "mechanism": "باراسيتامول يزيد مستوى وارفارين",
+      "recommendation_ar": "راقب مؤشرات التخثر"
+    },
+    {
+      "id": "INT004",
+      "drug_a": "metformin",
+      "drug_b": "alcohol",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "خطر الحماض اللاكتيكي",
+      "mechanism": "الكحول يزيد إنتاج اللاكتات",
+      "recommendation_ar": "امتنع عن الكحول أثناء العلاج"
+    },
+    {
+      "id": "INT005",
+      "drug_a": "digoxin",
+      "drug_b": "amiodarone",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "سمية قلبية خطيرة",
+      "mechanism": "أميودارون يرفع مستوى ديجوكسين",
+      "recommendation_ar": "قلل جرعة الديجوكسين 50%"
+    },
+    {
+      "id": "INT006",
+      "drug_a": "simvastatin",
+      "drug_b": "amlodipine",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "تلف عضلي رابدوميوليسيس",
+      "mechanism": "أملوديبين يرفع مستوى سيمفاستاتين",
+      "recommendation_ar": "لا تتجاوز 20mg سيمفاستاتين"
+    },
+    {
+      "id": "INT007",
+      "drug_a": "ssri",
+      "drug_b": "tramadol",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "متلازمة السيروتونين",
+      "mechanism": "زيادة مفرطة في السيروتونين",
+      "recommendation_ar": "تجنب الجمع تماماً"
+    },
+    {
+      "id": "INT008",
+      "drug_a": "methotrexate",
+      "drug_b": "nsaids",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "سمية كلوية وكبدية",
+      "mechanism": "NSAIDs تقلل إفراز ميثوتريكسات",
+      "recommendation_ar": "تجنب الجمع تماماً"
+    },
+    {
+      "id": "INT009",
+      "drug_a": "warfarin",
+      "drug_b": "rifampicin",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "تقليل مفعول وارفارين بشكل حاد",
+      "mechanism": "ريفامبيسين يسرع استقلاب وارفارين",
+      "recommendation_ar": "راقب مؤشرات التخثر يومياً"
+    },
+    {
+      "id": "INT010",
+      "drug_a": "lithium",
+      "drug_b": "nsaids",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "ارتفاع مستوى الليثيوم - سمية",
+      "mechanism": "NSAIDs تقلل إفراز الليثيوم",
+      "recommendation_ar": "تجنب الجمع - راقب مستوى الليثيوم"
+    },
+    {
+      "id": "INT011",
+      "drug_a": "clozapine",
+      "drug_b": "ciprofloxacin",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "ارتفاع مستوى كلوزابين - تشنجات",
+      "mechanism": "سيبروفلوكساسين يثبط استقلاب كلوزابين",
+      "recommendation_ar": "تجنب الجمع - استخدم مضاداً حيوياً بديلاً"
+    },
+    {
+      "id": "INT012",
+      "drug_a": "carbamazepine",
+      "drug_b": "erythromycin",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "ارتفاع مستوى كارباميزيبين",
+      "mechanism": "إريثروميسين يثبط استقلاب كارباميزيبين",
+      "recommendation_ar": "راقب مستوى الدواء في الدم"
+    },
+    {
+      "id": "INT013",
+      "drug_a": "phenytoin",
+      "drug_b": "fluconazole",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "ارتفاع مستوى فينيتوين - سمية",
+      "mechanism": "فلوكونازول يثبط استقلاب فينيتوين",
+      "recommendation_ar": "راقب مستوى فينيتوين في الدم"
+    },
+    {
+      "id": "INT014",
+      "drug_a": "amiodarone",
+      "drug_b": "simvastatin",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "تلف عضلي شديد",
+      "mechanism": "أميودارون يرفع مستوى الستاتين",
+      "recommendation_ar": "لا تتجاوز 20mg سيمفاستاتين"
+    },
+    {
+      "id": "INT015",
+      "drug_a": "maoi",
+      "drug_b": "ssri",
+      "severity": "high",
+      "severity_score": 3,
+      "effect_ar": "أزمة ضغط دم حادة",
+      "mechanism": "تراكم السيروتونين والنورإيبينفرين",
+      "recommendation_ar": "فارق أسبوعين بين الدواءين"
+    },
+    {
+      "id": "INT016",
+      "drug_a": "aspirin",
+      "drug_b": "ibuprofen",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "قرحة معدة",
+      "mechanism": "تنافس على نفس المستقبل COX",
+      "recommendation_ar": "استخدم واحداً فقط مع واقي معدة"
+    },
+    {
+      "id": "INT017",
+      "drug_a": "aspirin",
+      "drug_b": "diclofenac",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "قرحة معدة وزيادة النزيف",
+      "mechanism": "تأثير مزدوج على الصفائح الدموية",
+      "recommendation_ar": "تجنب الجمع - استخدم واحداً فقط"
+    },
+    {
+      "id": "INT018",
+      "drug_a": "metformin",
+      "drug_b": "glibenclamide",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "هبوط سكر الدم المفاجئ",
+      "mechanism": "تأثير مضاعف لخفض السكر",
+      "recommendation_ar": "راقب مستوى السكر بانتظام"
+    },
+    {
+      "id": "INT019",
+      "drug_a": "captopril",
+      "drug_b": "potassium",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "ارتفاع البوتاسيوم في الدم",
+      "mechanism": "كابتوبريل يحتجز البوتاسيوم",
+      "recommendation_ar": "راقب مستوى البوتاسيوم"
+    },
+    {
+      "id": "INT020",
+      "drug_a": "amoxicillin",
+      "drug_b": "warfarin",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "تعزيز مضاد التخثر",
+      "mechanism": "أموكسيسيلين يقلل فيتامين K",
+      "recommendation_ar": "راقب مؤشرات التخثر"
+    },
+    {
+      "id": "INT021",
+      "drug_a": "ciprofloxacin",
+      "drug_b": "antacid",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "تقليل امتصاص المضاد الحيوي 50%",
+      "mechanism": "المعادن تمنع امتصاص سيبروفلوكساسين",
+      "recommendation_ar": "فارق ساعتين بين الدواءين"
+    },
+    {
+      "id": "INT022",
+      "drug_a": "metronidazole",
+      "drug_b": "alcohol",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "غثيان وقيء شديد",
+      "mechanism": "تأثير Disulfiram-like",
+      "recommendation_ar": "امتنع عن الكحول خلال العلاج وبعده بيومين"
+    },
+    {
+      "id": "INT023",
+      "drug_a": "ibuprofen",
+      "drug_b": "captopril",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "تقليل فعالية أدوية الضغط",
+      "mechanism": "إيبوبروفين يقلل تأثير ACE inhibitors",
+      "recommendation_ar": "استخدم باراسيتامول بدلاً منه"
+    },
+    {
+      "id": "INT024",
+      "drug_a": "furosemide",
+      "drug_b": "gentamicin",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "سمية الكلى والأذن",
+      "mechanism": "تأثير مضاعف على الكلى",
+      "recommendation_ar": "راقب وظائف الكلى والسمع"
+    },
+    {
+      "id": "INT025",
+      "drug_a": "atorvastatin",
+      "drug_b": "clarithromycin",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "زيادة مستوى الستاتين",
+      "mechanism": "كلاريثروميسين يثبط CYP3A4",
+      "recommendation_ar": "قلل جرعة الستاتين مؤقتاً"
+    },
+    {
+      "id": "INT026",
+      "drug_a": "amlodipine",
+      "drug_b": "clarithromycin",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "انخفاض ضغط الدم",
+      "mechanism": "كلاريثروميسين يرفع مستوى أملوديبين",
+      "recommendation_ar": "راقب ضغط الدم بانتظام"
+    },
+    {
+      "id": "INT027",
+      "drug_a": "metformin",
+      "drug_b": "contrast_dye",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "خطر الحماض اللاكتيكي",
+      "mechanism": "صبغة التباين تضر وظائف الكلى",
+      "recommendation_ar": "أوقف ميتفورمين 48 ساعة قبل وبعد"
+    },
+    {
+      "id": "INT028",
+      "drug_a": "spironolactone",
+      "drug_b": "potassium",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "فرط بوتاسيوم الدم",
+      "mechanism": "سبيرونولاكتون يحتجز البوتاسيوم",
+      "recommendation_ar": "تجنب مكملات البوتاسيوم"
+    },
+    {
+      "id": "INT029",
+      "drug_a": "fluconazole",
+      "drug_b": "warfarin",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "تعزيز مفعول وارفارين",
+      "mechanism": "فلوكونازول يثبط استقلاب وارفارين",
+      "recommendation_ar": "راقب مؤشرات التخثر"
+    },
+    {
+      "id": "INT030",
+      "drug_a": "omeprazole",
+      "drug_b": "clopidogrel",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "تقليل فعالية كلوبيدوجريل",
+      "mechanism": "أوميبرازول يثبط CYP2C19",
+      "recommendation_ar": "استخدم بانتوبرازول بدلاً منه"
+    },
+    {
+      "id": "INT031",
+      "drug_a": "digoxin",
+      "drug_b": "furosemide",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "نقص البوتاسيوم يزيد سمية الديجوكسين",
+      "mechanism": "فيوروسيميد يسبب نقص البوتاسيوم",
+      "recommendation_ar": "راقب مستوى البوتاسيوم والديجوكسين"
+    },
+    {
+      "id": "INT032",
+      "drug_a": "theophylline",
+      "drug_b": "ciprofloxacin",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "ارتفاع مستوى الثيوفيلين",
+      "mechanism": "سيبروفلوكساسين يثبط استقلاب الثيوفيلين",
+      "recommendation_ar": "راقب مستوى الثيوفيلين في الدم"
+    },
+    {
+      "id": "INT033",
+      "drug_a": "carbamazepine",
+      "drug_b": "oral_contraceptive",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "تقليل فاعلية موانع الحمل",
+      "mechanism": "كارباميزيبين يسرع استقلاب الهرمونات",
+      "recommendation_ar": "استخدم وسيلة منع حمل إضافية"
+    },
+    {
+      "id": "INT034",
+      "drug_a": "azithromycin",
+      "drug_b": "antacid",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "تقليل امتصاص الأزيثروميسين",
+      "mechanism": "المعادن تمنع امتصاص الأزيثروميسين",
+      "recommendation_ar": "فارق ساعتين بين الدواءين"
+    },
+    {
+      "id": "INT035",
+      "drug_a": "metformin",
+      "drug_b": "ibuprofen",
+      "severity": "medium",
+      "severity_score": 2,
+      "effect_ar": "مراقبة وظائف الكلى",
+      "mechanism": "إيبوبروفين يقلل تدفق الدم للكلى",
+      "recommendation_ar": "راقب وظائف الكلى عند الاستخدام المطول"
+    },
+    {
+      "id": "INT036",
+      "drug_a": "calcium",
+      "drug_b": "iron",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص الحديد",
+      "mechanism": "الكالسيوم يتنافس مع الحديد",
+      "recommendation_ar": "فارق ساعتين بين الدواءين"
+    },
+    {
+      "id": "INT037",
+      "drug_a": "levothyroxine",
+      "drug_b": "calcium",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص هرمون الغدة",
+      "mechanism": "الكالسيوم يمنع امتصاص ليفوثيروكسين",
+      "recommendation_ar": "خذ ليفوثيروكسين على معدة فارغة"
+    },
+    {
+      "id": "INT038",
+      "drug_a": "iron",
+      "drug_b": "antacid",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص الحديد",
+      "mechanism": "القلوية تمنع امتصاص الحديد",
+      "recommendation_ar": "فارق ساعتين بين الدواءين"
+    },
+    {
+      "id": "INT039",
+      "drug_a": "simvastatin",
+      "drug_b": "omeprazole",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "زيادة طفيفة في مستوى الستاتين",
+      "mechanism": "أوميبرازول يثبط CYP2C19 جزئياً",
+      "recommendation_ar": "راقب أي آلام عضلية"
+    },
+    {
+      "id": "INT040",
+      "drug_a": "tetracycline",
+      "drug_b": "milk",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص المضاد الحيوي",
+      "mechanism": "الكالسيوم في الحليب يمنع الامتصاص",
+      "recommendation_ar": "تجنب الحليب ساعة قبل وبعد"
+    },
+    {
+      "id": "INT041",
+      "drug_a": "bisphosphonate",
+      "drug_b": "calcium",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص الدواء",
+      "mechanism": "الكالسيوم يمنع امتصاص البيسفوسفونات",
+      "recommendation_ar": "خذه على معدة فارغة بماء فقط"
+    },
+    {
+      "id": "INT042",
+      "drug_a": "metformin",
+      "drug_b": "vitamin_b12",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص فيتامين ب12",
+      "mechanism": "ميتفورمين يقلل امتصاص ب12 من الأمعاء",
+      "recommendation_ar": "راقب مستوى ب12 سنوياً"
+    },
+    {
+      "id": "INT043",
+      "drug_a": "warfarin",
+      "drug_b": "vitamin_k",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل مفعول وارفارين",
+      "mechanism": "فيتامين K يعاكس مفعول وارفارين",
+      "recommendation_ar": "ثبّت كمية الخضروات الورقية في طعامك"
+    },
+    {
+      "id": "INT044",
+      "drug_a": "iron",
+      "drug_b": "vitamin_c",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "زيادة امتصاص الحديد مفيدة",
+      "mechanism": "فيتامين C يحول الحديد للشكل الأسهل امتصاصاً",
+      "recommendation_ar": "يمكن دمجهما للاستفادة"
+    },
+    {
+      "id": "INT045",
+      "drug_a": "omeprazole",
+      "drug_b": "magnesium",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص المغنيسيوم",
+      "mechanism": "أوميبرازول يقلل امتصاص المغنيسيوم",
+      "recommendation_ar": "راقب مستوى المغنيسيوم عند الاستخدام الطويل"
+    },
+    {
+      "id": "INT046",
+      "drug_a": "furosemide",
+      "drug_b": "vitamin_b1",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "نقص الثيامين",
+      "mechanism": "فيوروسيميد يزيد إفراز الثيامين",
+      "recommendation_ar": "تناول مكمل ثيامين عند الاستخدام الطويل"
+    },
+    {
+      "id": "INT047",
+      "drug_a": "methotrexate",
+      "drug_b": "folic_acid",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "فولات يقلل سمية الميثوتريكسات",
+      "mechanism": "حمض الفوليك يحمي الخلايا السليمة",
+      "recommendation_ar": "خذ حمض الفوليك يومياً مع ميثوتريكسات"
+    },
+    {
+      "id": "INT048",
+      "drug_a": "iron",
+      "drug_b": "green_tea",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تقليل امتصاص الحديد",
+      "mechanism": "التانينات في الشاي تمنع امتصاص الحديد",
+      "recommendation_ar": "فارق ساعة بين الشاي والحديد"
+    },
+    {
+      "id": "INT049",
+      "drug_a": "aspirin",
+      "drug_b": "vitamin_c",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "زيادة امتصاص الأسبرين",
+      "mechanism": "فيتامين C يزيد امتصاص الأسبرين",
+      "recommendation_ar": "لا يوجد خطر - مجرد ملاحظة"
+    },
+    {
+      "id": "INT050",
+      "drug_a": "calcium",
+      "drug_b": "vitamin_d",
+      "severity": "low",
+      "severity_score": 1,
+      "effect_ar": "تعزيز امتصاص الكالسيوم مفيد",
+      "mechanism": "فيتامين D يزيد امتصاص الكالسيوم",
+      "recommendation_ar": "يمكن دمجهما للاستفادة القصوى"
+    }
+  ]
+}

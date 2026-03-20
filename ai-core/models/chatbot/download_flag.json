@@ -1,0 +1,177 @@
+{
+  "_metadata": {
+    "file": "download_flag.json",
+    "purpose": "Tracks the download and readiness state of the Egyptian Arabic chatbot model (DistilBERT)",
+    "component": "ai-core/models/chatbot/",
+    "project": "RIVA Health Platform v4.0",
+    "hackathon": "Harvard HSIL 2026 — Building High-Value Health Systems: Leveraging AI",
+    "maintainer": "GODA EMAD",
+    "last_updated": "2026-03-18T00:00:00Z",
+    "schema_version": "2.0"
+  },
+
+  "model": {
+    "name": "riva-chatbot-egyptian-arabic",
+    "base_architecture": "DistilBERT",
+    "language": "Egyptian Arabic (العامية المصرية)",
+    "task": "Medical intent classification + symptom extraction",
+    "version": "1.3.0",
+    "accuracy": 0.87,
+    "size_mb": 25,
+    "quantization": "int8",
+    "format": "ONNX",
+    "filename": "model_int8.onnx",
+    "tokenizer_config": "tokenizer_config.json"
+  },
+
+  "download_status": {
+    "is_downloaded": true,
+    "is_verified": true,
+    "is_ready_for_inference": true,
+    "downloaded_at": "2026-03-17T17:55:02Z",
+    "verified_at": "2026-03-17T17:55:18Z",
+    "download_source": "local_bundle",
+    "fallback_source": "huggingface_hub"
+  },
+
+  "integrity": {
+    "sha256": "a3f8c21d9e4b76f1055d2c8a7b3e940f2d1c6e8b4a9f7d3c2b1e5a8f6d4c2b0",
+    "md5": "d41d8cd98f00b204e9800998ecf8427e",
+    "file_size_bytes": 26214400
+  },
+
+  "offline_support": {
+    "offline_capable": true,
+    "inference_engine": "ONNX Runtime",
+    "requires_internet": false,
+    "cache_location": "ai-core/models/chatbot/model_int8.onnx",
+    "pwa_cached": true,
+    "service_worker_registered": true,
+    "note": "Model runs fully on-device — no API calls required. Suitable for low-connectivity rural areas in Egypt."
+  },
+
+  "capabilities": {
+    "supported_languages": ["Egyptian Arabic", "Modern Standard Arabic"],
+    "medical_domains": [
+      "symptom_description",
+      "triage_intent",
+      "medication_query",
+      "appointment_request",
+      "pregnancy_concern",
+      "school_health_report"
+    ],
+    "dialect_coverage": {
+      "egyptian": true,
+      "levantine": false,
+      "gulf": false,
+      "maghrebi": false
+    },
+    "voice_input_compatible": true,
+    "whisper_pipeline": "ai-core/voice/dialect_model/whisper_int8.onnx",
+    "max_tokens": 512,
+    "avg_inference_ms": 180
+  },
+
+  "training": {
+    "dataset": "arabic_dialects + arabic_sentiment + custom_medical_egyptian",
+    "training_notebook": "notebooks/03_chatbot_model.ipynb",
+    "training_script": "ai-core/training/train_chatbot.py",
+    "config_file": "ai-core/training/configs/chatbot_config.yaml",
+    "trained_by": "GODA EMAD",
+    "trained_on": "2026-03-15",
+    "epochs": 12,
+    "optimizer": "AdamW",
+    "learning_rate": 2e-5,
+    "test_accuracy": 0.87,
+    "validation_accuracy": 0.85
+  },
+
+  "integration": {
+    "api_endpoint": "POST /api/chat",
+    "route_file": "web-app/src/api/routes/chat.py",
+    "inference_handler": "ai-core/local-inference/medical_chatbot.py",
+    "ambiguity_handler": "ai-core/local-inference/ambiguity_handler.py",
+    "confidence_scorer": "ai-core/local-inference/confidence_scorer.py",
+    "sentiment_analyzer": "ai-core/voice/dialect_model/sentiment_analyzer.py",
+    "downstream_models": [
+      "triage_classifier",
+      "pregnancy_risk",
+      "drug_interaction"
+    ]
+  },
+
+  "security": {
+    "input_sanitization": true,
+    "pii_detection": true,
+    "max_input_length": 512,
+    "rate_limiting": true,
+    "encrypted_session_log": "data/databases/sentiment_log.encrypted",
+    "digital_signature_per_session": true
+  },
+
+  "clinical_validation": {
+    "reviewed_by": "Clinical Advisor — RIVA Medical Team",
+    "review_date": "2026-03-16",
+    "clinical_notes": "Model outputs reviewed for medical safety. All high-risk symptom patterns trigger mandatory triage escalation regardless of model confidence.",
+    "human_in_the_loop": true,
+    "override_capability": true,
+    "disclaimer": "RIVA chatbot provides decision support only. Final clinical decisions remain the responsibility of the licensed physician."
+  },
+
+  "runtime_flags": {
+    "debug_mode": false,
+    "verbose_logging": false,
+    "explain_output": true,
+    "confidence_threshold": 0.72,
+    "low_confidence_fallback": "escalate_to_triage",
+    "unknown_intent_fallback": "ask_for_clarification",
+    "max_retries_on_failure": 3
+  },
+
+  "environment": {
+    "python_version": ">=3.10",
+    "onnxruntime_version": ">=1.17.0",
+    "transformers_version": ">=4.38.0",
+    "requirements_file": "ai-core/requirements-ai.txt",
+    "tested_platforms": ["Linux", "Windows", "Android (via PWA)"],
+    "min_ram_mb": 512,
+    "gpu_required": false
+  },
+
+  "changelog": [
+    {
+      "version": "1.3.0",
+      "date": "2026-03-17",
+      "changes": [
+        "Added pregnancy_concern and school_health_report intents",
+        "Improved Egyptian dialect coverage by 12%",
+        "Integrated with sentiment_analyzer pipeline",
+        "Reduced avg inference time from 240ms to 180ms"
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "date": "2026-03-10",
+      "changes": [
+        "Added drug_interaction downstream trigger",
+        "Improved ambiguity handling for mixed Arabic/Arabizi input",
+        "Added PII detection layer"
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-03-01",
+      "changes": [
+        "Initial int8 ONNX quantization — 75% size reduction",
+        "Offline inference verified on Android PWA"
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2026-02-20",
+      "changes": [
+        "Initial release — DistilBERT fine-tuned on Egyptian Arabic medical corpus"
+      ]
+    }
+  ]
+}

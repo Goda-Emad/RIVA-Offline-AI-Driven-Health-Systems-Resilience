@@ -1,0 +1,83 @@
+{
+  "model": "XGBoost",
+  "f1_score": 0.8603,
+  "top_risk_factors": [
+    {
+      "feature": "BS",
+      "name": "مستوى السكر في الدم",
+      "importance": 0.3508,
+      "description": "أهم عامل خطر لمخاطر الحمل"
+    },
+    {
+      "feature": "SystolicBP",
+      "name": "الضغط الانقباضي",
+      "importance": 0.1703,
+      "description": "يؤثر بشكل كبير على صحة الأم"
+    },
+    {
+      "feature": "MeanBP",
+      "name": "متوسط الضغط الشرياني",
+      "importance": 0.12,
+      "description": "مؤشر مركب لضغط الدم"
+    },
+    {
+      "feature": "DiastolicBP",
+      "name": "الضغط الانبساطي",
+      "importance": 0.1067,
+      "description": "مؤشر مهم لصحة القلب"
+    },
+    {
+      "feature": "Age",
+      "name": "العمر",
+      "importance": 0.1004,
+      "description": "العمر فوق 35 سنة يزيد المخاطر"
+    }
+  ],
+  "thresholds": {
+    "low_risk": {
+      "bs": "<7",
+      "age": "<35",
+      "bp": "<120/80",
+      "description": "حالة منخفضة الخطورة - متابعة طبيعية"
+    },
+    "mid_risk": {
+      "bs": "7-10",
+      "age": "35-40",
+      "bp": "120-140/80-90",
+      "description": "حالة متوسطة الخطورة - تحتاج متابعة دورية"
+    },
+    "high_risk": {
+      "bs": ">10",
+      "age": ">40",
+      "bp": ">140/90",
+      "description": "حالة عالية الخطورة - تحتاج تدخل طبي فوري"
+    }
+  },
+  "feature_importance": {
+    "BS": 0.3508,
+    "SystolicBP": 0.1703,
+    "MeanBP": 0.12,
+    "DiastolicBP": 0.1067,
+    "Age": 0.1004,
+    "PulsePressure": 0.045,
+    "BP_ratio": 0.035,
+    "HeartRate": 0.03,
+    "BodyTemp": 0.025,
+    "HighBP": 0.008,
+    "AgeRisk": 0.005,
+    "HighSugar": 0.003,
+    "Temp_Fever": 0.002
+  },
+  "generated_date": "2026-03-16",
+  "dataset_info": {
+    "name": "Maternal Health Risk Dataset",
+    "source": "UCI Machine Learning Repository",
+    "samples": 1014,
+    "features": 13
+  },
+  "recommendations": {
+    "low_risk": "متابعة الحمل بشكل طبيعي مع الالتزام بالفحوصات الدورية",
+    "mid_risk": "زيارة طبيب النساء مرة شهرياً مع متابعة الضغط والسكر",
+    "high_risk": "تدخل طبي فوري ومتابعة مكثفة في وحدة الحمل عالي الخطورة"
+  }
+}

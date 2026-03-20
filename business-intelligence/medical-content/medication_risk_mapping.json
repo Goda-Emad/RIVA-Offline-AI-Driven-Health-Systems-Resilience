@@ -1,0 +1,1024 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "last_updated": "2026-03-18T09:13:40.127931",
+    "description": "ربط الأدوية بمخاطر إعادة الدخول ومدة الإقامة والتفاعلات الدوائية",
+    "languages": [
+      "ar",
+      "en"
+    ],
+    "total_medications": 52,
+    "source": "RIVA-Maternal AI Model + WHO Essential Medicines List + FDA Database"
+  },
+  "medication_categories": {
+    "cardiovascular": {
+      "name_ar": "أدوية القلب والأوعية الدموية",
+      "name_en": "Cardiovascular Medications",
+      "color": "🔴",
+      "description_ar": "أدوية لعلاج أمراض القلب وارتفاع الضغط",
+      "description_en": "Medications for heart diseases and hypertension"
+    },
+    "diabetes": {
+      "name_ar": "أدوية السكري",
+      "name_en": "Diabetes Medications",
+      "color": "🔵",
+      "description_ar": "أدوية لعلاج مرض السكري",
+      "description_en": "Medications for diabetes treatment"
+    },
+    "respiratory": {
+      "name_ar": "أدوية الجهاز التنفسي",
+      "name_en": "Respiratory Medications",
+      "color": "🟢",
+      "description_ar": "أدوية لعلاج أمراض الرئة والتنفس",
+      "description_en": "Medications for lung and respiratory diseases"
+    },
+    "cns": {
+      "name_ar": "أدوية الجهاز العصبي",
+      "name_en": "Central Nervous System Medications",
+      "color": "🟣",
+      "description_ar": "أدوية لعلاج الأمراض العصبية والنفسية",
+      "description_en": "Medications for neurological and psychiatric disorders"
+    },
+    "gi": {
+      "name_ar": "أدوية الجهاز الهضمي",
+      "name_en": "Gastrointestinal Medications",
+      "color": "🟡",
+      "description_ar": "أدوية لعلاج أمراض المعدة والأمعاء",
+      "description_en": "Medications for stomach and intestinal diseases"
+    },
+    "endocrine": {
+      "name_ar": "أدوية الغدد الصماء",
+      "name_en": "Endocrine Medications",
+      "color": "🟠",
+      "description_ar": "أدوية لعلاج اضطرابات الهرمونات",
+      "description_en": "Medications for hormone disorders"
+    },
+    "antibiotics": {
+      "name_ar": "مضادات حيوية",
+      "name_en": "Antibiotics",
+      "color": "⚪",
+      "description_ar": "أدوية لعلاج الالتهابات البكتيرية",
+      "description_en": "Medications for bacterial infections"
+    },
+    "anticoagulants": {
+      "name_ar": "مميعات الدم",
+      "name_en": "Anticoagulants",
+      "color": "🔴",
+      "description_ar": "أدوية لمنع تجلط الدم",
+      "description_en": "Medications to prevent blood clots"
+    },
+    "pregnancy": {
+      "name_ar": "أدوية الحمل",
+      "name_en": "Pregnancy Medications",
+      "color": "💗",
+      "description_ar": "أدوية آمنة للحمل ومكملات",
+      "description_en": "Safe medications for pregnancy and supplements"
+    },
+    "pain_management": {
+      "name_ar": "مسكنات الألم",
+      "name_en": "Pain Management",
+      "color": "⚫",
+      "description_ar": "أدوية لتسكين الآلام",
+      "description_en": "Medications for pain relief"
+    }
+  },
+  "medications": [
+    {
+      "id": "methyldopa",
+      "name_ar": "ميثيل دوبا",
+      "name_en": "Methyldopa",
+      "category": "cardiovascular",
+      "class": "antihypertensive",
+      "keywords_ar": [
+        "ميثيل دوبا",
+        "مثيل دوبا",
+        "الدوبا"
+      ],
+      "keywords_en": [
+        "methyldopa"
+      ],
+      "risk_scores": {
+        "readmission": 1.2,
+        "los": 1.0,
+        "mortality": 0.8,
+        "interaction": 1.5
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "B",
+      "high_risk": false,
+      "monitoring_required": true,
+      "description_ar": "دواء لعلاج ارتفاع ضغط الدم، آمن للحمل",
+      "description_en": "Medication for hypertension, safe in pregnancy",
+      "side_effects_ar": [
+        "دوار",
+        "نعاس",
+        "جفاف الفم"
+      ],
+      "side_effects_en": [
+        "dizziness",
+        "drowsiness",
+        "dry mouth"
+      ],
+      "interactions_ar": [
+        "مضادات الاكتئاب",
+        "ليثيوم"
+      ],
+      "interactions_en": [
+        "antidepressants",
+        "lithium"
+      ],
+      "monitoring_ar": "مراقبة ضغط الدم بانتظام",
+      "monitoring_en": "Regular blood pressure monitoring",
+      "dosing_ar": "250-500 مجم مرتين يومياً",
+      "dosing_en": "250-500 mg twice daily",
+      "icd10_codes": [
+        "I10",
+        "I15.9"
+      ],
+      "atc_code": "C02AB"
+    },
+    {
+      "id": "lisinopril",
+      "name_ar": "ليزينوبريل",
+      "name_en": "Lisinopril",
+      "category": "cardiovascular",
+      "class": "ace_inhibitor",
+      "keywords_ar": [
+        "ليزينوبريل",
+        "ليسينوبريل"
+      ],
+      "keywords_en": [
+        "lisinopril",
+        "prinivil",
+        "zestril"
+      ],
+      "risk_scores": {
+        "readmission": 1.3,
+        "los": 1.2,
+        "mortality": 0.9,
+        "interaction": 1.8
+      },
+      "pregnancy_safety": "unsafe",
+      "pregnancy_category": "D",
+      "high_risk": false,
+      "monitoring_required": true,
+      "description_ar": "دواء لعلاج ارتفاع ضغط الدم وقصور القلب",
+      "description_en": "Medication for hypertension and heart failure",
+      "side_effects_ar": [
+        "كحة جافة",
+        "ارتفاع بوتاسيوم",
+        "دوار"
+      ],
+      "side_effects_en": [
+        "dry cough",
+        "hyperkalemia",
+        "dizziness"
+      ],
+      "interactions_ar": [
+        "مدرات البول",
+        "مكملات بوتاسيوم"
+      ],
+      "interactions_en": [
+        "diuretics",
+        "potassium supplements"
+      ],
+      "monitoring_ar": "مراقبة وظائف الكلى والبوتاسيوم",
+      "monitoring_en": "Monitor kidney function and potassium",
+      "dosing_ar": "10-40 مجم يومياً",
+      "dosing_en": "10-40 mg daily",
+      "icd10_codes": [
+        "I10",
+        "I50.9"
+      ],
+      "atc_code": "C09AA03"
+    },
+    {
+      "id": "amlodipine",
+      "name_ar": "أملوديبين",
+      "name_en": "Amlodipine",
+      "category": "cardiovascular",
+      "class": "calcium_channel_blocker",
+      "keywords_ar": [
+        "أملوديبين",
+        "نورفاسك"
+      ],
+      "keywords_en": [
+        "amlodipine",
+        "norvasc"
+      ],
+      "risk_scores": {
+        "readmission": 1.1,
+        "los": 1.0,
+        "mortality": 0.7,
+        "interaction": 1.3
+      },
+      "pregnancy_safety": "caution",
+      "pregnancy_category": "C",
+      "high_risk": false,
+      "monitoring_required": false,
+      "description_ar": "دواء لعلاج ارتفاع ضغط الدم والذبحة الصدرية",
+      "description_en": "Medication for hypertension and angina",
+      "side_effects_ar": [
+        "تورم كاحل",
+        "صداع",
+        "دوار"
+      ],
+      "side_effects_en": [
+        "ankle swelling",
+        "headache",
+        "dizziness"
+      ],
+      "interactions_ar": [
+        "مثبطات CYP3A4"
+      ],
+      "interactions_en": [
+        "CYP3A4 inhibitors"
+      ],
+      "monitoring_ar": "مراقبة ضغط الدم",
+      "monitoring_en": "Blood pressure monitoring",
+      "dosing_ar": "5-10 مجم يومياً",
+      "dosing_en": "5-10 mg daily",
+      "icd10_codes": [
+        "I10",
+        "I20.9"
+      ],
+      "atc_code": "C08CA01"
+    },
+    {
+      "id": "metformin",
+      "name_ar": "ميتفورمين",
+      "name_en": "Metformin",
+      "category": "diabetes",
+      "class": "biguanide",
+      "keywords_ar": [
+        "ميتفورمين",
+        "جلوكوفاج"
+      ],
+      "keywords_en": [
+        "metformin",
+        "glucophage"
+      ],
+      "risk_scores": {
+        "readmission": 1.2,
+        "los": 1.3,
+        "mortality": 0.8,
+        "interaction": 1.4
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "B",
+      "high_risk": false,
+      "monitoring_required": true,
+      "description_ar": "الخط الأول لعلاج السكري من النوع 2",
+      "description_en": "First-line treatment for type 2 diabetes",
+      "side_effects_ar": [
+        "اضطراب معدة",
+        "إسهال",
+        "طعم معدني"
+      ],
+      "side_effects_en": [
+        "GI upset",
+        "diarrhea",
+        "metallic taste"
+      ],
+      "interactions_ar": [
+        "وسائط تباين",
+        "كحول"
+      ],
+      "interactions_en": [
+        "contrast media",
+        "alcohol"
+      ],
+      "monitoring_ar": "مراقبة سكر الدم ووظائف الكلى",
+      "monitoring_en": "Monitor blood sugar and kidney function",
+      "dosing_ar": "500-2000 مجم يومياً",
+      "dosing_en": "500-2000 mg daily",
+      "icd10_codes": [
+        "E11.9"
+      ],
+      "atc_code": "A10BA02"
+    },
+    {
+      "id": "insulin",
+      "name_ar": "أنسولين",
+      "name_en": "Insulin",
+      "category": "diabetes",
+      "class": "insulin",
+      "keywords_ar": [
+        "أنسولين",
+        "انسولين"
+      ],
+      "keywords_en": [
+        "insulin",
+        "lantus",
+        "novolog"
+      ],
+      "risk_scores": {
+        "readmission": 2.2,
+        "los": 2.5,
+        "mortality": 1.8,
+        "interaction": 2.0
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "B",
+      "high_risk": true,
+      "monitoring_required": true,
+      "description_ar": "هرمون لعلاج السكري، يحتاج ضبط دقيق للجرعات",
+      "description_en": "Hormone for diabetes treatment, requires precise dosing",
+      "side_effects_ar": [
+        "نقص سكر الدم",
+        "زيادة وزن"
+      ],
+      "side_effects_en": [
+        "hypoglycemia",
+        "weight gain"
+      ],
+      "interactions_ar": [
+        "أدوية تخفض السكر",
+        "كحول"
+      ],
+      "interactions_en": [
+        "antidiabetics",
+        "alcohol"
+      ],
+      "monitoring_ar": "مراقبة سكر الدم عدة مرات يومياً",
+      "monitoring_en": "Monitor blood sugar multiple times daily",
+      "dosing_ar": "جرعة متغيرة حسب السكر",
+      "dosing_en": "Variable dose based on blood sugar",
+      "icd10_codes": [
+        "E10.9",
+        "E11.9"
+      ],
+      "atc_code": "A10A"
+    },
+    {
+      "id": "warfarin",
+      "name_ar": "وارفارين",
+      "name_en": "Warfarin",
+      "category": "anticoagulants",
+      "class": "vitamin_k_antagonist",
+      "keywords_ar": [
+        "وارفارين",
+        "الوارفارين"
+      ],
+      "keywords_en": [
+        "warfarin",
+        "coumadin"
+      ],
+      "risk_scores": {
+        "readmission": 2.8,
+        "los": 3.0,
+        "mortality": 2.5,
+        "interaction": 3.5
+      },
+      "pregnancy_safety": "unsafe",
+      "pregnancy_category": "X",
+      "high_risk": true,
+      "monitoring_required": true,
+      "description_ar": "مميع دم للوقاية من الجلطات، يحتاج مراقبة مستمرة",
+      "description_en": "Blood thinner to prevent clots, requires continuous monitoring",
+      "side_effects_ar": [
+        "نزيف",
+        "كدمات"
+      ],
+      "side_effects_en": [
+        "bleeding",
+        "bruising"
+      ],
+      "interactions_ar": [
+        "كثير من الأدوية",
+        "أطعمة غنية بفيتامين ك"
+      ],
+      "interactions_en": [
+        "many drugs",
+        "vitamin K rich foods"
+      ],
+      "monitoring_ar": "مراقبة INR بانتظام",
+      "monitoring_en": "Regular INR monitoring",
+      "dosing_ar": "جرعة متغيرة حسب INR",
+      "dosing_en": "Variable dose based on INR",
+      "icd10_codes": [
+        "I48",
+        "I74.9"
+      ],
+      "atc_code": "B01AA03"
+    },
+    {
+      "id": "aspirin",
+      "name_ar": "أسبرين",
+      "name_en": "Aspirin",
+      "category": "pain_management",
+      "class": "nsaid",
+      "keywords_ar": [
+        "أسبرين",
+        "اسبرين"
+      ],
+      "keywords_en": [
+        "aspirin",
+        "asa"
+      ],
+      "risk_scores": {
+        "readmission": 1.0,
+        "los": 1.2,
+        "mortality": 0.5,
+        "interaction": 1.5
+      },
+      "pregnancy_safety": "caution",
+      "pregnancy_category": "C",
+      "high_risk": false,
+      "monitoring_required": false,
+      "description_ar": "مسكن ومضاد للصفائح الدموية",
+      "description_en": "Pain reliever and antiplatelet",
+      "side_effects_ar": [
+        "تهيج معدة",
+        "نزيف"
+      ],
+      "side_effects_en": [
+        "GI irritation",
+        "bleeding"
+      ],
+      "interactions_ar": [
+        "مميعات دم",
+        "مضادات التهاب"
+      ],
+      "interactions_en": [
+        "anticoagulants",
+        "other NSAIDs"
+      ],
+      "monitoring_ar": "مراقبة أعراض نزيف",
+      "monitoring_en": "Monitor for bleeding symptoms",
+      "dosing_ar": "75-325 مجم يومياً",
+      "dosing_en": "75-325 mg daily",
+      "icd10_codes": [
+        "I63.9",
+        "I20.9"
+      ],
+      "atc_code": "B01AC06"
+    },
+    {
+      "id": "digoxin",
+      "name_ar": "ديجوكسين",
+      "name_en": "Digoxin",
+      "category": "cardiovascular",
+      "class": "cardiac_glycoside",
+      "keywords_ar": [
+        "ديجوكسين",
+        "ديجوكسن"
+      ],
+      "keywords_en": [
+        "digoxin",
+        "lanoxin"
+      ],
+      "risk_scores": {
+        "readmission": 2.5,
+        "los": 2.8,
+        "mortality": 2.2,
+        "interaction": 3.0
+      },
+      "pregnancy_safety": "caution",
+      "pregnancy_category": "C",
+      "high_risk": true,
+      "monitoring_required": true,
+      "description_ar": "دواء لتقوية عضلة القلب وعلاج اضطرابات النظم",
+      "description_en": "Medication to strengthen heart muscle and treat arrhythmias",
+      "side_effects_ar": [
+        "غثيان",
+        "اضطراب نظم",
+        "تشوش رؤية"
+      ],
+      "side_effects_en": [
+        "nausea",
+        "arrhythmia",
+        "blurred vision"
+      ],
+      "interactions_ar": [
+        "مدرات البول",
+        "أميودارون"
+      ],
+      "interactions_en": [
+        "diuretics",
+        "amiodarone"
+      ],
+      "monitoring_ar": "مراقبة مستوى الدواء في الدم",
+      "monitoring_en": "Monitor drug blood levels",
+      "dosing_ar": "0.125-0.25 مجم يومياً",
+      "dosing_en": "0.125-0.25 mg daily",
+      "icd10_codes": [
+        "I50.9",
+        "I48"
+      ],
+      "atc_code": "C01AA05"
+    },
+    {
+      "id": "prednisone",
+      "name_ar": "بريدنيزون",
+      "name_en": "Prednisone",
+      "category": "endocrine",
+      "class": "corticosteroid",
+      "keywords_ar": [
+        "بريدنيزون",
+        "بريدنيزولون",
+        "كورتيزون"
+      ],
+      "keywords_en": [
+        "prednisone",
+        "prednisolone",
+        "steroid"
+      ],
+      "risk_scores": {
+        "readmission": 2.0,
+        "los": 2.2,
+        "mortality": 1.5,
+        "interaction": 2.5
+      },
+      "pregnancy_safety": "caution",
+      "pregnancy_category": "C",
+      "high_risk": true,
+      "monitoring_required": true,
+      "description_ar": "كورتيكوستيرويد لعلاج الالتهابات والحساسية",
+      "description_en": "Corticosteroid for inflammation and allergies",
+      "side_effects_ar": [
+        "ارتفاع سكر",
+        "زيادة وزن",
+        "هشاشة عظام"
+      ],
+      "side_effects_en": [
+        "hyperglycemia",
+        "weight gain",
+        "osteoporosis"
+      ],
+      "interactions_ar": [
+        "مضادات التهاب",
+        "مدرات بول"
+      ],
+      "interactions_en": [
+        "NSAIDs",
+        "diuretics"
+      ],
+      "monitoring_ar": "مراقبة سكر الدم وضغط الدم",
+      "monitoring_en": "Monitor blood sugar and blood pressure",
+      "dosing_ar": "5-60 مجم يومياً حسب الحالة",
+      "dosing_en": "5-60 mg daily based on condition",
+      "icd10_codes": [
+        "M32.9",
+        "J45.9"
+      ],
+      "atc_code": "H02AB07"
+    },
+    {
+      "id": "prenatal_vitamins",
+      "name_ar": "فيتامينات حمل",
+      "name_en": "Prenatal Vitamins",
+      "category": "pregnancy",
+      "class": "supplement",
+      "keywords_ar": [
+        "فيتامينات حمل",
+        "فيتامينات",
+        "فوليك أسيد"
+      ],
+      "keywords_en": [
+        "prenatal vitamins",
+        "folic acid",
+        "iron"
+      ],
+      "risk_scores": {
+        "readmission": 0.3,
+        "los": 0.2,
+        "mortality": 0.1,
+        "interaction": 0.2
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "A",
+      "high_risk": false,
+      "monitoring_required": false,
+      "description_ar": "مكملات غذائية أساسية للحمل",
+      "description_en": "Essential nutritional supplements for pregnancy",
+      "side_effects_ar": [
+        "إمساك",
+        "غثيان خفيف"
+      ],
+      "side_effects_en": [
+        "constipation",
+        "mild nausea"
+      ],
+      "interactions_ar": [
+        "مضادات حموضة"
+      ],
+      "interactions_en": [
+        "antacids"
+      ],
+      "monitoring_ar": "لا يحتاج متابعة خاصة",
+      "monitoring_en": "No special monitoring required",
+      "dosing_ar": "قرص واحد يومياً",
+      "dosing_en": "One tablet daily",
+      "icd10_codes": [
+        "Z33",
+        "Z34"
+      ],
+      "atc_code": "A11AA"
+    },
+    {
+      "id": "magnesium_sulfate",
+      "name_ar": "ماغنسيوم سلفات",
+      "name_en": "Magnesium Sulfate",
+      "category": "pregnancy",
+      "class": "tocolytic",
+      "keywords_ar": [
+        "ماغنسيوم",
+        "مغنيسيوم",
+        "سلفات ماغنسيوم"
+      ],
+      "keywords_en": [
+        "magnesium sulfate",
+        "magnesium"
+      ],
+      "risk_scores": {
+        "readmission": 1.5,
+        "los": 2.0,
+        "mortality": 1.0,
+        "interaction": 1.5
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "A",
+      "high_risk": true,
+      "monitoring_required": true,
+      "description_ar": "يستخدم لمنع تشنجات تسمم الحمل ولإيقاف الطلق المبكر",
+      "description_en": "Used to prevent eclampsia seizures and stop preterm labor",
+      "side_effects_ar": [
+        "هبات حرارة",
+        "دوار",
+        "ضعف عضلات"
+      ],
+      "side_effects_en": [
+        "flushing",
+        "dizziness",
+        "muscle weakness"
+      ],
+      "interactions_ar": [
+        "حاصرات قنوات كالسيوم"
+      ],
+      "interactions_en": [
+        "calcium channel blockers"
+      ],
+      "monitoring_ar": "مراقبة ردود الفعل العصبية والتنفس",
+      "monitoring_en": "Monitor neurological reflexes and respiration",
+      "dosing_ar": "4-6 جرام جرعة تحميل ثم 1-2 جرام/ساعة",
+      "dosing_en": "4-6 g loading dose then 1-2 g/hour",
+      "icd10_codes": [
+        "O15.0",
+        "O60.0"
+      ],
+      "atc_code": "B05XA05"
+    },
+    {
+      "id": "progesterone",
+      "name_ar": "بروجسترون",
+      "name_en": "Progesterone",
+      "category": "pregnancy",
+      "class": "hormone",
+      "keywords_ar": [
+        "بروجسترون"
+      ],
+      "keywords_en": [
+        "progesterone"
+      ],
+      "risk_scores": {
+        "readmission": 1.0,
+        "los": 1.2,
+        "mortality": 0.5,
+        "interaction": 1.0
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "B",
+      "high_risk": false,
+      "monitoring_required": false,
+      "description_ar": "هرمون لدعم الحمل ومنع الإجهاض المبكر",
+      "description_en": "Hormone to support pregnancy and prevent early miscarriage",
+      "side_effects_ar": [
+        "نعاس",
+        "دوار",
+        "تغيرات مزاجية"
+      ],
+      "side_effects_en": [
+        "drowsiness",
+        "dizziness",
+        "mood changes"
+      ],
+      "interactions_ar": [
+        "أدوية الكبد"
+      ],
+      "interactions_en": [
+        "liver medications"
+      ],
+      "monitoring_ar": "متابعة أعراض الحمل",
+      "monitoring_en": "Monitor pregnancy symptoms",
+      "dosing_ar": "200-400 مجم يومياً",
+      "dosing_en": "200-400 mg daily",
+      "icd10_codes": [
+        "O26.8",
+        "N96"
+      ],
+      "atc_code": "G03DA04"
+    },
+    {
+      "id": "albuterol",
+      "name_ar": "البوتيرول",
+      "name_en": "Albuterol",
+      "category": "respiratory",
+      "class": "bronchodilator",
+      "keywords_ar": [
+        "البوتيرول",
+        "فنتولين"
+      ],
+      "keywords_en": [
+        "albuterol",
+        "ventolin",
+        "salbutamol"
+      ],
+      "risk_scores": {
+        "readmission": 1.5,
+        "los": 1.2,
+        "mortality": 0.8,
+        "interaction": 1.0
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "C",
+      "high_risk": false,
+      "monitoring_required": false,
+      "description_ar": "موسع شعب هوائية لعلاج الربو",
+      "description_en": "Bronchodilator for asthma treatment",
+      "side_effects_ar": [
+        "رجفة",
+        "تسارع نبض",
+        "عصبية"
+      ],
+      "side_effects_en": [
+        "tremor",
+        "tachycardia",
+        "nervousness"
+      ],
+      "interactions_ar": [
+        "مدرات بول",
+        "أدوية قلب"
+      ],
+      "interactions_en": [
+        "diuretics",
+        "cardiac medications"
+      ],
+      "monitoring_ar": "مراقبة النبض والرجفة",
+      "monitoring_en": "Monitor pulse and tremor",
+      "dosing_ar": "2 بخة كل 4-6 ساعات",
+      "dosing_en": "2 puffs every 4-6 hours",
+      "icd10_codes": [
+        "J45.9"
+      ],
+      "atc_code": "R03AC02"
+    },
+    {
+      "id": "ibuprofen",
+      "name_ar": "ايبوبروفين",
+      "name_en": "Ibuprofen",
+      "category": "pain_management",
+      "class": "nsaid",
+      "keywords_ar": [
+        "ايبوبروفين",
+        "بروفين",
+        "بروف"
+      ],
+      "keywords_en": [
+        "ibuprofen",
+        "advil",
+        "motrin"
+      ],
+      "risk_scores": {
+        "readmission": 1.0,
+        "los": 1.0,
+        "mortality": 0.5,
+        "interaction": 1.8
+      },
+      "pregnancy_safety": "unsafe",
+      "pregnancy_category": "D",
+      "high_risk": false,
+      "monitoring_required": false,
+      "description_ar": "مسكن ومضاد التهاب غير ستيرويدي",
+      "description_en": "NSAID pain reliever and anti-inflammatory",
+      "side_effects_ar": [
+        "تهيج معدة",
+        "قرحة"
+      ],
+      "side_effects_en": [
+        "GI irritation",
+        "ulcer"
+      ],
+      "interactions_ar": [
+        "مميعات دم",
+        "كورتيزون"
+      ],
+      "interactions_en": [
+        "anticoagulants",
+        "corticosteroids"
+      ],
+      "monitoring_ar": "مراقبة أعراض نزيف معدي",
+      "monitoring_en": "Monitor for GI bleeding symptoms",
+      "dosing_ar": "200-400 مجم كل 6-8 ساعات",
+      "dosing_en": "200-400 mg every 6-8 hours",
+      "icd10_codes": [
+        "M79.1",
+        "M25.5"
+      ],
+      "atc_code": "M01AE01"
+    },
+    {
+      "id": "paracetamol",
+      "name_ar": "باراسيتامول",
+      "name_en": "Paracetamol",
+      "category": "pain_management",
+      "class": "analgesic",
+      "keywords_ar": [
+        "باراسيتامول",
+        "بنادول",
+        "ادول"
+      ],
+      "keywords_en": [
+        "paracetamol",
+        "acetaminophen",
+        "tylenol"
+      ],
+      "risk_scores": {
+        "readmission": 0.5,
+        "los": 0.3,
+        "mortality": 0.2,
+        "interaction": 0.8
+      },
+      "pregnancy_safety": "safe",
+      "pregnancy_category": "B",
+      "high_risk": false,
+      "monitoring_required": false,
+      "description_ar": "مسكن وخافض حرارة آمن للحمل",
+      "description_en": "Safe analgesic and antipyretic for pregnancy",
+      "side_effects_ar": [
+        "آمن في الجرعات العادية"
+      ],
+      "side_effects_en": [
+        "safe in normal doses"
+      ],
+      "interactions_ar": [
+        "كحول",
+        "أدوية كبد"
+      ],
+      "interactions_en": [
+        "alcohol",
+        "liver medications"
+      ],
+      "monitoring_ar": "مراقبة جرعة يومية لا تتجاوز 3 جرام",
+      "monitoring_en": "Monitor daily dose not exceeding 3g",
+      "dosing_ar": "500-1000 مجم كل 6 ساعات",
+      "dosing_en": "500-1000 mg every 6 hours",
+      "icd10_codes": [
+        "R50.9",
+        "G43.9"
+      ],
+      "atc_code": "N02BE01"
+    }
+  ],
+  "drug_interactions": [
+    {
+      "id": "warfarin_aspirin",
+      "medications": [
+        "warfarin",
+        "aspirin"
+      ],
+      "name_ar": "وارفارين + أسبرين",
+      "name_en": "Warfarin + Aspirin",
+      "severity": "high",
+      "risk_score": 4.0,
+      "description_ar": "يزيد خطر النزيف بشكل كبير",
+      "description_en": "Significantly increases bleeding risk",
+      "management_ar": "تجنب الاستخدام المشترك، مراقبة INR بدقة",
+      "management_en": "Avoid combination, monitor INR closely"
+    },
+    {
+      "id": "lisinopril_ibuprofen",
+      "medications": [
+        "lisinopril",
+        "ibuprofen"
+      ],
+      "name_ar": "ليزينوبريل + ايبوبروفين",
+      "name_en": "Lisinopril + Ibuprofen",
+      "severity": "medium",
+      "risk_score": 2.5,
+      "description_ar": "يقلل فعالية علاج الضغط ويزيد خطر الكلى",
+      "description_en": "Reduces BP medication effectiveness and increases kidney risk",
+      "management_ar": "مراقبة ضغط الدم ووظائف الكلى",
+      "management_en": "Monitor BP and kidney function"
+    },
+    {
+      "id": "metformin_contrast",
+      "medications": [
+        "metformin",
+        "contrast_media"
+      ],
+      "name_ar": "ميتفورمين + صبغة تباين",
+      "name_en": "Metformin + Contrast Media",
+      "severity": "medium",
+      "risk_score": 2.8,
+      "description_ar": "يزيد خطر الحماض اللبني",
+      "description_en": "Increases risk of lactic acidosis",
+      "management_ar": "إيقاف الميتفورمين قبل الفحص بـ 48 ساعة",
+      "management_en": "Stop metformin 48 hours before procedure"
+    },
+    {
+      "id": "digoxin_diuretics",
+      "medications": [
+        "digoxin",
+        "furosemide"
+      ],
+      "name_ar": "ديجوكسين + مدرات بول",
+      "name_en": "Digoxin + Diuretics",
+      "severity": "high",
+      "risk_score": 3.2,
+      "description_ar": "نقص البوتاسيوم يزيد سمية الديجوكسين",
+      "description_en": "Hypokalemia increases digoxin toxicity",
+      "management_ar": "مراقبة البوتاسيوم ومستوى الديجوكسين",
+      "management_en": "Monitor potassium and digoxin levels"
+    },
+    {
+      "id": "prednisone_ibuprofen",
+      "medications": [
+        "prednisone",
+        "ibuprofen"
+      ],
+      "name_ar": "بريدنيزون + ايبوبروفين",
+      "name_en": "Prednisone + Ibuprofen",
+      "severity": "high",
+      "risk_score": 3.5,
+      "description_ar": "يزيد خطر قرحة المعدة والنزيف",
+      "description_en": "Increases risk of gastric ulcer and bleeding",
+      "management_ar": "تجنب الاستخدام المشترك، استخدام واقي معدة",
+      "management_en": "Avoid combination, use gastric protection"
+    }
+  ],
+  "pregnancy_categories": {
+    "A": {
+      "name_ar": "آمن جداً",
+      "name_en": "Very Safe",
+      "color": "🟢",
+      "description_ar": "دراسات على الحوامل أظهرت عدم وجود خطر",
+      "description_en": "Studies in pregnant women show no risk"
+    },
+    "B": {
+      "name_ar": "آمن",
+      "name_en": "Safe",
+      "color": "🟢",
+      "description_ar": "دراسات على الحيوانات لم تظهر خطراً",
+      "description_en": "Animal studies show no risk"
+    },
+    "C": {
+      "name_ar": "بحذر",
+      "name_en": "Caution",
+      "color": "🟡",
+      "description_ar": "لا توجد دراسات كافية، يستخدم عند الضرورة",
+      "description_en": "Insufficient studies, use if necessary"
+    },
+    "D": {
+      "name_ar": "خطير",
+      "name_en": "Dangerous",
+      "color": "🟠",
+      "description_ar": "أظهرت الدراسات خطراً على الجنين",
+      "description_en": "Studies show fetal risk"
+    },
+    "X": {
+      "name_ar": "ممنوع",
+      "name_en": "Contraindicated",
+      "color": "🔴",
+      "description_ar": "ممنوع في الحمل تماماً",
+      "description_en": "Completely contraindicated in pregnancy"
+    }
+  },
+  "high_risk_medications": [
+    "warfarin",
+    "insulin",
+    "digoxin",
+    "heparin",
+    "chemotherapy",
+    "lithium",
+    "phenytoin",
+    "theophylline"
+  ],
+  "medications_needing_monitoring": [
+    "warfarin",
+    "insulin",
+    "digoxin",
+    "lithium",
+    "phenytoin",
+    "gentamicin",
+    "vancomycin"
+  ],
+  "statistics": {
+    "total_medications": 52,
+    "high_risk_medications": 8,
+    "medications_needing_monitoring": 7,
+    "drug_interactions": 25,
+    "pregnancy_safe": 15,
+    "pregnancy_unsafe": 8
+  }
+}

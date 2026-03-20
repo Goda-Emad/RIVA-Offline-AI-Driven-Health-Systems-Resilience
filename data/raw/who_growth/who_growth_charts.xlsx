@@ -1,0 +1,42 @@
+import pandas as pd
+import json
+
+with open('who_growth_standards.json', encoding='utf-8') as f:
+    who = json.load(f)
+
+# BMI Boys
+bmi_boys = pd.DataFrame(who['bmi_boys'])
+bmi_boys.insert(0, 'gender', 'boys')
+bmi_boys.insert(0, 'indicator', 'BMI')
+
+# BMI Girls
+bmi_girls = pd.DataFrame(who['bmi_girls'])
+bmi_girls.insert(0, 'gender', 'girls')
+bmi_girls.insert(0, 'indicator', 'BMI')
+
+# Height Boys
+height_boys = pd.DataFrame(who['height_boys'])
+height_boys.insert(0, 'gender', 'boys')
+height_boys.insert(0, 'indicator', 'Height')
+
+# Height Girls
+height_girls = pd.DataFrame(who['height_girls'])
+height_girls.insert(0, 'gender', 'girls')
+height_girls.insert(0, 'indicator', 'Height')
+
+# دمج في ملف Excel واحد — كل indicator في sheet
+with pd.ExcelWriter('who_growth_charts.xlsx', engine='openpyxl') as writer:
+    bmi_boys.to_excel(writer,    sheet_name='BMI_Boys',    index=False)
+    bmi_girls.to_excel(writer,   sheet_name='BMI_Girls',   index=False)
+    height_boys.to_excel(writer, sheet_name='Height_Boys', index=False)
+    height_girls.to_excel(writer,sheet_name='Height_Girls',index=False)
+
+print('✅ who_growth_charts.xlsx — 4 sheets')
+
+from google.colab import files
+files.download('who_growth_charts.xlsx')
+```
+
+ارفعه في:
+```
+data-storage/raw/who_growth/who_growth_charts.xlsx

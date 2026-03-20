@@ -1,0 +1,327 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "last_updated": "2026-03-18T08:59:41.277408",
+    "description": "عوامل خطر إعادة دخول المريض خلال 30 يوم",
+    "model_auc": 0.917,
+    "source": "RIVA-Maternal AI Model + Medical Literature"
+  },
+  "demographic_factors": [
+    {
+      "factor": "age_above_65",
+      "name_ar": "العمر فوق 65 سنة",
+      "name_en": "Age above 65 years",
+      "weight": 1.5,
+      "description_ar": "كبار السن أكثر عرضة للمضاعفات وإعادة الدخول",
+      "description_en": "Elderly patients are at higher risk for complications and readmission",
+      "recommendation_ar": "متابعة دقيقة مع توفير رعاية منزلية",
+      "recommendation_en": "Close follow-up with home care support"
+    },
+    {
+      "factor": "age_above_80",
+      "name_ar": "العمر فوق 80 سنة",
+      "name_en": "Age above 80 years",
+      "weight": 2.0,
+      "description_ar": "مرضى كبار السن جداً يحتاجون رعاية خاصة",
+      "description_en": "Very elderly patients require special care",
+      "recommendation_ar": "خطة رعاية متكاملة مع متابعة يومية",
+      "recommendation_en": "Comprehensive care plan with daily follow-up"
+    },
+    {
+      "factor": "male_gender",
+      "name_ar": "الجنس ذكر",
+      "name_en": "Male gender",
+      "weight": 1.2,
+      "description_ar": "الذكور أكثر عرضة لإعادة الدخول بعد الخروج",
+      "description_en": "Males are at higher risk for readmission after discharge",
+      "recommendation_ar": "متابعة دقيقة مع التركيز على الالتزام بالعلاج",
+      "recommendation_en": "Close monitoring with focus on medication adherence"
+    }
+  ],
+  "clinical_factors": [
+    {
+      "factor": "chf",
+      "name_ar": "قصور القلب",
+      "name_en": "Congestive Heart Failure",
+      "weight": 2.5,
+      "importance": 0.023,
+      "description_ar": "مرضى قصور القلب معرضون لتراكم السوائل والمضاعفات",
+      "description_en": "CHF patients are prone to fluid overload and complications",
+      "intervention_ar": "مراقبة الوزن يومياً، متابعة وظائف الكلى",
+      "intervention_en": "Daily weight monitoring, kidney function follow-up"
+    },
+    {
+      "factor": "renal",
+      "name_ar": "أمراض الكلى",
+      "name_en": "Renal Disease",
+      "weight": 2.3,
+      "importance": 0.119,
+      "description_ar": "أمراض الكلى تزيد من خطر إعادة الدخول بسبب اختلال توازن السوائل والأدوية",
+      "description_en": "Kidney disease increases readmission risk due to fluid imbalance and medications",
+      "intervention_ar": "مراقبة وظائف الكلى، تعديل جرعات الأدوية",
+      "intervention_en": "Monitor kidney function, adjust medication doses"
+    },
+    {
+      "factor": "neurological",
+      "name_ar": "الأمراض العصبية",
+      "name_en": "Neurological Disorders",
+      "weight": 2.8,
+      "importance": 0.506,
+      "description_ar": "أهم عامل خطر - الأمراض العصبية تزيد بشكل كبير من احتمالية إعادة الدخول",
+      "description_en": "Most important risk factor - neurological disorders significantly increase readmission probability",
+      "intervention_ar": "متابعة تخصصية مع تقييم وظيفي منتظم",
+      "intervention_en": "Specialist follow-up with regular functional assessment"
+    },
+    {
+      "factor": "liver",
+      "name_ar": "أمراض الكبد",
+      "name_en": "Liver Disease",
+      "weight": 2.2,
+      "importance": 0.028,
+      "description_ar": "أمراض الكبد تؤثر على استقلاب الأدوية ووظائف الجسم",
+      "description_en": "Liver disease affects drug metabolism and body functions",
+      "intervention_ar": "مراقبة وظائف الكبد، تجنب الأدوية السامة للكبد",
+      "intervention_en": "Monitor liver function, avoid hepatotoxic drugs"
+    },
+    {
+      "factor": "hypertension",
+      "name_ar": "ارتفاع ضغط الدم",
+      "name_en": "Hypertension",
+      "weight": 1.5,
+      "importance": 0.037,
+      "description_ar": "ارتفاع ضغط الدم غير المنضبط يزيد من خطر المضاعفات",
+      "description_en": "Uncontrolled hypertension increases complication risk",
+      "intervention_ar": "مراقبة ضغط الدم يومياً، الالتزام بالعلاج",
+      "intervention_en": "Daily blood pressure monitoring, medication adherence"
+    },
+    {
+      "factor": "diabetes",
+      "name_ar": "السكري",
+      "name_en": "Diabetes",
+      "weight": 1.8,
+      "importance": 0.015,
+      "description_ar": "مرضى السكري عرضة لتقلبات السكر والالتهابات",
+      "description_en": "Diabetics are prone to glucose fluctuations and infections",
+      "intervention_ar": "مراقبة سكر الدم، العناية بالقدمين",
+      "intervention_en": "Blood glucose monitoring, foot care"
+    }
+  ],
+  "medication_factors": [
+    {
+      "factor": "multiple_medications",
+      "name_ar": "تعدد الأدوية (> 5 أدوية)",
+      "name_en": "Polypharmacy (> 5 medications)",
+      "weight": 1.8,
+      "description_ar": "كثرة الأدوية تزيد من خطر التفاعلات الدوائية وعدم الالتزام",
+      "description_en": "Multiple medications increase risk of drug interactions and non-adherence",
+      "recommendation_ar": "مراجعة الأدوية مع صيدلي إكلينيكي",
+      "recommendation_en": "Medication review with clinical pharmacist"
+    },
+    {
+      "factor": "high_risk_medications",
+      "name_ar": "أدوية عالية الخطورة",
+      "name_en": "High-risk medications",
+      "weight": 2.0,
+      "medications": [
+        "warfarin",
+        "insulin",
+        "digoxin",
+        "heparin"
+      ],
+      "description_ar": "أدوية تحتاج مراقبة دقيقة لمستوياتها في الدم",
+      "description_en": "Medications requiring close blood level monitoring",
+      "recommendation_ar": "مراقبة مستوى الدواء في الدم، متابعة منتظمة",
+      "recommendation_en": "Monitor drug blood levels, regular follow-up"
+    },
+    {
+      "factor": "lab_count_high",
+      "name_ar": "كثرة التحاليل (> 100 تحليل)",
+      "name_en": "High lab count (> 100 tests)",
+      "weight": 1.6,
+      "importance": 0.15,
+      "description_ar": "كثرة التحاليل تشير إلى حالة معقدة تحتاج متابعة",
+      "description_en": "High lab count indicates complex condition requiring monitoring",
+      "recommendation_ar": "تقييم شامل مع أخصائي",
+      "recommendation_en": "Comprehensive evaluation with specialist"
+    }
+  ],
+  "symptom_factors": [
+    {
+      "factor": "chest_pain",
+      "name_ar": "ألم في الصدر",
+      "name_en": "Chest pain",
+      "weight": 2.2,
+      "description_ar": "ألم الصدر قد يشير إلى مشكلة قلبية تحتاج متابعة",
+      "description_en": "Chest pain may indicate cardiac issues needing follow-up",
+      "emergency": true
+    },
+    {
+      "factor": "shortness_of_breath",
+      "name_ar": "نهجان / ضيق تنفس",
+      "name_en": "Shortness of breath",
+      "weight": 2.4,
+      "description_ar": "ضيق التنفس علامة خطيرة تزيد من خطر إعادة الدخول",
+      "description_en": "Dyspnea is a serious sign increasing readmission risk",
+      "emergency": true
+    },
+    {
+      "factor": "bleeding",
+      "name_ar": "نزيف",
+      "name_en": "Bleeding",
+      "weight": 3.0,
+      "description_ar": "النزيف حالة طارئة تزيد خطر إعادة الدخول بشكل كبير",
+      "description_en": "Bleeding is an emergency that greatly increases readmission risk",
+      "emergency": true
+    },
+    {
+      "factor": "fever",
+      "name_ar": "حرارة",
+      "name_en": "Fever",
+      "weight": 1.5,
+      "description_ar": "ارتفاع الحرارة قد يشير إلى عدوى تحتاج علاج",
+      "description_en": "Fever may indicate infection requiring treatment"
+    }
+  ],
+  "vital_signs_factors": [
+    {
+      "factor": "heart_rate_high",
+      "name_ar": "تسارع نبضات القلب (> 100)",
+      "name_en": "Tachycardia (> 100 bpm)",
+      "threshold": 100,
+      "weight": 1.7,
+      "description_ar": "تسارع النبض يشير إلى إجهاد على القلب",
+      "description_en": "Tachycardia indicates cardiac stress"
+    },
+    {
+      "factor": "oxygen_low",
+      "name_ar": "انخفاض الأكسجين (< 92%)",
+      "name_en": "Low oxygen saturation (< 92%)",
+      "threshold": 92,
+      "weight": 2.5,
+      "description_ar": "انخفاض الأكسجين علامة خطيرة تحتاج تدخل فوري",
+      "description_en": "Low oxygen is a serious sign requiring immediate intervention",
+      "emergency": true
+    },
+    {
+      "factor": "bp_high",
+      "name_ar": "ارتفاع ضغط الدم (> 140/90)",
+      "name_en": "High blood pressure (> 140/90)",
+      "threshold": "140/90",
+      "weight": 1.6,
+      "description_ar": "ارتفاع الضغط غير المنضبط يزيد من خطر المضاعفات",
+      "description_en": "Uncontrolled hypertension increases complication risk"
+    }
+  ],
+  "previous_admissions": [
+    {
+      "factor": "readmission_last_30_days",
+      "name_ar": "إعادة دخول خلال آخر 30 يوم",
+      "name_en": "Readmission in last 30 days",
+      "weight": 3.0,
+      "description_ar": "أقوى مؤشر على إعادة الدخول هو إعادة دخول سابقة",
+      "description_en": "Strongest predictor of readmission is previous readmission",
+      "recommendation_ar": "مراجعة شاملة لخطة العلاج، متابعة مكثفة",
+      "recommendation_en": "Comprehensive treatment review, intensive follow-up"
+    },
+    {
+      "factor": "multiple_admissions",
+      "name_ar": "تنويمات متعددة (> 3 في السنة)",
+      "name_en": "Multiple admissions (> 3 per year)",
+      "weight": 2.2,
+      "description_ar": "تكرار التنويم يشير إلى حالة مزمنة غير منضبطة",
+      "description_en": "Frequent admissions indicate uncontrolled chronic condition",
+      "recommendation_ar": "تحويل لرعاية مزمنة، متابعة منتظمة",
+      "recommendation_en": "Refer to chronic care, regular follow-up"
+    }
+  ],
+  "risk_categories": [
+    {
+      "category": "low",
+      "range": "0-30%",
+      "color": "🟢",
+      "name_ar": "منخفض",
+      "name_en": "Low",
+      "description_ar": "احتمالية منخفضة لإعادة الدخول - متابعة روتينية",
+      "description_en": "Low readmission probability - routine follow-up",
+      "intervention": "متابعة خلال شهر"
+    },
+    {
+      "category": "medium",
+      "range": "30-70%",
+      "color": "🟡",
+      "name_ar": "متوسط",
+      "name_en": "Medium",
+      "description_ar": "احتمالية متوسطة - تحتاج متابعة دقيقة",
+      "description_en": "Medium probability - requires careful follow-up",
+      "intervention": "متابعة خلال أسبوع"
+    },
+    {
+      "category": "high",
+      "range": "70-100%",
+      "color": "🔴",
+      "name_ar": "مرتفع",
+      "name_en": "High",
+      "description_ar": "احتمالية مرتفعة جداً - تدخل فوري",
+      "description_en": "High probability - immediate intervention",
+      "intervention": "متابعة خلال 48 ساعة"
+    }
+  ],
+  "interventions": [
+    {
+      "name_ar": "متابعة هاتفية",
+      "name_en": "Phone follow-up",
+      "description_ar": "الاتصال بالمريض بعد 48 ساعة من الخروج",
+      "description_en": "Call patient 48 hours after discharge",
+      "effectiveness": "يقلل إعادة الدخول بنسبة 20%"
+    },
+    {
+      "name_ar": "زيارة منزلية",
+      "name_en": "Home visit",
+      "description_ar": "زيارة ممرض للمنزل لتقييم الحالة",
+      "description_en": "Nurse home visit for assessment",
+      "effectiveness": "يقلل إعادة الدخول بنسبة 30%"
+    },
+    {
+      "name_ar": "مراجعة الأدوية",
+      "name_en": "Medication reconciliation",
+      "description_ar": "مراجعة جميع الأدوية مع صيدلي",
+      "description_en": "Review all medications with pharmacist",
+      "effectiveness": "يقلل إعادة الدخول بنسبة 25%"
+    },
+    {
+      "name_ar": "تثقيف المريض",
+      "name_en": "Patient education",
+      "description_ar": "تعليم المريض علامات الخطر ومواعيد الأدوية",
+      "description_en": "Educate patient on warning signs and medication schedule",
+      "effectiveness": "يقلل إعادة الدخول بنسبة 15%"
+    }
+  ],
+  "statistics": {
+    "model_accuracy": "84.6%",
+    "model_auc": 0.917,
+    "top_features": [
+      {
+        "feature": "NEUROLOGICAL",
+        "importance": 0.506
+      },
+      {
+        "feature": "lab_count",
+        "importance": 0.15
+      },
+      {
+        "feature": "RENAL",
+        "importance": 0.119
+      },
+      {
+        "feature": "lab_mean",
+        "importance": 0.044
+      },
+      {
+        "feature": "HYPERTENSION",
+        "importance": 0.037
+      }
+    ],
+    "total_patients_trained": 129,
+    "readmission_rate": "8.53%"
+  }
+}
