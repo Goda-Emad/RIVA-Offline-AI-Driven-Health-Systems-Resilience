@@ -203,7 +203,18 @@ def process_consultation(
     final_response   = prefix + chat_result["text"]
 
     # Stage 4: Smart routing → target page
-    target_page = _smart_route(intent, clinical_profile)
+    confidence  = chat_result.get("confidence_score", 1.0)
+
+    # Medical Transparency — low confidence → AI explanation page
+    from .chat import LOW_CONFIDENCE_THRESH
+    if confidence < LOW_CONFIDENCE_THRESH:
+        target_page = "12_ai_explanation.html"
+        log.warning(
+            "[RIVA-Router] Low confidence %.2f < %.2f → %s",
+            confidence, LOW_CONFIDENCE_THRESH, target_page,
+        )
+    else:
+        target_page = _smart_route(intent, clinical_profile)
 
     total_ms = round((time.perf_counter() - t0) * 1000, 1)
     log.info(
@@ -215,7 +226,8 @@ def process_consultation(
         "patient_said":      user_text,
         "riva_response":     final_response,
         "intent":            intent,
-        "target_page":       target_page,        # ← الصفحة الصح من الـ 17
+        "target_page":       target_page,
+        "confidence_score":  confidence,
         "session_id":        session_id,
         "clinical_profile":  clinical_profile,
         "stt_duration_ms":   stt.get("duration_ms", 0),
@@ -245,7 +257,8 @@ class ConsultationResponse(BaseModel):
     patient_said:      str
     riva_response:     str
     intent:            str
-    target_page:       str     # ← الصفحة من الـ 17 اللي المريض يروحها
+    target_page:       str
+    confidence_score:  float
     session_id:        str
     clinical_profile:  dict
     stt_duration_ms:   float
