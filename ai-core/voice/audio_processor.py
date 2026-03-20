@@ -1,7 +1,7 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║           RIVA Health Platform — Audio Processor                             ║
-║           ai-core/voice/dialect_model/audio_processor.py                     ║
+║           ai-core/voice/audio_processor.py                                   ║
 ║                                                                              ║
 ║  Purpose : Preprocess raw audio from PWA microphone before Whisper STT.     ║
 ║            Runs fully offline — no external API calls.                       ║
@@ -31,8 +31,14 @@
 ║  • Returns ProcessedAudio dataclass with full quality metadata.             ║
 ║                                                                              ║
 ║  Author  : Goda Emad  (AI Core)                                              ║
-║  Version : 1.1.0                                                             ║
+║  Version : 1.2.0                                                             ║
 ║  Updated : 2026-03-18                                                        ║
+║                                                                              ║
+║  Changelog v1.2.0                                                            ║
+║  ─────────────────────────────────────────────────────────────────────────  ║
+║  • FIX 1 Thread leak: pool created once at module load (not per-request).  ║
+║  • FIX 2 _estimate_noise_floor: empty-array guard before np.percentile.    ║
+║  • FIX 3 pydub 8-bit: unsigned WAV now correctly centred at 128.           ║
 ║                                                                              ║
 ║  Changelog v1.1.0                                                            ║
 ║  ─────────────────────────────────────────────────────────────────────────  ║
@@ -352,10 +358,25 @@ class AudioProcessor:
         # pydub path
         if _PYDUB_AVAILABLE:
             try:
-                seg   = AudioSegment.from_file(buf)
-                seg   = seg.set_channels(1).set_frame_rate(self._sr)
-                raw   = np.array(seg.get_array_of_samples(), dtype=np.float32)
-                audio = raw / (2 ** (seg.sample_width * 8 - 1))
+                seg = AudioSegment.from_file(buf)
+                seg = seg.set_channels(1).set_frame_rate(self._sr)
+
+                # FIX v1.2: 8-bit WAV uses UNSIGNED samples (0–255, centre=128).
+                # The old formula raw / (2**(width*8-1)) assumed signed integers,
+                # producing severe distortion on 8-bit files.
+                # Fix: normalise by sample range based on actual sample_width:
+                #   8-bit  unsigned → subtract 128, divide by 128
+                #   16-bit signed   → divide by 32768  (2^15)
+                #   24/32-bit signed→ divide by 2^(width*8-1)
+                raw = np.array(seg.get_array_of_samples(), dtype=np.float32)
+                if seg.sample_width == 1:
+                    # 8-bit unsigned PCM: range [0, 255], centre = 128
+                    audio = (raw - 128.0) / 128.0
+                else:
+                    # 16-bit and wider: signed, range = 2^(bits-1)
+                    audio = raw / float(2 ** (seg.sample_width * 8 - 1))
+
+                audio = np.clip(audio, -1.0, 1.0)   # safety clamp
                 return audio, self._sr
             except Exception:
                 buf.seek(0)
@@ -581,14 +602,24 @@ class AudioProcessor:
 
         Uses the 10th percentile RMS across all frames as the noise floor
         estimate — robust to occasional speech bursts.
+
+        FIX v1.2: added empty-array guard — np.percentile([]) raises
+        IndexError. Happens when audio is shorter than one VAD frame.
         """
         frame_len = int(self._sr * self._vad_frame / 1000)
         if frame_len == 0 or len(audio) < frame_len:
             return 0.0
 
         n_frames = len(audio) // frame_len
+        if n_frames == 0:              # FIX: guard against zero-frame edge case
+            return 0.0
+
         frames   = audio[: n_frames * frame_len].reshape(n_frames, frame_len)
         rms_vals = np.sqrt(np.mean(frames ** 2, axis=1))
+
+        if len(rms_vals) == 0:         # FIX: final safety net before percentile
+            return 0.0
+
         return float(np.percentile(rms_vals, 10))
 
     @staticmethod
@@ -618,12 +649,17 @@ class AudioProcessor:
 
 _default_processor: AudioProcessor | None = None
 
-# FIX v1.1: dedicated thread pool for CPU-bound audio processing
-# Keeps FastAPI event loop unblocked when multiple patients send audio
-# simultaneously — each preprocess() call runs in its own thread.
+# FIX v1.2: pool initialised ONCE at module load — never recreated.
+# Reading RIVA_AUDIO_WORKERS inside the async function and replacing the
+# pool on every call caused a Thread Leak: old pool threads stayed alive
+# because ThreadPoolExecutor.shutdown() was never called.
+# Fix: read env var here at import time, create one pool, never replace it.
+import os as _os
 from concurrent.futures import ThreadPoolExecutor as _ThreadPoolExecutor
+
+_AUDIO_POOL_WORKERS: int = int(_os.environ.get("RIVA_AUDIO_WORKERS", 4))
 _audio_pool = _ThreadPoolExecutor(
-    max_workers = 4,
+    max_workers        = _AUDIO_POOL_WORKERS,
     thread_name_prefix = "riva_audio",
 )
 
@@ -636,7 +672,7 @@ def preprocess(
     """
     Module-level shortcut — uses a cached default AudioProcessor instance.
 
-    >>> from ai_core.voice.dialect_model.audio_processor import preprocess
+    >>> from ai_core.voice.audio_processor import preprocess
     >>> result = preprocess(audio_bytes, mime_type="audio/webm")
     >>> for chunk in result.chunks:
     ...     text = whisper.transcribe(chunk)
@@ -673,18 +709,10 @@ async def preprocess_async(
     • Thread-safe — AudioProcessor is stateless.
     • max_workers=4 covers typical clinic loads; tune via RIVA_AUDIO_WORKERS.
     """
+    # FIX v1.2: _audio_pool is created once at module load (no leak).
+    # Old code recreated the pool if RIVA_AUDIO_WORKERS changed at runtime
+    # but never called old_pool.shutdown() → zombie threads accumulated.
     import asyncio
-    import os
-
-    global _audio_pool
-    # Allow overriding pool size via environment variable
-    workers = int(os.environ.get("RIVA_AUDIO_WORKERS", 4))
-    if _audio_pool._max_workers != workers:
-        _audio_pool = _ThreadPoolExecutor(
-            max_workers        = workers,
-            thread_name_prefix = "riva_audio",
-        )
-
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(
         _audio_pool,
