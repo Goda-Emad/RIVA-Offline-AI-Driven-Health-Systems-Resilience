@@ -1,1 +1,459 @@
+/* ============================================================
+   RIVA Health Platform - Mobile Responsive Design
+   ============================================================
+   تصميم متجاوب لجميع الشاشات - موبايل، تابلت، ديسكتوب
+   يستخدم في جميع الصفحات الـ 17
+   ============================================================ */
 
+/* ──────────────────────────────────────────────────────────
+   Breakpoints (نقاط التحول)
+   ────────────────────────────────────────────────────────── */
+/* الهواتف الصغيرة (iPhone SE, Galaxy Fold) */
+@media (max-width: 480px) {
+    /* الحاوية الرئيسية */
+    .container {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    /* العناوين */
+    h1 {
+        font-size: var(--font-size-2xl);
+    }
+    
+    h2 {
+        font-size: var(--font-size-xl);
+    }
+    
+    h3 {
+        font-size: var(--font-size-lg);
+    }
+    
+    /* الأزرار */
+    .btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
+    }
+    
+    .btn-lg {
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-size-sm);
+    }
+    
+    /* الكروت */
+    .card {
+        border-radius: var(--radius-md);
+    }
+    
+    .card-body {
+        padding: var(--spacing-md);
+    }
+    
+    /* النماذج */
+    .form-control {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    /* الجداول - تحويلها إلى بطاقات */
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .table {
+        min-width: 600px;
+    }
+    
+    /* الشريط العلوي */
+    .navbar {
+        padding: var(--spacing-sm) 0;
+    }
+    
+    .logo span {
+        font-size: var(--font-size-md);
+    }
+    
+    /* الشات */
+    .message {
+        max-width: 90%;
+    }
+    
+    .message-content {
+        font-size: var(--font-size-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .chat-input-area {
+        padding: var(--spacing-sm);
+    }
+    
+    .chat-input-area textarea {
+        font-size: var(--font-size-sm);
+        padding: var(--spacing-sm);
+    }
+    
+    /* لوحات التحكم */
+    .dashboard-sidebar {
+        position: fixed;
+        top: 0;
+        right: -280px;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transition: right var(--transition-normal);
+        background: var(--white);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .dashboard-sidebar.open {
+        right: 0;
+    }
+    
+    .dashboard-main {
+        margin-right: 0 !important;
+    }
+    
+    /* التنبيهات */
+    .alert {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    /* الشبكات */
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    /* المؤشرات الدائرية */
+    .risk-gauge {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .risk-gauge-value .value {
+        font-size: 24px;
+    }
+    
+    /* عوامل الخطر */
+    .risk-factor-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .risk-factor-impact {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    /* الرسوم البيانية */
+    .chart-container {
+        height: 250px;
+    }
+    
+    /* الفوتر */
+    .footer {
+        text-align: center;
+        padding: var(--spacing-md);
+        font-size: var(--font-size-xs);
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   الهواتف المتوسطة والكبيرة (481px - 768px)
+   ────────────────────────────────────────────────────────── */
+@media (min-width: 481px) and (max-width: 768px) {
+    .container {
+        padding: 0 var(--spacing-md);
+    }
+    
+    h1 {
+        font-size: var(--font-size-3xl);
+    }
+    
+    .grid-2, .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dashboard-sidebar {
+        width: 260px;
+    }
+    
+    .dashboard-main {
+        margin-right: 260px !important;
+    }
+    
+    .chart-container {
+        height: 280px;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   الأجهزة اللوحية (769px - 1024px)
+   ────────────────────────────────────────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 960px;
+    }
+    
+    .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dashboard-sidebar {
+        width: 280px;
+    }
+    
+    .dashboard-main {
+        margin-right: 280px !important;
+    }
+    
+    .chart-container {
+        height: 300px;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   الشاشات الصغيرة (1025px - 1280px)
+   ────────────────────────────────────────────────────────── */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .container {
+        max-width: 1100px;
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   الشاشات الكبيرة (1281px فأكثر)
+   ────────────────────────────────────────────────────────── */
+@media (min-width: 1281px) {
+    .container {
+        max-width: 1280px;
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   تنسيقات خاصة للشاشات الأفقية (Landscape)
+   ────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 600px) {
+    .chat-messages {
+        max-height: 200px;
+    }
+    
+    .dashboard-sidebar {
+        overflow-y: auto;
+        max-height: 100vh;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   دعم الشاشات العالية الكثافة (Retina)
+   ────────────────────────────────────────────────────────── */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo img {
+        image-rendering: crisp-edges;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   قائمة التنقل للموبايل (Hamburger Menu)
+   ────────────────────────────────────────────────────────── */
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--dark);
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+    
+    .nav-links {
+        position: fixed;
+        top: 60px;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: calc(100vh - 60px);
+        background: var(--white);
+        flex-direction: column;
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-lg);
+        transition: right var(--transition-normal);
+        z-index: 999;
+        overflow-y: auto;
+    }
+    
+    .nav-links.open {
+        right: 0;
+    }
+    
+    .nav-links li {
+        margin: var(--spacing-md) 0;
+        width: 100%;
+    }
+    
+    .nav-links a {
+        display: block;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-lg);
+    }
+    
+    /* Overlay عند فتح القائمة */
+    .nav-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 998;
+        display: none;
+    }
+    
+    .nav-overlay.open {
+        display: block;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   تنسيقات الشاشات الصغيرة جداً (تحت 360px)
+   ────────────────────────────────────────────────────────── */
+@media (max-width: 360px) {
+    .btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+    
+    .metric-card {
+        padding: var(--spacing-md);
+    }
+    
+    .metric-value {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .chat-input-area {
+        flex-direction: column;
+    }
+    
+    .chat-input-area textarea {
+        width: 100%;
+    }
+    
+    .send-btn {
+        width: 100%;
+        margin-top: var(--spacing-sm);
+    }
+    
+    .input-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   تنسيقات الشاشات الكبيرة جداً (أكثر من 1920px)
+   ────────────────────────────────────────────────────────── */
+@media (min-width: 1921px) {
+    .container {
+        max-width: 1600px;
+    }
+    
+    body {
+        font-size: 18px;
+    }
+    
+    h1 {
+        font-size: 48px;
+    }
+    
+    .btn {
+        font-size: var(--font-size-md);
+        padding: var(--spacing-md) var(--spacing-xl);
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   دعم وضع القراءة المريحة (Reduced Motion)
+   ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   دعم وضع الليل (Dark Mode) - اختياري
+   ────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    /* يمكن تفعيلها عند الحاجة */
+    /* 
+    body {
+        background: var(--dark);
+        color: var(--light);
+    }
+    
+    .card, .metric-card, .risk-factors-section {
+        background: var(--gray-dark);
+    }
+    */
+}
+
+/* ──────────────────────────────────────────────────────────
+   تنسيقات للطباعة (Print)
+   ────────────────────────────────────────────────────────── */
+@media print {
+    .no-print, 
+    .btn, 
+    .navbar, 
+    .footer,
+    .mobile-menu-btn,
+    .input-actions,
+    .send-btn {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .container {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .card, .metric-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+    
+    a {
+        text-decoration: none;
+        color: black;
+    }
+}
