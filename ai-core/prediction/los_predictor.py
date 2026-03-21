@@ -1,26 +1,24 @@
 """
 los_predictor.py
 ================
-RIVA Health Platform — Length of Stay Predictor v4.2
+RIVA Health Platform — Length of Stay Predictor v4.3
 -----------------------------------------------------
-يتوقع مدة إقامة المريض في المستشفى.
+المسار : ai-core/prediction/los_predictor.py
+النموذج: XGBoost — MAE 7.11 يوم (achieved)
+الملف  : ai-core/models/los/los_latest_model.json (XGBoost native)
 
-النموذج: XGBoost مدرّب على MIMIC-III
-الدقة:   MAE 3.23 يوم
-الملف:   ai-core/models/los/  → los_latest_model.pkl (symlink)
+التحسينات v4.3:
+    Fix A — Separation of Concerns  : ML data فقط، LOSPresenter للـ UI
+    Fix B — Pickle Security         : XGBoost JSON load أولاً، joblib fallback
+    Fix C — Data-Driven thresholds  : LOS_LONG/MEDIUM من features JSON
+    Fix D — Module-level imports    : HAS_SHAP / HAS_XGB flags
 
-التحسينات v4.2 (Enterprise Grade):
-    Fix 1 — Confidence: XGBoost tree variance بدل heuristic
-    Fix 2 — Hardcoded path: env var LOS_MODEL_PATH + symlink strategy
-    Fix 3 — _extract_reasons: SHAP-aware لو الموديل محمل
-    Fix 4 — Unit normalization: lab_count scaled قبل الموديل
-    Fix 5 — Data drift note: تحذير اللي تدريب محلي مطلوب
-
-Author : GODA EMAD
+Author : GODA EMAD · Harvard HSIL Hackathon 2026
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import warnings
@@ -33,103 +31,91 @@ import numpy as np
 log = logging.getLogger("riva.prediction.los_predictor")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Path resolution  (Fix 2 — env var + symlink strategy)
+# Fix D — Module-level optional imports with HAS_* flags
 # ─────────────────────────────────────────────────────────────────────────────
-#
-#  Priority:
-#    1. LOS_MODEL_PATH env var         (CI/CD sets this after retraining)
-#    2. models/los/los_latest_model.pkl (symlink — always points to active model)
-#    3. Hardcoded filename fallback     (legacy compatibility only)
-#
-#  To update the active model after retraining:
-#    ln -sf los_final_xgb_tuned_20260320_120000.pkl \
-#            ai-core/models/los/los_latest_model.pkl
-#
-#  Or set env var before starting the server:
-#    LOS_MODEL_PATH=ai-core/models/los/los_v5.pkl uvicorn app:app
 
-_HERE        = Path(__file__).resolve().parent
-_AICORE      = _HERE.parent
-_MODELS_DIR  = _AICORE / "models" / "los"
+try:
+    import shap as _shap
+    HAS_SHAP = True
+except ImportError:
+    _shap    = None  # type: ignore
+    HAS_SHAP = False
+    log.info("[LOSPredictor] shap not installed — SHAP reasons disabled")
+
+try:
+    import xgboost as _xgb
+    HAS_XGB = True
+except ImportError:
+    _xgb    = None  # type: ignore
+    HAS_XGB = False
+    log.info("[LOSPredictor] xgboost not installed — native JSON load disabled")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Path resolution
+# ─────────────────────────────────────────────────────────────────────────────
+#  This file: ai-core/prediction/los_predictor.py
+#  _PRED    = ai-core/prediction/
+#  _AICORE  = ai-core/
+#  _ROOT    = project-root/
+
+_PRED       = Path(__file__).resolve().parent
+_AICORE     = _PRED.parent
+_MODELS_DIR = _AICORE / "models" / "los"
+
 
 def _resolve_model_path() -> Path:
-    """Resolve active model path — env var > symlink > hardcoded fallback."""
-    env_path = os.environ.get("LOS_MODEL_PATH")
-    if env_path:
-        p = Path(env_path)
-        if not p.is_absolute():
-            p = _AICORE / p
-        log.info("[LOSPredictor] model path from LOS_MODEL_PATH env var: %s", p)
-        return p
+    """
+    Priority:
+      1. LOS_MODEL_PATH env var            (CI/CD sets after retraining)
+      2. los_latest_model.json             (XGBoost native — most secure)
+      3. los_latest_model.pkl              (symlink)
+      4. Auto-discover los_*.json / .pkl
+      5. Hardcoded fallback + warning
+    """
+    env = os.environ.get("LOS_MODEL_PATH")
+    if env:
+        p = Path(env)
+        return p if p.is_absolute() else _AICORE / p
 
-    symlink = _MODELS_DIR / "los_latest_model.pkl"
-    if symlink.exists():
-        log.info("[LOSPredictor] model path from symlink: %s → %s", symlink, symlink.resolve())
-        return symlink
+    for name in ("los_latest_model.json", "los_latest_model.pkl"):
+        p = _MODELS_DIR / name
+        if p.exists():
+            return p
 
-    # Legacy hardcoded fallback — log a deprecation warning
+    if _MODELS_DIR.exists():
+        for pattern in ("los_*.json", "los_*.pkl"):
+            candidates = sorted(_MODELS_DIR.glob(pattern))
+            if candidates:
+                return candidates[-1]
+
     legacy = _MODELS_DIR / "los_final_xgb_tuned_20260317_174240.pkl"
     log.warning(
-        "[LOSPredictor] using hardcoded model filename '%s'. "
-        "Create a symlink 'los_latest_model.pkl' or set LOS_MODEL_PATH "
-        "env var to avoid updating code on each retrain.",
-        legacy.name,
+        "[LOSPredictor] using hardcoded filename. "
+        "Create 'los_latest_model.json' or set LOS_MODEL_PATH env var."
     )
     return legacy
+
 
 _MODEL_PATH = _resolve_model_path()
 _FEATS_PATH = _MODELS_DIR / "los_features_20260317_174240.json"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Constants
+# Fix C — Data-Driven constants (fallbacks only — overridden by features JSON)
 # ─────────────────────────────────────────────────────────────────────────────
 
-MAX_LOS    = 30.0
-MODEL_MAE  = 3.23
-LOS_LONG   = 10.0
-LOS_MEDIUM = 5.0
-LOS_SHORT  = 3.0
+MAX_LOS   = 30.0
+MODEL_MAE = 3.23
 
-# Fix 4 — Unit normalization: lab_count MIMIC-III statistics
-# Source: computed from MIMIC-III training set (n=34,499 admissions)
-# lab_count: mean=97.3, std=89.6
+# Fallback thresholds — training script saves these into features JSON
+_FALLBACK_LOS_LONG   = 10.0
+_FALLBACK_LOS_MEDIUM = 5.0
+_FALLBACK_LOS_SHORT  = 3.0
+
+# lab_count MIMIC-III normalization stats
 _LAB_COUNT_MEAN = 97.3
 _LAB_COUNT_STD  = 89.6
 
-# Fix 2 — Data drift warning threshold
-# If retrain date > N days old, warn in logs
-_RETRAIN_WARNING_DAYS = 180
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Category metadata
-# ─────────────────────────────────────────────────────────────────────────────
-
-_CATEGORY_META: dict[str, dict] = {
-    "long": {
-        "ar":          "طويلة جداً",
-        "color":       "#ef4444",
-        "target_page": "14_los_dashboard.html",
-        "action":      "تجهيز جناح طويل الإقامة + متابعة يومية",
-    },
-    "medium": {
-        "ar":          "متوسطة",
-        "color":       "#f59e0b",
-        "target_page": "14_los_dashboard.html",
-        "action":      "تحضير خطة خروج منظمة + تثقيف المريض",
-    },
-    "short": {
-        "ar":          "قصيرة",
-        "color":       "#10b981",
-        "target_page": "05_history.html",
-        "action":      "تجهيز تقرير الخروج + موعد متابعة خارجي",
-    },
-}
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Default features + reason labels
-# ─────────────────────────────────────────────────────────────────────────────
-
-_DEFAULT_FEATURES = [
+_DEFAULT_FEATURES: list[str] = [
     "CHF", "ARRHYTHMIA", "VALVULAR", "PULMONARY", "PVD",
     "HYPERTENSION", "PARALYSIS", "NEUROLOGICAL", "HYPOTHYROID",
     "RENAL", "LIVER", "ULCER", "AIDS",
@@ -139,17 +125,73 @@ _DEFAULT_FEATURES = [
 ]
 
 _REASON_LABELS: dict[str, str] = {
-    "CHF":         "قصور القلب",
-    "RENAL":       "مشاكل كلوية",
-    "NEUROLOGICAL":"أمراض عصبية",
-    "LIVER":       "مشاكل الكبد",
-    "AIDS":        "نقص المناعة",
-    "PARALYSIS":   "شلل",
-    "ARRHYTHMIA":  "اضطراب النبض",
-    "PULMONARY":   "أمراض رئوية",
-    "HYPERTENSION":"ارتفاع الضغط",
-    "RENAL":       "مشاكل الكلى",
+    "CHF": "قصور القلب", "RENAL": "مشاكل كلوية",
+    "NEUROLOGICAL": "أمراض عصبية", "LIVER": "مشاكل الكبد",
+    "AIDS": "نقص المناعة", "PARALYSIS": "شلل",
+    "ARRHYTHMIA": "اضطراب النبض", "PULMONARY": "أمراض رئوية",
+    "HYPERTENSION": "ارتفاع الضغط",
 }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Fix A — Separation of Concerns
+# ─────────────────────────────────────────────────────────────────────────────
+# ML layer (_LOS_SUMMARIES) → data only: labels, actions
+# UI layer (LOSPresenter)   → colors, page names, platform routing
+
+_LOS_SUMMARIES: dict[str, dict] = {
+    "long": {
+        "ar":     "طويلة جداً",
+        "action": "تجهيز جناح طويل الإقامة + متابعة يومية",
+    },
+    "medium": {
+        "ar":     "متوسطة",
+        "action": "تحضير خطة خروج منظمة + تثقيف المريض",
+    },
+    "short": {
+        "ar":     "قصيرة",
+        "action": "تجهيز تقرير الخروج + موعد متابعة خارجي",
+    },
+}
+
+
+class LOSPresenter:
+    """
+    Fix A — Presentation layer for LOS predictor.
+
+    Maps ML output (category str) → platform-specific UI fields.
+    Keeps colors + HTML page names OUT of the ML model.
+
+    Web:
+        result   = predict_los(features)
+        web_view = LOSPresenter.present(result, platform="web")
+
+    Mobile:
+        mob_view = LOSPresenter.present(result, platform="mobile")
+    """
+
+    _COLOR_MAP: dict[str, str] = {
+        "long":   "#ef4444",
+        "medium": "#f59e0b",
+        "short":  "#10b981",
+    }
+    _PAGE_MAP: dict[str, str] = {
+        "long":   "14_los_dashboard.html",
+        "medium": "14_los_dashboard.html",
+        "short":  "05_history.html",
+    }
+
+    @classmethod
+    def present(cls, result: dict, platform: str = "web") -> dict:
+        cat      = result.get("category", "medium")
+        enriched = dict(result)
+        if platform == "web":
+            enriched["color"]       = cls._COLOR_MAP.get(cat, "#f59e0b")
+            enriched["target_page"] = cls._PAGE_MAP.get(cat, "14_los_dashboard.html")
+        elif platform == "mobile":
+            enriched["screen"]      = f"LOSScreen_{cat.capitalize()}"
+            enriched["badge_color"] = cls._COLOR_MAP.get(cat, "#f59e0b")
+        return enriched
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Rule-based fallback
@@ -179,173 +221,156 @@ def _fallback_predict(features: Optional[dict]) -> float:
 
 class LOSPredictor:
     """
-    Length of Stay predictor — RIVA v4.2.
-
-    Integrated with:
-        - unified_predictor.py      : same model path + numpy inference
-        - explanation_generator.py  : explain_los() for Arabic explanation
-        - orchestrator.py           : target_page routing
-        - confidence_scorer.py      : XGBoost tree variance → real uncertainty
-        - 14_los_dashboard.html     : prediction display
+    ML-only LOS predictor — returns pure data.
+    Use LOSPresenter.present() to add UI fields.
     """
 
     def __init__(self, model_path: Optional[Path] = None) -> None:
-        self._model         = None
-        self._feature_names = _DEFAULT_FEATURES
-        self._model_mae     = MODEL_MAE
-        self._shap_explainer = None   # Fix 3: lazy SHAP init
+        self._model          = None
+        self._feature_names  = _DEFAULT_FEATURES
+        self._model_mae      = MODEL_MAE
+        self._los_long       = _FALLBACK_LOS_LONG
+        self._los_medium     = _FALLBACK_LOS_MEDIUM
+        self._shap_explainer = None
 
+        self._load_features_json()   # Fix C: load thresholds first
         self._try_load(model_path or _MODEL_PATH)
 
-    def _try_load(self, path: Path) -> bool:
+    # ── Fix C: load thresholds from JSON ─────────────────────────────────────
+
+    def _load_features_json(self) -> None:
+        """
+        Fix C — Data-Driven: read feature list, MAE, and LOS thresholds
+        from the features JSON artifact produced during training.
+
+        Training script should save:
+        {
+            "features":   [...],
+            "mae":        3.23,
+            "thresholds": {"los_long": 10.0, "los_medium": 5.0}
+        }
+        """
+        if not _FEATS_PATH.exists():
+            return
         try:
-            import joblib, json
-
-            self._model = joblib.load(str(path))
-
-            if _FEATS_PATH.exists():
-                data = json.loads(_FEATS_PATH.read_text(encoding="utf-8"))
-                self._feature_names = data.get("features", _DEFAULT_FEATURES)
-                self._model_mae     = data.get("mae", MODEL_MAE)
-
-            log.info(
-                "[LOSPredictor] loaded | features=%d | MAE=%.2f | path=%s",
-                len(self._feature_names), self._model_mae, path.name,
-            )
-
-            # Fix 2 — Data drift note
-            log.info(
-                "[LOSPredictor] DATA DRIFT NOTE: model trained on MIMIC-III "
-                "(US ICU data). For Egyptian clinical context, schedule "
-                "fine-tuning on local admission data every %d days.",
-                _RETRAIN_WARNING_DAYS,
-            )
-            return True
-
+            data = json.loads(_FEATS_PATH.read_text(encoding="utf-8"))
+            self._feature_names = data.get("features", _DEFAULT_FEATURES)
+            self._model_mae     = data.get("mae", MODEL_MAE)
+            thresh = data.get("thresholds", {})
+            if thresh:
+                self._los_long   = thresh.get("los_long",   _FALLBACK_LOS_LONG)
+                self._los_medium = thresh.get("los_medium", _FALLBACK_LOS_MEDIUM)
+                log.info(
+                    "[LOSPredictor] thresholds from JSON: long=%.1f medium=%.1f",
+                    self._los_long, self._los_medium,
+                )
         except Exception as exc:
-            log.warning("[LOSPredictor] model load failed: %s — using rule-based fallback", exc)
+            log.warning("[LOSPredictor] features JSON parse failed: %s", exc)
+
+    # ── Fix B: secure model loading ───────────────────────────────────────────
+
+    def _try_load(self, path: Path) -> bool:
+        """
+        Fix B — XGBoost native JSON first (secure), joblib fallback.
+
+        Migration from pkl:
+            import joblib, xgboost as xgb
+            model = joblib.load('los_final.pkl')
+            model.get_booster().save_model('los_latest_model.json')
+        """
+        if not path.exists():
+            log.warning("[LOSPredictor] model not found: %s — rule-based fallback", path)
+            return False
+
+        # Path 1: XGBoost native JSON
+        if path.suffix == ".json" and HAS_XGB:
+            try:
+                booster = _xgb.Booster()
+                booster.load_model(str(path))
+                self._model = booster
+                log.info("[LOSPredictor] loaded via XGBoost JSON (secure) | %s", path.name)
+                return True
+            except Exception as exc:
+                log.warning("[LOSPredictor] XGBoost JSON load failed: %s", exc)
+
+        # Path 2: joblib fallback
+        try:
+            import joblib
+            log.warning(
+                "[LOSPredictor] loading via joblib (pickle) — "
+                "migrate to XGBoost JSON: model.get_booster().save_model('los_latest_model.json')"
+            )
+            self._model = joblib.load(str(path))
+            log.info("[LOSPredictor] loaded via joblib | %s | MAE=%.2f", path.name, self._model_mae)
+            return True
+        except Exception as exc:
+            log.error("[LOSPredictor] all load attempts failed: %s", exc)
             return False
 
     def is_loaded(self) -> bool:
         return self._model is not None
 
-    # ── Fix 4: Unit normalization ─────────────────────────────────────────────
+    # ── Feature normalization ─────────────────────────────────────────────────
 
     def _normalize_features(self, features: dict) -> dict:
-        """
-        Fix 4 — Unit normalization for lab_count.
+        """Z-score lab_count before inference."""
+        norm = dict(features)
+        raw  = features.get("lab_count", 0.0)
+        if raw and _LAB_COUNT_STD > 0:
+            norm["lab_count"] = (float(raw) - _LAB_COUNT_MEAN) / _LAB_COUNT_STD
+        return norm
 
-        lab_count varies wildly (0–1000+) depending on severity.
-        Without scaling, extreme values dominate the prediction.
-        We apply z-score normalization using MIMIC-III training set statistics.
+    # ── Inference ─────────────────────────────────────────────────────────────
 
-        MIMIC-III lab_count: mean=97.3, std=89.6
-        Formula: lab_count_scaled = (lab_count - 97.3) / 89.6
+    def _infer(self, X: np.ndarray) -> float:
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning)
+            if HAS_XGB and isinstance(self._model, _xgb.Booster):
+                log_days = float(self._model.predict(_xgb.DMatrix(X))[0])
+            else:
+                log_days = float(self._model.predict(X)[0])
+        return float(np.expm1(log_days))
 
-        Note: ideally the scaler is saved from training and loaded here.
-        These constants are a safe approximation — replace with
-        saved scaler artifact in production (see Fix C in triage_classifier.py).
-        """
-        normalized = dict(features)
-        raw_lab    = features.get("lab_count", 0.0)
-        if raw_lab and _LAB_COUNT_STD > 0:
-            normalized["lab_count"] = (float(raw_lab) - _LAB_COUNT_MEAN) / _LAB_COUNT_STD
-        return normalized
-
-    # ── Fix 1: XGBoost tree variance confidence ───────────────────────────────
+    # ── XGBoost tree variance confidence ─────────────────────────────────────
 
     def _compute_confidence(self, X: np.ndarray) -> float:
-        """
-        Fix 1 — Real uncertainty from XGBoost tree variance.
-
-        Old heuristic: 0.70 + feature_count * 0.01
-        Problem: more features ≠ higher confidence. A patient with many
-                 conflicting labs and comorbidities is actually harder to predict.
-
-        New approach: use variance across individual XGBoost estimators.
-        Each tree makes its own prediction — high variance = low confidence.
-
-        Formula:
-            - Get predictions from all N trees
-            - std_dev = std(tree_predictions)
-            - confidence = 1 - clamp(std_dev / MAX_LOS, 0, 0.5) * 2
-
-        Fallback: if model doesn't support staged predict, use MAE-normalized heuristic.
-        """
         try:
-            # XGBoost / sklearn ensemble: iterate over estimators
-            if hasattr(self._model, "estimators_"):
-                # sklearn RandomForest / GradientBoosting
-                tree_preds = np.array([
-                    est.predict(X)[0]
-                    for est in self._model.estimators_
-                ])
-                std_dev    = float(np.std(tree_preds))
-                confidence = 1.0 - min(std_dev / MAX_LOS, 0.5) * 2.0
-                return round(max(0.50, min(0.95, confidence)), 2)
-
-            elif hasattr(self._model, "get_booster"):
-                # XGBoost native: margin per tree via ntree_limit
-                import xgboost as xgb
-                booster   = self._model.get_booster()
-                n_trees   = booster.num_boosted_rounds()
-                margins   = []
-                for i in range(1, n_trees + 1):
-                    pred = booster.predict(
-                        xgb.DMatrix(X),
-                        iteration_range=(0, i),
+            if HAS_XGB and isinstance(self._model, _xgb.Booster):
+                n = self._model.num_boosted_rounds()
+                margins = [
+                    float(self._model.predict(
+                        _xgb.DMatrix(X),
+                        iteration_range=(0, i + 1),
                         output_margin=True,
-                    )
-                    margins.append(float(pred[0]))
-                std_dev    = float(np.std(margins))
-                confidence = 1.0 - min(std_dev / MAX_LOS, 0.5) * 2.0
-                return round(max(0.50, min(0.95, confidence)), 2)
+                    )[0])
+                    for i in range(min(n, 50))
+                ]
+                std = float(np.std(margins))
+                return round(max(0.50, min(0.95, 1.0 - std / MAX_LOS)), 2)
+
+            if hasattr(self._model, "estimators_"):
+                preds = np.array([e.predict(X)[0] for e in self._model.estimators_])
+                std   = float(np.std(preds))
+                return round(max(0.50, min(0.95, 1.0 - std / MAX_LOS)), 2)
 
         except Exception as exc:
-            log.debug("[LOSPredictor] tree variance failed (%s) — MAE fallback", exc)
+            log.debug("[LOSPredictor] tree variance failed: %s", exc)
 
-        # MAE-normalized fallback (better than feature_count heuristic)
-        # Lower MAE relative to prediction range = higher confidence
         return round(max(0.55, min(0.85, 1.0 - self._model_mae / MAX_LOS)), 2)
 
-    # ── Fix 3: SHAP-aware reason extraction ──────────────────────────────────
+    # ── SHAP-aware reasons ────────────────────────────────────────────────────
 
-    def _extract_reasons(
-        self,
-        features: dict,
-        X:        Optional[np.ndarray] = None,
-    ) -> list[str]:
-        """
-        Fix 3 — SHAP-aware reasons (if model loaded) vs boolean fallback.
-
-        Old: checked if feature == True (boolean presence only).
-        Problem: "قصور القلب وحده قد لا يطيل الإقامة، لكن تفاعله مع كبر السن يطيلها".
-
-        New:
-            If model loaded + shap available → use SHAP values to rank features
-            by actual contribution to THIS prediction (not just presence).
-            Falls back to boolean presence if SHAP unavailable (no extra deps needed).
-
-        SHAP values give the doctor:
-            "المدة طالت 3 أيام بسبب قصور القلب + يومين بسبب كثرة التحاليل"
-        instead of:
-            "لديه قصور القلب" (وجود المرض فقط)
-        """
-        if X is not None and self.is_loaded():
+    def _extract_reasons(self, features: dict, X: Optional[np.ndarray] = None) -> list[str]:
+        if HAS_SHAP and X is not None and self.is_loaded():
             try:
-                import shap
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore")
-                    # Lazy init SHAP explainer
                     if self._shap_explainer is None:
-                        self._shap_explainer = shap.TreeExplainer(self._model)
+                        self._shap_explainer = _shap.TreeExplainer(self._model)
                     shap_vals = self._shap_explainer.shap_values(X)[0]
-
-                # Rank features by absolute SHAP contribution
                 ranked = sorted(
                     zip(self._feature_names, shap_vals),
-                    key=lambda x: abs(x[1]),
-                    reverse=True,
+                    key=lambda x: abs(x[1]), reverse=True,
                 )
                 reasons = []
                 for feat, val in ranked[:4]:
@@ -355,18 +380,11 @@ class LOSPredictor:
                         reasons.append(f"{label} ({direction} المدة {abs(val):.1f} يوم)")
                 if reasons:
                     return reasons
-
-            except ImportError:
-                log.debug("[LOSPredictor] shap not installed — boolean fallback")
             except Exception as exc:
-                log.debug("[LOSPredictor] SHAP failed: %s — boolean fallback", exc)
+                log.debug("[LOSPredictor] SHAP failed: %s", exc)
 
-        # Boolean fallback — presence-based
-        reasons = [
-            _REASON_LABELS[k]
-            for k in _REASON_LABELS
-            if features.get(k, 0)
-        ]
+        # Boolean fallback
+        reasons = [_REASON_LABELS[k] for k in _REASON_LABELS if features.get(k, 0)]
         if features.get("lab_count", 0) > _LAB_COUNT_MEAN:
             reasons.append("كثرة التحاليل المخبرية")
         return reasons[:4]
@@ -380,32 +398,20 @@ class LOSPredictor:
         for_doctor: bool = False,
     ) -> dict:
         """
-        Predicts Length of Stay with enterprise-grade confidence estimation.
-
-        Applies all v4.2 fixes:
-            Fix 1: XGBoost tree variance for real uncertainty
-            Fix 2: resolved model path (env var / symlink)
-            Fix 3: SHAP-aware reasons
-            Fix 4: lab_count normalized before inference
+        Returns pure ML data — no colors, no page names (Fix A).
+        Use LOSPresenter.present(result) to add UI fields.
         """
-        # Edge case guard
-        features = features or {}
-
-        # Fix 4: normalize before inference
+        features      = features or {}
         features_norm = self._normalize_features(features)
-
         X: Optional[np.ndarray] = None
 
         if self.is_loaded():
             try:
-                X = np.array(
+                X    = np.array(
                     [[self._safe_val(features_norm.get(f)) for f in self._feature_names]],
                     dtype=np.float32,
                 )
-                with warnings.catch_warnings():
-                    warnings.filterwarnings("ignore", category=UserWarning)
-                    log_days = float(self._model.predict(X)[0])
-                days = float(np.expm1(log_days))
+                days = self._infer(X)
             except Exception as exc:
                 log.warning("[LOSPredictor] inference error: %s — fallback", exc)
                 days = _fallback_predict(features)
@@ -413,33 +419,26 @@ class LOSPredictor:
             days = _fallback_predict(features)
 
         days     = min(round(days, 1), MAX_LOS)
+
+        # Fix C: thresholds from JSON
         category = (
-            "long"   if days >= LOS_LONG   else
-            "medium" if days >= LOS_MEDIUM else
+            "long"   if days >= self._los_long   else
+            "medium" if days >= self._los_medium else
             "short"
         )
-        meta = _CATEGORY_META[category]
-
-        # MAE-based confidence interval
-        ci = {
+        meta       = _LOS_SUMMARIES[category]
+        ci         = {
             "lower": round(max(0.0, days - self._model_mae), 2),
             "upper": round(days + self._model_mae, 2),
         }
-
-        # Fix 1: real confidence from tree variance
         confidence = self._compute_confidence(X) if X is not None else 0.60
+        reasons    = self._extract_reasons(features, X)
 
-        # Fix 3: SHAP-aware reasons
-        reasons = self._extract_reasons(features, X)
-
-        # Arabic explanation
         try:
             from .explanation_generator import explain_los
-            exp = explain_los(
-                days=days, features=features,
-                los_mae=self._model_mae,
-                session_id=session_id, for_doctor=for_doctor,
-            )
+            exp         = explain_los(days=days, features=features,
+                                      los_mae=self._model_mae,
+                                      session_id=session_id, for_doctor=for_doctor)
             explanation = exp["summary"]
         except Exception:
             explanation = (
@@ -447,35 +446,31 @@ class LOSPredictor:
                 + (f" — بسبب: {', '.join(reasons[:2])}" if reasons else "")
             )
 
-        doctor_note = None
-        if for_doctor:
-            doctor_note = (
-                f"Predicted: {days}d | MAE={self._model_mae}d | "
-                f"CI=[{ci['lower']},{ci['upper']}] | "
-                f"Confidence: {confidence} (tree variance) | "
-                f"Model: {'XGBoost' if self.is_loaded() else 'rule-based fallback'} | "
-                f"DATA DRIFT: MIMIC-III trained — local fine-tuning recommended"
-            )
+        doctor_note = (
+            f"Predicted: {days}d | MAE={self._model_mae}d | "
+            f"CI=[{ci['lower']},{ci['upper']}] | conf={confidence} | "
+            f"{'XGBoost JSON' if HAS_XGB and isinstance(self._model, _xgb.Booster) else 'joblib'} | "
+            f"DATA DRIFT: MIMIC-III — local fine-tuning recommended"
+        ) if for_doctor else None
 
-        log.info(
-            "[LOSPredictor] session=%s days=%.1f cat=%s conf=%.2f",
-            session_id, days, category, confidence,
-        )
+        log.info("[LOSPredictor] session=%s days=%.1f cat=%s conf=%.2f",
+                 session_id, days, category, confidence)
 
+        # Fix A: pure data — no color, no target_page
         return {
             "days":                days,
             "category":            category,
             "category_ar":         meta["ar"],
-            "color":               meta["color"],
             "confidence_interval": ci,
             "confidence":          confidence,
             "confidence_method":   "tree_variance" if self.is_loaded() else "mae_heuristic",
             "explanation":         explanation,
             "reasons":             reasons,
-            "target_page":         meta["target_page"],
             "action":              meta["action"],
             "model_mae":           self._model_mae,
-            "model_used":          "xgboost" if self.is_loaded() else "rule_based_fallback",
+            "model_used":          "xgboost_json" if (HAS_XGB and isinstance(self._model, _xgb.Booster))
+                                   else ("xgboost_pkl" if self.is_loaded() else "rule_based_fallback"),
+            "thresholds_used":     {"long": self._los_long, "medium": self._los_medium},
             "doctor_note":         doctor_note,
             "shap_ready":          {f: self._safe_val(features_norm.get(f))
                                     for f in self._feature_names},
@@ -486,11 +481,10 @@ class LOSPredictor:
     # ── Batch prediction ──────────────────────────────────────────────────────
 
     def predict_batch(self, patients: list[dict]) -> list[dict]:
-        """Vectorised batch — sorted by days descending (longest stay first)."""
+        """Pure data batch — sorted by days descending."""
         if not patients:
             return []
 
-        # Fix 4: normalize each patient's features
         patients_norm = [self._normalize_features(p or {}) for p in patients]
 
         if self.is_loaded():
@@ -502,7 +496,10 @@ class LOSPredictor:
                 )
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", category=UserWarning)
-                    log_days_arr = self._model.predict(X)
+                    if HAS_XGB and isinstance(self._model, _xgb.Booster):
+                        log_days_arr = self._model.predict(_xgb.DMatrix(X))
+                    else:
+                        log_days_arr = self._model.predict(X)
                 days_arr = np.expm1(log_days_arr)
             except Exception as exc:
                 log.warning("[LOSPredictor] batch error: %s — fallback", exc)
@@ -512,23 +509,21 @@ class LOSPredictor:
 
         results = []
         for i, (p, raw_days) in enumerate(zip(patients, days_arr)):
-            p = p or {}
+            p        = p or {}
             days     = min(round(float(raw_days), 1), MAX_LOS)
-            category = ("long" if days >= LOS_LONG else
-                        "medium" if days >= LOS_MEDIUM else "short")
-            meta     = _CATEGORY_META[category]
+            category = ("long"   if days >= self._los_long   else
+                        "medium" if days >= self._los_medium else "short")
+            meta     = _LOS_SUMMARIES[category]
             results.append({
                 "patient_id":  p.get("patient_id", f"patient_{i}"),
                 "days":        days,
                 "category":    category,
                 "category_ar": meta["ar"],
-                "color":       meta["color"],
-                "target_page": meta["target_page"],
+                "action":      meta["action"],
+                # Fix A: no color/page in ML output
             })
 
         return sorted(results, key=lambda x: x["days"], reverse=True)
-
-    # ── Helpers ───────────────────────────────────────────────────────────────
 
     @staticmethod
     def _safe_val(val) -> float:
@@ -540,19 +535,19 @@ class LOSPredictor:
     @property
     def status(self) -> dict:
         return {
-            "loaded":             self.is_loaded(),
-            "model_path":         str(_MODEL_PATH),
-            "model_path_strategy":"env_var > symlink > hardcoded",
-            "features":           len(self._feature_names),
-            "model_mae":          self._model_mae,
-            "max_los":            MAX_LOS,
-            "thresholds":         {"long": LOS_LONG, "medium": LOS_MEDIUM, "short": LOS_SHORT},
-            "confidence_method":  "xgboost_tree_variance",
-            "lab_normalization":  {"mean": _LAB_COUNT_MEAN, "std": _LAB_COUNT_STD},
-            "fixes":              ["Fix1:tree_variance", "Fix2:symlink_path",
-                                   "Fix3:shap_reasons", "Fix4:lab_normalization"],
-            "data_drift_note":    "Model trained on MIMIC-III (US). Local fine-tuning recommended.",
-            "target_pages":       {k: v["target_page"] for k, v in _CATEGORY_META.items()},
+            "loaded":            self.is_loaded(),
+            "model_path":        str(_MODEL_PATH),
+            "model_format":      _MODEL_PATH.suffix,
+            "features":          len(self._feature_names),
+            "model_mae":         self._model_mae,
+            "max_los":           MAX_LOS,
+            "thresholds":        {"long": self._los_long, "medium": self._los_medium},
+            "thresholds_source": "json" if _FEATS_PATH.exists() else "hardcoded",
+            "has_shap":          HAS_SHAP,
+            "has_xgb":           HAS_XGB,
+            "lab_normalization": {"mean": _LAB_COUNT_MEAN, "std": _LAB_COUNT_STD},
+            "fixes":             ["A:separation_of_concerns", "B:xgb_json_load",
+                                  "C:data_driven_thresholds", "D:module_imports"],
         }
 
 
@@ -571,21 +566,26 @@ def predict_los(
     features:   Optional[dict],
     session_id: Optional[str] = None,
     for_doctor: bool = False,
+    platform:   str  = "web",
 ) -> dict:
     """
-    Main entry point.
+    Main entry point — ML data + UI fields for platform.
 
     Usage in orchestrator.py:
-        from .los_predictor import predict_los
-        result = predict_los(features=patient_features, session_id=sid)
+        result = predict_los(features, session_id=sid, platform="web")
         target_page = result["target_page"]   # 14_los_dashboard.html
     """
-    return _predictor.predict(features, session_id=session_id, for_doctor=for_doctor)
+    raw = _predictor.predict(features, session_id=session_id, for_doctor=for_doctor)
+    return LOSPresenter.present(raw, platform=platform)
 
 
-def predict_los_batch(patients: list[dict]) -> list[dict]:
+def predict_los_batch(
+    patients: list[dict],
+    platform: str = "web",
+) -> list[dict]:
     """Batch LOS sorted by days (longest first)."""
-    return _predictor.predict_batch(patients)
+    raw_list = _predictor.predict_batch(patients)
+    return [LOSPresenter.present(r, platform=platform) for r in raw_list]
 
 
 def get_status() -> dict:
@@ -601,60 +601,71 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     print("=" * 55)
-    print("RIVA LOSPredictor v4.2 — self-test")
+    print("RIVA LOSPredictor v4.3 — self-test")
     print("=" * 55)
 
     pred = LOSPredictor()
-
     sample = {
         "CHF": 1, "RENAL": 1, "NEUROLOGICAL": 0,
         "lab_count": 150, "lab_mean": 45.0,
         "heart_rate_mean": 88.0, "sbp_mean": 130.0,
-        "spo2_mean": 96.0,
     }
 
-    # Fix 1: confidence method
-    print("\n[Fix 1] Confidence method:")
-    r = pred.predict(sample, session_id="test-001", for_doctor=True)
-    print(f"  confidence        : {r['confidence']}")
-    print(f"  confidence_method : {r['confidence_method']}")
-    print(f"  ✅ Not heuristic feature_count — real uncertainty")
+    # Fix A: Separation of concerns
+    print("\n[Fix A] Separation of concerns:")
+    raw = pred.predict(sample)
+    assert "color"       not in raw, "FAIL: ML layer leaked color"
+    assert "target_page" not in raw, "FAIL: ML layer leaked target_page"
+    assert "category"    in raw
+    print(f"  ✅ ML output has no color/page")
 
-    # Fix 2: path resolution
-    print("\n[Fix 2] Model path resolution:")
-    print(f"  resolved path : {_MODEL_PATH.name}")
-    print(f"  strategy      : env var > symlink > hardcoded")
-    print(f"  ✅ Set LOS_MODEL_PATH or create los_latest_model.pkl symlink")
+    web = LOSPresenter.present(raw, "web")
+    assert "color" in web and "target_page" in web
+    print(f"  ✅ Web presenter: color={web['color']} page={web['target_page']}")
 
-    # Fix 3: reasons
-    print("\n[Fix 3] SHAP-aware reasons:")
-    print(f"  reasons: {r['reasons']}")
-    print(f"  ✅ SHAP values used if available, boolean fallback otherwise")
+    mob = LOSPresenter.present(raw, "mobile")
+    assert "screen" in mob and "target_page" not in mob
+    print(f"  ✅ Mobile presenter: screen={mob['screen']} (no HTML)")
 
-    # Fix 4: lab_count normalization
-    print("\n[Fix 4] lab_count normalization:")
-    norm = pred._normalize_features(sample)
-    raw  = sample["lab_count"]
-    scaled = norm["lab_count"]
+    # Fix B: model loading
+    print("\n[Fix B] Model loading:")
+    print(f"  format  : {_MODEL_PATH.suffix}")
+    print(f"  HAS_XGB : {HAS_XGB}")
+    print(f"  ✅ XGBoost JSON preferred, joblib fallback documented")
+
+    # Fix C: data-driven thresholds
+    print("\n[Fix C] Data-driven thresholds:")
+    print(f"  los_long   : {pred._los_long}  (from {'JSON' if _FEATS_PATH.exists() else 'hardcoded'})")
+    print(f"  los_medium : {pred._los_medium}")
+    print(f"  result['thresholds_used'] : {raw['thresholds_used']}")
+    print(f"  ✅ No hardcoded 10.0/5.0 in model code")
+
+    # Fix D: module-level imports
+    print("\n[Fix D] Module-level imports:")
+    print(f"  HAS_SHAP : {HAS_SHAP}")
+    print(f"  HAS_XGB  : {HAS_XGB}")
+    print(f"  ✅ ImportError at startup, not during patient request")
+
+    # lab_count normalization
+    print("\n[lab_count normalization]:")
+    norm     = pred._normalize_features(sample)
     expected = (150 - _LAB_COUNT_MEAN) / _LAB_COUNT_STD
-    assert abs(scaled - expected) < 0.01, f"FAIL: {scaled} != {expected}"
-    print(f"  raw lab_count    : {raw}")
-    print(f"  scaled lab_count : {scaled:.3f}  (z-score)")
-    print(f"  ✅ Normalized before model inference")
+    assert abs(norm["lab_count"] - expected) < 0.01
+    print(f"  raw={sample['lab_count']} → scaled={norm['lab_count']:.3f} ✅")
 
     # Edge cases
     print("\n[Edge cases]:")
-    r_none = predict_los(None)
-    assert "days" in r_none
-    print(f"  ✅ features=None → days={r_none['days']} (rule-based fallback)")
+    r = predict_los(None)
+    assert "days" in r
+    print(f"  ✅ features=None → days={r['days']}")
 
-    batch = predict_los_batch([])
-    assert batch == []
+    b = predict_los_batch([])
+    assert b == []
     print(f"  ✅ empty batch → []")
 
-    batch2 = predict_los_batch([sample, None, {"CHF": 1}])
-    assert len(batch2) == 3
-    print(f"  ✅ batch with None entry → {len(batch2)} results")
+    b2 = predict_los_batch([sample, None, {"CHF": 1}])
+    assert len(b2) == 3
+    print(f"  ✅ batch with None → {len(b2)} results")
 
-    print(f"\n✅ LOSPredictor v4.2 self-test complete")
+    print(f"\n✅ LOSPredictor v4.3 self-test complete")
     sys.exit(0)
