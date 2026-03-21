@@ -1,1 +1,396 @@
+/* ============================================================
+   RIVA Health Platform - RTL (Right-to-Left) Support
+   ============================================================
+   يدعم اللغة العربية - يعكس الاتجاهات والمسافات
+   يستخدم في جميع الصفحات الـ 17
+   ============================================================ */
 
+/* الاتجاه الأساسي */
+body {
+    direction: rtl;
+    text-align: right;
+}
+
+/* عكس اتجاهات النصوص العامة */
+[dir="rtl"] {
+    text-align: right;
+}
+
+/* ============================================================
+   1. عكس الهوامش (Margin)
+   ============================================================ */
+/* Margin Right ↔ Margin Left */
+.mr-0 { margin-left: 0; margin-right: 0; }
+.mr-1 { margin-left: var(--spacing-xs); margin-right: 0; }
+.mr-2 { margin-left: var(--spacing-sm); margin-right: 0; }
+.mr-3 { margin-left: var(--spacing-md); margin-right: 0; }
+.mr-4 { margin-left: var(--spacing-lg); margin-right: 0; }
+.mr-5 { margin-left: var(--spacing-xl); margin-right: 0; }
+
+.ml-0 { margin-right: 0; margin-left: 0; }
+.ml-1 { margin-right: var(--spacing-xs); margin-left: 0; }
+.ml-2 { margin-right: var(--spacing-sm); margin-left: 0; }
+.ml-3 { margin-right: var(--spacing-md); margin-left: 0; }
+.ml-4 { margin-right: var(--spacing-lg); margin-left: 0; }
+.ml-5 { margin-right: var(--spacing-xl); margin-left: 0; }
+
+/* ============================================================
+   2. عكس المسافات الداخلية (Padding)
+   ============================================================ */
+/* Padding Right ↔ Padding Left */
+.pr-0 { padding-left: 0; padding-right: 0; }
+.pr-1 { padding-left: var(--spacing-xs); padding-right: 0; }
+.pr-2 { padding-left: var(--spacing-sm); padding-right: 0; }
+.pr-3 { padding-left: var(--spacing-md); padding-right: 0; }
+.pr-4 { padding-left: var(--spacing-lg); padding-right: 0; }
+.pr-5 { padding-left: var(--spacing-xl); padding-right: 0; }
+
+.pl-0 { padding-right: 0; padding-left: 0; }
+.pl-1 { padding-right: var(--spacing-xs); padding-left: 0; }
+.pl-2 { padding-right: var(--spacing-sm); padding-left: 0; }
+.pl-3 { padding-right: var(--spacing-md); padding-left: 0; }
+.pl-4 { padding-right: var(--spacing-lg); padding-left: 0; }
+.pl-5 { padding-right: var(--spacing-xl); padding-left: 0; }
+
+/* ============================================================
+   3. عكس مواضع العناصر (Position)
+   ============================================================ */
+/* Left ↔ Right */
+.left-0 { right: 0; left: auto; }
+.right-0 { left: 0; right: auto; }
+
+/* ============================================================
+   4. عكس الحدود (Border)
+   ============================================================ */
+/* Border Right ↔ Border Left */
+.border-right {
+    border-left: 1px solid var(--gray-lighter);
+    border-right: none;
+}
+
+.border-left {
+    border-right: 1px solid var(--gray-lighter);
+    border-left: none;
+}
+
+/* تنبيهات - الحدود من اليمين */
+.alert {
+    border-right: 4px solid transparent;
+    border-left: none;
+}
+
+.alert-success {
+    border-right-color: var(--success);
+}
+
+.alert-danger {
+    border-right-color: var(--danger);
+}
+
+.alert-warning {
+    border-right-color: var(--warning);
+}
+
+.alert-info {
+    border-right-color: var(--info);
+}
+
+/* ============================================================
+   5. عكس الأيقونات
+   ============================================================ */
+/* أيقونات الأسهم */
+.icon-arrow-right {
+    transform: rotate(180deg);
+}
+
+.icon-arrow-left {
+    transform: rotate(180deg);
+}
+
+/* ============================================================
+   6. عكس الشريط الجانبي (Sidebar)
+   ============================================================ */
+.sidebar {
+    right: 0;
+    left: auto;
+}
+
+.sidebar.collapsed {
+    right: -250px;
+    left: auto;
+}
+
+/* ============================================================
+   7. عكس قوائم التنقل (Navbar)
+   ============================================================ */
+.navbar-nav {
+    padding-right: 0;
+}
+
+.nav-item:first-child {
+    margin-right: 0;
+    margin-left: auto;
+}
+
+.nav-item:last-child {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    right: 0;
+    left: auto;
+    text-align: right;
+}
+
+/* ============================================================
+   8. عكس النماذج (Forms)
+   ============================================================ */
+.form-check {
+    padding-right: var(--spacing-lg);
+    padding-left: 0;
+}
+
+.form-check-input {
+    margin-right: -var(--spacing-lg);
+    margin-left: 0;
+}
+
+/* ============================================================
+   9. عكس الشات (Chat)
+   ============================================================ */
+.message {
+    flex-direction: row;
+}
+
+.user-message {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+.bot-message {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.message-avatar {
+    margin-left: var(--spacing-sm);
+    margin-right: 0;
+}
+
+/* ============================================================
+   10. عكس الجداول (Tables)
+   ============================================================ */
+.table th,
+.table td {
+    text-align: right;
+}
+
+/* ============================================================
+   11. عكس الشريط الجانبي للرسوم البيانية
+   ============================================================ */
+.chart-legend {
+    text-align: right;
+}
+
+.chart-legend-item {
+    margin-left: var(--spacing-md);
+    margin-right: 0;
+}
+
+/* ============================================================
+   12. عكس الأزرار مع الأيقونات
+   ============================================================ */
+.btn-icon-right {
+    margin-left: var(--spacing-sm);
+    margin-right: 0;
+}
+
+.btn-icon-left {
+    margin-right: var(--spacing-sm);
+    margin-left: 0;
+}
+
+/* ============================================================
+   13. عكس الـ Modal
+   ============================================================ */
+.modal-header .close {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+/* ============================================================
+   14. عكس الـ Breadcrumb
+   ============================================================ */
+.breadcrumb {
+    padding-right: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item {
+    padding-right: var(--spacing-sm);
+    padding-left: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    padding-left: var(--spacing-sm);
+    padding-right: 0;
+    content: "›";
+}
+
+/* ============================================================
+   15. عكس الـ Pagination
+   ============================================================ */
+.pagination {
+    padding-right: 0;
+}
+
+.page-item:first-child .page-link {
+    border-top-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.page-item:last-child .page-link {
+    border-top-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-md);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* ============================================================
+   16. عكس الـ Tabs
+   ============================================================ */
+.nav-tabs {
+    padding-right: 0;
+}
+
+.nav-tabs .nav-item {
+    margin-left: var(--spacing-sm);
+    margin-right: 0;
+}
+
+/* ============================================================
+   17. عكس الـ Carousel
+   ============================================================ */
+.carousel-control-prev {
+    right: 0;
+    left: auto;
+}
+
+.carousel-control-next {
+    left: 0;
+    right: auto;
+}
+
+/* ============================================================
+   18. عكس الـ Tooltip
+   ============================================================ */
+.tooltip {
+    text-align: center;
+}
+
+/* ============================================================
+   19. عكس الـ Progress Bar
+   ============================================================ */
+.progress-bar {
+    left: auto;
+    right: 0;
+}
+
+/* ============================================================
+   20. تصحيح المسافات للموبايل
+   ============================================================ */
+@media (max-width: 768px) {
+    .text-right-mobile {
+        text-align: right;
+    }
+    
+    .text-left-mobile {
+        text-align: left;
+    }
+    
+    .dropdown-menu {
+        right: 0;
+        left: auto;
+    }
+}
+
+/* ============================================================
+   21. تصحيح المسافات للتابلت
+   ============================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .text-right-tablet {
+        text-align: right;
+    }
+    
+    .text-left-tablet {
+        text-align: left;
+    }
+}
+
+/* ============================================================
+   22. عكس الأيقونات الخاصة بالـ Dashboard
+   ============================================================ */
+.dashboard-widget-icon {
+    margin-left: var(--spacing-md);
+    margin-right: 0;
+}
+
+/* ============================================================
+   23. عكس الأزرار العائمة (FAB)
+   ============================================================ */
+.fab {
+    right: auto;
+    left: var(--spacing-lg);
+}
+
+/* ============================================================
+   24. عكس الـ Toast Notifications
+   ============================================================ */
+.toast {
+    right: auto;
+    left: var(--spacing-lg);
+}
+
+/* ============================================================
+   25. دعم خاص لصفحات التنبؤات
+   ============================================================ */
+.prediction-card .metric-value {
+    text-align: center;
+}
+
+.prediction-card .metric-label {
+    text-align: center;
+}
+
+/* ============================================================
+   26. دعم خاص للشات بوت
+   ============================================================ */
+.chat-input-area {
+    direction: rtl;
+}
+
+.chat-input-area textarea {
+    text-align: right;
+}
+
+/* ============================================================
+   27. دعم خاص للوحات التحكم
+   ============================================================ */
+.dashboard-sidebar {
+    right: 0;
+    left: auto;
+}
+
+.dashboard-main {
+    margin-right: 280px;
+    margin-left: 0;
+}
+
+@media (max-width: 768px) {
+    .dashboard-main {
+        margin-right: 0;
+    }
+}
