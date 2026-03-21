@@ -1,1 +1,535 @@
+/* ============================================================
+   RIVA Health Platform - Core Style Sheet
+   ============================================================
+   يستخدم في جميع الصفحات الـ 17
+   يحتوي على: المتغيرات، الأساسيات، الأزرار، الكروت، النماذج
+   ============================================================ */
 
+/* ──────────────────────────────────────────────────────────
+   1. CSS Variables (متغيرات التصميم)
+   ────────────────────────────────────────────────────────── */
+:root {
+    /* الألوان الأساسية */
+    --primary: #1a73e8;
+    --primary-dark: #0d47a1;
+    --primary-light: #4285f4;
+    --secondary: #34a853;
+    --success: #34a853;
+    --danger: #ea4335;
+    --warning: #fbbc04;
+    --info: #1a73e8;
+    
+    /* الألوان المحايدة */
+    --dark: #202124;
+    --gray-dark: #3c4043;
+    --gray: #5f6368;
+    --gray-light: #9aa0a6;
+    --gray-lighter: #e8eaed;
+    --light: #f8f9fa;
+    --white: #ffffff;
+    
+    /* ألوان طبية إضافية */
+    --medical-blue: #1a73e8;
+    --medical-green: #34a853;
+    --medical-red: #ea4335;
+    --medical-yellow: #fbbc04;
+    --medical-purple: #9c27b0;
+    --medical-orange: #ff9800;
+    
+    /* الخطوط */
+    --font-primary: 'Cairo', 'Tahoma', 'Segoe UI', sans-serif;
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+    --font-size-3xl: 28px;
+    --font-size-4xl: 32px;
+    
+    /* المسافات */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 64px;
+    
+    /* الظلال */
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+    --shadow-xl: 0 20px 25px rgba(0,0,0,0.1);
+    
+    /* الحواف */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+    
+    /* الشفافية */
+    --overlay-light: rgba(0,0,0,0.5);
+    --overlay-dark: rgba(0,0,0,0.7);
+    
+    /* transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* ──────────────────────────────────────────────────────────
+   2. Reset & Base Styles
+   ────────────────────────────────────────────────────────── */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    font-family: var(--font-primary);
+    font-size: var(--font-size-md);
+    line-height: 1.6;
+    color: var(--dark);
+    background-color: var(--light);
+    min-height: 100vh;
+}
+
+/* ──────────────────────────────────────────────────────────
+   3. Typography (نصوص)
+   ────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: var(--spacing-md);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--dark);
+}
+
+h1 { font-size: var(--font-size-4xl); }
+h2 { font-size: var(--font-size-3xl); }
+h3 { font-size: var(--font-size-2xl); }
+h4 { font-size: var(--font-size-xl); }
+h5 { font-size: var(--font-size-lg); }
+h6 { font-size: var(--font-size-md); }
+
+p {
+    margin-bottom: var(--spacing-md);
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* ──────────────────────────────────────────────────────────
+   4. Container & Layout
+   ────────────────────────────────────────────────────────── */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.container-fluid {
+    width: 100%;
+    padding: 0 var(--spacing-md);
+}
+
+.section {
+    padding: var(--spacing-2xl) 0;
+}
+
+.section-sm {
+    padding: var(--spacing-xl) 0;
+}
+
+.section-lg {
+    padding: var(--spacing-3xl) 0;
+}
+
+/* ──────────────────────────────────────────────────────────
+   5. Buttons (أزرار)
+   ────────────────────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-family: var(--font-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    background: transparent;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ألوان الأزرار */
+.btn-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--secondary);
+    color: var(--white);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #2b8c45;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: var(--white);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #c5221f;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: var(--dark);
+}
+
+.btn-warning:hover:not(:disabled) {
+    background: #e67300;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: var(--primary);
+    color: var(--white);
+    transform: translateY(-2px);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--gray);
+}
+
+.btn-ghost:hover:not(:disabled) {
+    background: var(--gray-lighter);
+    color: var(--dark);
+}
+
+/* أحجام الأزرار */
+.btn-sm {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-xs);
+}
+
+.btn-lg {
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+}
+
+.btn-icon {
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-full);
+}
+
+/* ──────────────────────────────────────────────────────────
+   6. Cards (كروت)
+   ────────────────────────────────────────────────────────── */
+.card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--gray-lighter);
+    background: var(--white);
+}
+
+.card-header h3, .card-header h4 {
+    margin-bottom: 0;
+}
+
+.card-body {
+    padding: var(--spacing-lg);
+}
+
+.card-footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--gray-lighter);
+    background: var(--light);
+}
+
+/* ──────────────────────────────────────────────────────────
+   7. Forms (نماذج)
+   ────────────────────────────────────────────────────────── */
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-family: var(--font-primary);
+    font-size: var(--font-size-md);
+    line-height: 1.5;
+    color: var(--dark);
+    background-color: var(--white);
+    border: 1px solid var(--gray-lighter);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger);
+}
+
+.form-control.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.1);
+}
+
+.form-text {
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--gray);
+}
+
+.form-error {
+    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--danger);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ──────────────────────────────────────────────────────────
+   8. Alerts & Messages (تنبيهات)
+   ────────────────────────────────────────────────────────── */
+.alert {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    border-right: 4px solid transparent;
+}
+
+.alert-success {
+    background: #e6f4ea;
+    border-right-color: var(--success);
+    color: #137333;
+}
+
+.alert-danger {
+    background: #fce8e6;
+    border-right-color: var(--danger);
+    color: #c5221f;
+}
+
+.alert-warning {
+    background: #fef7e0;
+    border-right-color: var(--warning);
+    color: #b06000;
+}
+
+.alert-info {
+    background: #e8f0fe;
+    border-right-color: var(--info);
+    color: #0d47a1;
+}
+
+/* ──────────────────────────────────────────────────────────
+   9. Badges (شارات)
+   ────────────────────────────────────────────────────────── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+    border-radius: var(--radius-full);
+    background: var(--gray-lighter);
+    color: var(--gray-dark);
+}
+
+.badge-success {
+    background: #e6f4ea;
+    color: #137333;
+}
+
+.badge-danger {
+    background: #fce8e6;
+    color: #c5221f;
+}
+
+.badge-warning {
+    background: #fef7e0;
+    color: #b06000;
+}
+
+.badge-info {
+    background: #e8f0fe;
+    color: #0d47a1;
+}
+
+.badge-primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+/* ──────────────────────────────────────────────────────────
+   10. Loading Spinner
+   ────────────────────────────────────────────────────────── */
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--gray-lighter);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.spinner-lg {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ──────────────────────────────────────────────────────────
+   11. Utilities (كلاسات مساعدة)
+   ────────────────────────────────────────────────────────── */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--spacing-xs); }
+.mt-2 { margin-top: var(--spacing-sm); }
+.mt-3 { margin-top: var(--spacing-md); }
+.mt-4 { margin-top: var(--spacing-lg); }
+.mt-5 { margin-top: var(--spacing-xl); }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+.mb-5 { margin-bottom: var(--spacing-xl); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+.p-5 { padding: var(--spacing-xl); }
+
+.d-flex { display: flex; }
+.d-grid { display: grid; }
+.d-none { display: none; }
+.d-block { display: block; }
+
+.flex-row { flex-direction: row; }
+.flex-column { flex-direction: column; }
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.align-center { align-items: center; }
+.gap-1 { gap: var(--spacing-xs); }
+.gap-2 { gap: var(--spacing-sm); }
+.gap-3 { gap: var(--spacing-md); }
+
+.w-100 { width: 100%; }
+.h-100 { height: 100%; }
+
+.rounded { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-full { border-radius: var(--radius-full); }
+
+.shadow { box-shadow: var(--shadow-sm); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+
+/* ──────────────────────────────────────────────────────────
+   12. Responsive Utilities
+   ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .hide-mobile { display: none; }
+    .text-center-mobile { text-align: center; }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .hide-tablet { display: none; }
+}
+
+@media (min-width: 1025px) {
+    .hide-desktop { display: none; }
+}
