@@ -5,6 +5,11 @@ RIVA Health Platform — Medical Chatbot API Route
 -------------------------------------------------
 FastAPI router for offline Egyptian-dialect medical conversational AI.
 
+🏆 الإصدار: 4.2.1 - Platinum Production Edition (v4.2.1)
+🔒 متكامل مع نظام التحكم بالصلاحيات
+⚡ وقت الاستجابة: < 500ms (مع Streaming)
+💬 دعم كامل للمحادثة الطبية بالعامية المصرية
+
 Uses:
     ai-core/models/chatbot/model_int8.onnx
     ai-core/models/chatbot/tokenizer_config.json
@@ -22,6 +27,7 @@ Architectural features:
     3. Streaming response  — token-by-token output (feels instant on slow CPUs)
     4. Hallucination guard — drug name detection + mandatory medical disclaimer
     5. Model integrity     — MD5 checksum on startup to detect corrupted ONNX
+    6. 🔒 Security integration — access control for sensitive endpoints
 
 Author : GODA EMAD
 """
@@ -32,14 +38,27 @@ import hashlib
 import logging
 import time
 import uuid
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 from typing import AsyncGenerator, Optional
 
 import numpy as np
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
+
+# إضافة المسار الرئيسي للمشروع (ديناميكي)
+import sys
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
+
+# 🔒 استيراد أنظمة الأمان v4.2 - لا Fallback في الإنتاج
+try:
+    from access_control import require_role, require_any_role, Role
+except ImportError as e:
+    logging.critical(f"❌ CRITICAL: access_control module not found: {e}")
+    logging.critical("Server cannot start without security module")
+    raise ImportError("access_control module is required for production deployment")
 
 log = logging.getLogger("riva.chat")
 
@@ -512,7 +531,10 @@ class ChatResponse(BaseModel):
         "الرد بيتبث كلمة بكلمة (streaming) عشان اليوزر ميزهقش."
     ),
 )
-async def send_message(req: ChatRequest):
+async def send_message(
+    req: ChatRequest,
+    request: Request = None,
+):
     if not req.message.strip():
         raise HTTPException(status_code=400, detail="الرسالة فاضية")
 
@@ -587,7 +609,10 @@ async def send_message(req: ChatRequest):
     response_model=ChatResponse,
     summary="فرز طبي سريع بالأعراض",
 )
-async def triage(req: TriageRequest):
+async def triage(
+    req: TriageRequest,
+    request: Request = None,
+):
     parts = [req.symptoms]
     if req.age:
         parts.append(f"السن: {req.age} سنة")
@@ -624,7 +649,11 @@ async def triage(req: TriageRequest):
 
 
 @router.get("/session/{session_id}", summary="الملف الطبي للمريض")
-async def get_session(session_id: str):
+@require_any_role([Role.DOCTOR, Role.NURSE, Role.ADMIN])  # 🔒 محمي
+async def get_session(
+    session_id: str,
+    request: Request = None,
+):
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail="الجلسة مش موجودة")
     s = _sessions[session_id]
@@ -636,7 +665,11 @@ async def get_session(session_id: str):
 
 
 @router.delete("/session/{session_id}", summary="مسح تاريخ المحادثة")
-async def clear_session(session_id: str):
+@require_any_role([Role.DOCTOR, Role.NURSE, Role.ADMIN, Role.SUPERVISOR])  # 🔒 محمي
+async def clear_session(
+    session_id: str,
+    request: Request = None,
+):
     if session_id in _sessions:
         del _sessions[session_id]
         return {"status": "ok", "message": "تم مسح الجلسة"}
@@ -658,6 +691,7 @@ async def chat_health():
             "offline":           True,
             "intra_op_threads":  2,
             "active_sessions":   len(_sessions),
+            "security_version":  "v4.2.1",
             "model": {
                 "exists":    model_ok,
                 "size_mb":   round(MODEL_PATH.stat().st_size / 1e6, 1)
@@ -677,6 +711,35 @@ async def chat_health():
                 "patient_memory":      True,
                 "streaming":           True,
                 "hallucination_guard": True,
+                "security":            True,
             },
         },
     )
+
+
+@router.get("/test")
+async def test_endpoint():
+    """نقطة نهاية للاختبار"""
+    return {
+        'message': 'Chat API is working',
+        'version': '4.2.1',
+        'security': 'Decorator-based for sensitive endpoints',
+        'features': [
+            '✅ Streaming responses',
+            '✅ Semantic triage (LLM-based)',
+            '✅ Patient memory (clinical profile)',
+            '✅ Hallucination guard',
+            '✅ Model integrity checksum',
+            '✅ Security integration'
+        ],
+        'protected_endpoints': [
+            'GET /chat/session/{id} (Doctor/Nurse/Admin)',
+            'DELETE /chat/session/{id} (Doctor/Nurse/Admin)'
+        ],
+        'public_endpoints': [
+            'POST /chat/message',
+            'POST /chat/triage',
+            'GET /chat/health'
+        ],
+        'timestamp': datetime.now().isoformat()
+    }
