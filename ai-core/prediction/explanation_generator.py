@@ -95,6 +95,18 @@ _READ_RECOMMENDATIONS: dict[str, list[str]] = {
     ],
 }
 
+# Dynamic recommendation add-ons based on dominant factor
+_FACTOR_RECOMMENDATIONS: dict[str, str] = {
+    "num_medications":   "مراجعة جدول الأدوية اليومي مع الصيدلاني — كثرة الأدوية تزيد الخطر",
+    "num_diagnoses":     "تنسيق بين أطباء التخصصات المختلفة — تعدد التشخيصات يحتاج تكاملاً",
+    "has_diabetes":      "مراجعة جدول قياسات السكر اليومي — التحكم في السكر يقلل الخطر بشكل كبير",
+    "has_heart_disease": "مراجعة أدوية القلب ومتابعة النبض يومياً",
+    "has_hypertension":  "قياس الضغط مرتين يومياً وتسجيل النتائج",
+    "visit_frequency":   "تحديد سبب تكرار الزيارات ومعالجته جذرياً",
+    "medication_changes":"مراجعة سبب التغييرات المتكررة في الأدوية مع الطبيب",
+    "los_days":          "تحضير بيئة المنزل للاستقبال قبل الخروج",
+}
+
 _READ_SUMMARIES: dict[str, str] = {
     "high":   "احتمال إعادة الإدخال مرتفع — يحتاج متابعة مكثفة فوراً",
     "medium": "احتمال إعادة الإدخال متوسط — متابعة دقيقة مطلوبة",
@@ -200,9 +212,21 @@ class ExplanationGenerator:
                 f"Top features: {[f['name'] for f in top_factors]}"
             )
 
+        # 1. Dynamic recommendations — add factor-specific advice
+        recs = list(_READ_RECOMMENDATIONS[risk])
+        for factor in top_factors[:2]:
+            extra = _FACTOR_RECOMMENDATIONS.get(factor["name"])
+            if extra and extra not in recs:
+                recs.append(extra)
+
+        # 2. Uncertainty note
+        confidence_tier = "reliable" if 0.1 < probability < 0.9 else "uncertain"
+        if confidence_tier == "uncertain":
+            recs.insert(0, "⚠️ هذا التقدير تقريبي — يرجى الاعتماد كلياً على الفحص السريري")
+
         result = {
             "summary":          summary,
-            "recommendations":  _READ_RECOMMENDATIONS[risk],
+            "recommendations":  recs,
             "risk_level":       risk,
             "risk_level_ar":    {"high":"مرتفع","medium":"متوسط","low":"منخفض"}[risk],
             "color":            _COLORS[risk],
@@ -211,7 +235,7 @@ class ExplanationGenerator:
             "target_page":      self._readmission_page(risk),
             "doctor_review":    risk == "high",
             "doctor_note":      doctor_note,
-            "confidence_tier":  "reliable" if 0.1 < probability < 0.9 else "uncertain",
+            "confidence_tier":  confidence_tier,
             "timestamp":        datetime.now(timezone.utc).isoformat(),
         }
 
@@ -418,6 +442,62 @@ class ExplanationGenerator:
         }[category]
 
 
+# ─── Audit storage ───────────────────────────────────────────────────────────
+
+def _store_explanation_audit(
+    patient_id:  str,
+    exp_type:    str,   # "readmission" | "los" | "combined"
+    summary_ar:  str,
+    risk_level:  str,
+    probability: float,
+    target_page: str,
+) -> None:
+    """
+    Stores Arabic summary in unified_predictions_audit.db.
+    Accessible to doctor in 16_doctor_notes.html.
+
+    Table: explanation_audit
+        patient_id, timestamp, exp_type, summary_ar,
+        risk_level, probability, target_page
+    """
+    try:
+        import sqlite3
+        from pathlib import Path
+
+        db_path = (
+            Path(__file__).parent.parent.parent
+            / "data/databases/unified_predictions_audit.db"
+        )
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        con = sqlite3.connect(str(db_path))
+        cur = con.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS explanation_audit (
+                patient_id   TEXT,
+                timestamp    TEXT,
+                exp_type     TEXT,
+                summary_ar   TEXT,
+                risk_level   TEXT,
+                probability  REAL,
+                target_page  TEXT
+            )
+        """)
+        cur.execute("INSERT INTO explanation_audit VALUES (?,?,?,?,?,?,?)", (
+            patient_id,
+            datetime.now(timezone.utc).isoformat(),
+            exp_type,
+            summary_ar,
+            risk_level,
+            probability,
+            target_page,
+        ))
+        con.commit()
+        con.close()
+        log.debug("[ExplanationGenerator] audit stored for %s", patient_id)
+    except Exception as e:
+        log.warning("[ExplanationGenerator] audit failed: %s", e)
+
+
 # ─── Singleton ────────────────────────────────────────────────────────────────
 
 _generator = ExplanationGenerator()
@@ -439,9 +519,18 @@ def explain_readmission(
         exp = explain_readmission(result["probability"], result["shap_ready"])
         result["explanation"] = exp
     """
-    return _generator.generate_readmission_explanation(
+    result = _generator.generate_readmission_explanation(
         probability, features, session_id, for_doctor
     )
+    _store_explanation_audit(
+        patient_id  = session_id or "unknown",
+        exp_type    = "readmission",
+        summary_ar  = result["summary"],
+        risk_level  = result["risk_level"],
+        probability = result["probability"],
+        target_page = result["target_page"],
+    )
+    return result
 
 
 def explain_los(
@@ -458,9 +547,18 @@ def explain_los(
         from .explanation_generator import explain_los
         exp = explain_los(result["los"]["predicted_days"], result["shap_ready"])
     """
-    return _generator.generate_los_explanation(
+    result = _generator.generate_los_explanation(
         days, features, los_mae, session_id, for_doctor
     )
+    _store_explanation_audit(
+        patient_id  = session_id or "unknown",
+        exp_type    = "los",
+        summary_ar  = result["summary"],
+        risk_level  = result["category"],
+        probability = days / 30,   # normalised for storage
+        target_page = result["target_page"],
+    )
+    return result
 
 
 def explain_combined(
