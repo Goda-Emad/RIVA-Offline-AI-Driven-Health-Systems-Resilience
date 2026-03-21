@@ -5,17 +5,17 @@ API لشجرة العائلة والمخاطر الوراثية
 Family Tree & Genetic Risk API
 ===============================================================================
 
-🏆 الإصدار: 4.0.0 - Platinum Production Edition
-🥇 جاهز للرفع على أي سيرفر (Cloud/On-Premise)
+🏆 الإصدار: 4.1.0 - Platinum Production Edition (v4.1)
+🥇 متكامل مع db_loader v4.1 - بيانات مشفرة حقيقية
 ⚡ وقت الاستجابة: < 250ms
-🔐 متكامل مع نظام التحكم بالصلاحيات والتشفير
+🔐 متكامل مع نظام التحكم بالصلاحيات (Decorators Only)
 👨‍👩‍👧‍👦 دعم كامل للشجرة العائلية والمخاطر الوراثية
 ===============================================================================
 """
 
 from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, List, Any, Literal
+from typing import Optional, Dict, List, Any
 from datetime import datetime
 import logging
 import sys
@@ -23,11 +23,14 @@ import os
 import hashlib
 from enum import Enum
 
-# إضافة المسار الرئيسي للمشروع (ديناميكي - يشتغل في أي مكان)
+# إضافة المسار الرئيسي للمشروع
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# استيراد أنظمة الأمان v4.0
-from access_control import get_access_control, Role
+# استيراد أنظمة الأمان v4.1 - باستخدام Decorators فقط
+from access_control import require_role, require_any_role
+
+# استيراد db_loader v4.1
+from db_loader import get_db_loader
 
 # إعداد التسجيل
 logging.basicConfig(level=logging.INFO)
@@ -110,7 +113,7 @@ class GeneticRiskFactor(BaseModel):
     percentage: float
     description: str
     arabic_description: str
-    affected_members: List[str]  # أسماء الأعضاء المصابين
+    affected_members: List[str]
     recommendations: List[str]
 
 
@@ -135,14 +138,6 @@ class FamilyRiskReport(BaseModel):
     arabic_recommendations: List[str]
 
 
-class FamilyLinkRequest(BaseModel):
-    """طلب بيانات شجرة العائلة"""
-    patient_id: str
-    language: Language = Language.ARABIC
-    include_risk_report: bool = True
-    max_generations: int = Field(3, ge=1, le=5)
-
-
 class FamilyLinkResponse(BaseModel):
     """استجابة شجرة العائلة"""
     success: bool
@@ -152,12 +147,10 @@ class FamilyLinkResponse(BaseModel):
     patient_id: str
     family_tree: Optional[FamilyTree] = None
     risk_report: Optional[FamilyRiskReport] = None
-    access_info: Optional[Dict[str, Any]] = None
 
 
 class UpdateFamilyMemberRequest(BaseModel):
     """طلب تحديث بيانات عضو في العائلة"""
-    patient_id: str
     member_id: str
     name: Optional[str] = None
     age: Optional[int] = None
@@ -174,9 +167,6 @@ class FamilyLinkService:
     """خدمة شجرة العائلة والمخاطر الوراثية"""
     
     def __init__(self):
-        # قاعدة بيانات افتراضية للعائلات (في الإنتاج تستخدم قاعدة بيانات حقيقية)
-        self.family_database: Dict[str, FamilyTree] = {}
-        
         # قاعدة بيانات المخاطر الوراثية
         self.genetic_risk_rules = {
             GeneticCondition.DIABETES_TYPE_2: {
@@ -201,6 +191,93 @@ class FamilyLinkService:
             }
         }
     
+    def _convert_db_member_to_model(self, db_member: Dict) -> Optional[FamilyMember]:
+        """
+        تحويل بيانات العضو من قاعدة البيانات إلى نموذج Pydantic
+        متوافق مع هيكل البيانات من seed_all_databases.py
+        """
+        try:
+            # استخراج الـ subject_id كـ id
+            member_id = db_member.get('subject_id', '')
+            if not member_id:
+                member_id = db_member.get('id', '')
+            
+            # بناء قائمة الحالات الوراثية من الحقول المنطقية
+            genetic_conditions = []
+            
+            # فحص الحالات الوراثية من الحقول المنطقية
+            if db_member.get('has_diabetes', False):
+                genetic_conditions.append(GeneticCondition.DIABETES_TYPE_2)
+            if db_member.get('has_hypertension', False):
+                genetic_conditions.append(GeneticCondition.HYPERTENSION)
+            if db_member.get('has_heart_disease', False):
+                genetic_conditions.append(GeneticCondition.HEART_DISEASE)
+            if db_member.get('has_cancer', False):
+                # تحديد نوع السرطان إن وجد
+                cancer_type = db_member.get('cancer_type', '')
+                if 'breast' in cancer_type.lower():
+                    genetic_conditions.append(GeneticCondition.BREAST_CANCER)
+                elif 'colon' in cancer_type.lower():
+                    genetic_conditions.append(GeneticCondition.COLON_CANCER)
+                else:
+                    genetic_conditions.append(GeneticCondition.BREAST_CANCER)  # افتراضي
+            
+            # تحويل العلاقة من النص إلى Enum
+            relationship_str = db_member.get('relationship', 'son')
+            try:
+                relationship = RelationshipType(relationship_str)
+            except ValueError:
+                relationship = RelationshipType.SON
+            
+            # تحويل الجنس
+            gender_str = db_member.get('gender', 'male')
+            try:
+                gender = Gender(gender_str)
+            except ValueError:
+                gender = Gender.MALE
+            
+            return FamilyMember(
+                id=member_id,
+                name=db_member.get('name', ''),
+                gender=gender,
+                relationship=relationship,
+                age=db_member.get('age'),
+                is_alive=db_member.get('is_alive', True),
+                genetic_conditions=genetic_conditions,
+                notes=db_member.get('notes')
+            )
+            
+        except Exception as e:
+            logger.warning(f"Failed to parse member: {e}, data: {db_member}")
+            return None
+    
+    def parse_family_tree(self, patient_id: str, family_data: Dict) -> FamilyTree:
+        """تحليل بيانات شجرة العائلة من قاعدة البيانات"""
+        
+        members = []
+        for member_data in family_data.get('members', []):
+            member = self._convert_db_member_to_model(member_data)
+            if member:
+                members.append(member)
+        
+        # حساب عدد الأجيال
+        generations = set()
+        for member in members:
+            gen = 1
+            if member.relationship in [RelationshipType.FATHER, RelationshipType.MOTHER]:
+                gen = 2
+            elif member.relationship in [RelationshipType.GRANDFATHER, RelationshipType.GRANDMOTHER]:
+                gen = 3
+            generations.add(gen)
+        
+        return FamilyTree(
+            root_patient_id=patient_id,
+            root_name=family_data.get('root_name', 'Patient'),
+            members=members,
+            generation_count=max(generations) if generations else 1,
+            total_members=len(members)
+        )
+    
     def calculate_genetic_risk(
         self, 
         patient_id: str, 
@@ -222,14 +299,12 @@ class FamilyLinkService:
         
         # حساب المخاطر لكل حالة
         for condition, affected_members in condition_counts.items():
-            # عدد الأعضاء المصابين
             affected_count = len(affected_members)
             
-            # حساب نسبة الخطر (كلما زاد عدد المصابين، زاد الخطر)
-            base_risk = 0.10  # 10% خطر أساسي
+            # حساب نسبة الخطر
+            base_risk = 0.10
             multiplier = self.genetic_risk_rules.get(condition, {}).get('risk_multiplier', 1.5)
             
-            # زيادة الخطر مع كل عضو مصاب
             additional_risk = (affected_count - 1) * 0.15
             total_risk = min(base_risk * multiplier + additional_risk, 0.95)
             
@@ -243,7 +318,7 @@ class FamilyLinkService:
             else:
                 risk_level = RiskLevel.VERY_HIGH
             
-            # التوصيات بناءً على مستوى الخطر
+            # التوصيات
             recommendations = self._get_recommendations(condition, risk_level, language)
             
             # وصف الخطر
@@ -262,13 +337,11 @@ class FamilyLinkService:
                 percentage=round(total_risk * 100, 1),
                 description=description_en,
                 arabic_description=description_ar,
-                affected_members=affected_members[:5],  # عرض أول 5 أعضاء فقط
+                affected_members=affected_members[:5],
                 recommendations=recommendations
             ))
         
-        # ترتيب حسب مستوى الخطر (الأعلى أولاً)
         risks.sort(key=lambda x: x.percentage, reverse=True)
-        
         return risks
     
     def _get_recommendations(
@@ -300,7 +373,6 @@ class FamilyLinkService:
             }
         }
         
-        # Default recommendations
         default_recs = {
             RiskLevel.LOW: ['Regular screening', 'Lifestyle modifications', 'Annual follow-up'],
             RiskLevel.MODERATE: ['Increased screening frequency', 'Specialist consultation', 'Risk factor management'],
@@ -308,7 +380,6 @@ class FamilyLinkService:
             RiskLevel.VERY_HIGH: ['Urgent specialist evaluation', 'Comprehensive genetic testing', 'Intensive preventive care']
         }
         
-        # اللغة
         lang_map = {
             'Annual blood sugar screening': 'فحص السكر سنوياً',
             'Healthy diet': 'نظام غذائي صحي',
@@ -357,7 +428,6 @@ class FamilyLinkService:
             'Intensive preventive care': 'رعاية وقائية مكثفة'
         }
         
-        # الحصول على التوصيات
         condition_recs = recommendations.get(condition, default_recs)
         recs = condition_recs.get(risk_level, default_recs[RiskLevel.MODERATE])
         
@@ -381,7 +451,6 @@ class FamilyLinkService:
         high_risks = [r for r in risks if r.risk_level in [RiskLevel.HIGH, RiskLevel.VERY_HIGH]]
         
         if high_risks:
-            conditions = [r.condition.value.replace('_', ' ') for r in high_risks[:3]]
             if language == Language.ARABIC:
                 summary = f"تم اكتشاف {len(high_risks)} خطر وراثي مرتفع"
                 arabic_summary = f"تم اكتشاف {len(high_risks)} خطر وراثي مرتفع يتطلب متابعة فورية"
@@ -394,24 +463,22 @@ class FamilyLinkService:
 
 
 # =========================================================================
-# Main Endpoints
+# Main Endpoint - Decorator فقط (بدون Depends)
 # =========================================================================
 
 @router.get("/family-links/{patient_id}", response_model=FamilyLinkResponse)
+@require_any_role([Role.GENETIC_COUNSELOR, Role.DOCTOR, Role.ADMIN, Role.SUPERVISOR])
 async def get_family_links(
     patient_id: str,
     language: Language = Language.ARABIC,
-    include_risk_report: bool = True,
-    max_generations: int = 3,
-    fastapi_request: Request = None,
-    access: get_access_control = Depends(get_access_control)
+    include_risk_report: bool = True
 ):
     """
     👨‍👩‍👧‍👦 استرجاع شجرة العائلة والمخاطر الوراثية
     
     🔐 الأمان:
-        - التحقق من هوية المستخدم عبر JWT
-        - التحقق من صلاحيات الوصول (Genetic Counselor, Doctor, Admin, Supervisor)
+        - Decorator @require_any_role يضمن الصلاحيات تلقائياً
+        - لا يوجد Depends(get_access_control) - Decorator هو المسؤول عن الأمان
     
     📊 المخرجات:
         - شجرة العائلة الكاملة
@@ -424,162 +491,50 @@ async def get_family_links(
     logger.info(f"👨‍👩‍👧‍👦 Family links request | Patient: {patient_id} | Request ID: {request_id}")
     
     # =================================================================
-    # 🔐 LAYER 1: Authentication & Authorization
+    # 📦 LAYER 2: Load Family Data from Encrypted Database (v4.1)
     # =================================================================
     try:
-        access.authenticate()
+        db = get_db_loader()
         
-        # التحقق من الصلاحيات - Genetic Counselor, Doctor, Admin, Supervisor فقط
-        user_role = access.get_user_role()
-        allowed_roles = [Role.GENETIC_COUNSELOR, Role.DOCTOR, Role.ADMIN, Role.SUPERVISOR]
+        # تحميل بيانات شجرة العائلة من الملف المشفر
+        family_data = db.load_family_links(patient_id)
         
-        if not access.require_any_role(allowed_roles):
-            logger.warning(f"❌ Unauthorized access | Role: {user_role} | Patient: {patient_id}")
-            raise HTTPException(
-                status_code=403, 
-                detail=f"Role {user_role} does not have permission to view family links. Required: genetic_counselor, doctor, admin, or supervisor"
-            )
+        if not family_data:
+            logger.warning(f"⚠️ No family data found for patient {patient_id}")
+            raise HTTPException(status_code=404, detail=f"No family data found for patient {patient_id}")
         
-        logger.info(f"✅ Authentication successful | Role: {user_role} | Request ID: {request_id}")
+        logger.info(f"📊 Family data loaded from encrypted database | Members: {len(family_data.get('members', []))}")
         
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"❌ Authentication failed: {e}")
-        raise HTTPException(status_code=401, detail="Authentication failed")
-    
-    # =================================================================
-    # 📦 LAYER 2: Load Family Data
-    # =================================================================
-    try:
-        # محاولة تحميل بيانات العائلة من قاعدة البيانات
-        from db_loader import get_db_loader
-        
-        db = get_db_loader()
-        patient_data = await db.load_patient_context(patient_id, include_encrypted=True)
-        
-        # بناء شجرة العائلة (في الإنتاج، هذه البيانات تأتي من قاعدة بيانات)
-        # هنا نستخدم بيانات افتراضية للتجربة
-        
-        # بيانات افتراضية لشجرة العائلة
-        family_members = [
-            FamilyMember(
-                id="p1",
-                name="أحمد محمد" if language == Language.ARABIC else "Ahmed Mohamed",
-                gender=Gender.MALE,
-                relationship=RelationshipType.FATHER,
-                age=65,
-                is_alive=True,
-                genetic_conditions=[GeneticCondition.HYPERTENSION, GeneticCondition.DIABETES_TYPE_2]
-            ),
-            FamilyMember(
-                id="p2",
-                name="فاطمة محمد" if language == Language.ARABIC else "Fatima Mohamed",
-                gender=Gender.FEMALE,
-                relationship=RelationshipType.MOTHER,
-                age=62,
-                is_alive=True,
-                genetic_conditions=[GeneticCondition.HYPERTENSION]
-            ),
-            FamilyMember(
-                id="p3",
-                name="علي أحمد" if language == Language.ARABIC else "Ali Ahmed",
-                gender=Gender.MALE,
-                relationship=RelationshipType.BROTHER,
-                age=40,
-                is_alive=True,
-                genetic_conditions=[GeneticCondition.DIABETES_TYPE_2]
-            ),
-            FamilyMember(
-                id="p4",
-                name="سارة أحمد" if language == Language.ARABIC else "Sara Ahmed",
-                gender=Gender.FEMALE,
-                relationship=RelationshipType.SISTER,
-                age=38,
-                is_alive=True,
-                genetic_conditions=[]
-            ),
-            FamilyMember(
-                id="p5",
-                name="محمد عبدالله" if language == Language.ARABIC else "Mohamed Abdullah",
-                gender=Gender.MALE,
-                relationship=RelationshipType.GRANDFATHER,
-                age=85,
-                is_alive=False,
-                genetic_conditions=[GeneticCondition.HEART_DISEASE, GeneticCondition.HYPERTENSION]
-            )
-        ]
-        
-        family_tree = FamilyTree(
-            root_patient_id=patient_id,
-            root_name=patient_data.get('name', 'Patient') if patient_data else 'Patient',
-            members=family_members,
-            generation_count=3,
-            total_members=len(family_members)
-        )
-        
-        logger.info(f"📊 Family tree loaded | Members: {len(family_members)}")
-        
-    except ImportError:
-        logger.warning("⚠️ db_loader not available, using demo data")
-        # بيانات افتراضية
-        family_members = [
-            FamilyMember(
-                id="demo1",
-                name="Father",
-                gender=Gender.MALE,
-                relationship=RelationshipType.FATHER,
-                age=65,
-                is_alive=True,
-                genetic_conditions=[GeneticCondition.HYPERTENSION]
-            ),
-            FamilyMember(
-                id="demo2",
-                name="Mother",
-                gender=Gender.FEMALE,
-                relationship=RelationshipType.MOTHER,
-                age=62,
-                is_alive=True,
-                genetic_conditions=[]
-            )
-        ]
-        
-        family_tree = FamilyTree(
-            root_patient_id=patient_id,
-            root_name="Patient",
-            members=family_members,
-            generation_count=2,
-            total_members=len(family_members)
-        )
-        
     except Exception as e:
         logger.error(f"❌ Failed to load family data: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to load family data: {str(e)}")
     
     # =================================================================
-    # 🧬 LAYER 3: Calculate Genetic Risks
+    # 🧬 LAYER 3: Parse and Calculate Genetic Risks
     # =================================================================
-    risk_report = None
-    
-    if include_risk_report:
-        try:
-            service = FamilyLinkService()
-            
-            # حساب المخاطر الوراثية
+    try:
+        service = FamilyLinkService()
+        
+        # تحويل البيانات إلى نموذج شجرة العائلة
+        family_tree = service.parse_family_tree(patient_id, family_data)
+        logger.info(f"🌳 Family tree parsed | Members: {family_tree.total_members} | Generations: {family_tree.generation_count}")
+        
+        # حساب المخاطر الوراثية
+        risk_report = None
+        if include_risk_report:
             genetic_risks = service.calculate_genetic_risk(patient_id, family_tree, language)
-            
-            # توليد الملخص
             summary, arabic_summary = service.generate_risk_summary(genetic_risks, language)
             
-            # التوصيات العامة
+            # جمع التوصيات العامة
             general_recommendations = []
             arabic_general_recommendations = []
             
-            if genetic_risks:
-                for risk in genetic_risks[:3]:
-                    general_recommendations.extend(risk.recommendations[:2])
-                    if language == Language.ARABIC:
-                        arabic_general_recommendations.extend(risk.recommendations[:2])
+            for risk in genetic_risks[:3]:
+                general_recommendations.extend(risk.recommendations[:2])
+                if language == Language.ARABIC:
+                    arabic_general_recommendations.extend(risk.recommendations[:2])
             
             if not general_recommendations:
                 general_recommendations = [
@@ -603,9 +558,10 @@ async def get_family_links(
             )
             
             logger.info(f"🧬 Genetic risks calculated | Found: {len(genetic_risks)} risks")
-            
-        except Exception as e:
-            logger.error(f"❌ Risk calculation failed: {e}")
+        
+    except Exception as e:
+        logger.error(f"❌ Risk calculation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Risk calculation failed: {str(e)}")
     
     # =================================================================
     # 📤 LAYER 4: Response
@@ -619,11 +575,7 @@ async def get_family_links(
         processing_time_ms=round(processing_time, 2),
         patient_id=patient_id,
         family_tree=family_tree,
-        risk_report=risk_report,
-        access_info={
-            'user_role': await access.get_user_role(),
-            'authenticated': True
-        }
+        risk_report=risk_report
     )
     
     logger.info(f"✅ Family links completed in {processing_time:.0f}ms | Request ID: {request_id}")
@@ -631,48 +583,60 @@ async def get_family_links(
 
 
 # =========================================================================
-# Update Family Member Endpoint
+# Update Family Member Endpoint - Simulated for Hackathon (v4.1)
 # =========================================================================
 
 @router.put("/family-links/{patient_id}/member/{member_id}")
+@require_role(Role.GENETIC_COUNSELOR)
 async def update_family_member(
     patient_id: str,
     member_id: str,
-    request: UpdateFamilyMemberRequest,
-    fastapi_request: Request,
-    access: get_access_control = Depends(get_access_control)
+    request: UpdateFamilyMemberRequest
 ):
     """
     ✏️ تحديث بيانات عضو في شجرة العائلة
+    
+    🔐 الأمان:
+        - Decorator @require_role يضمن أن المستخدم هو Genetic Counselor
+    
+    ⚠️ ملاحظة للهاكاثون:
+        هذا المسار يقوم بـ Simulated Update (تحديث وهمي) لأن تعديل 
+        الملفات المشفرة يتطلب وقت O(N) وقد يسبب مشاكل في التزامن.
+        في الإنتاج الحقيقي، يتم التحديث عبر Queue System.
     """
     start_time = datetime.now()
     
-    try:
-        access.authenticate()
-        
-        # Doctor or Genetic Counselor only
-        user_role = access.get_user_role()
-        if user_role not in [Role.DOCTOR, Role.GENETIC_COUNSELOR, Role.ADMIN]:
-            raise HTTPException(status_code=403, detail="Only doctors and genetic counselors can update family data")
-        
-        # في الإنتاج، هنا يتم تحديث قاعدة البيانات
-        logger.info(f"✏️ Updating family member | Patient: {patient_id} | Member: {member_id}")
-        
-        processing_time = (datetime.now() - start_time).total_seconds() * 1000
-        
-        return {
-            'success': True,
-            'message': 'Family member updated successfully',
-            'patient_id': patient_id,
-            'member_id': member_id,
-            'processing_time_ms': round(processing_time, 2)
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to update family member: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    # =================================================================
+    # 📝 Simulated Update for Hackathon
+    # =================================================================
+    logger.info(f"✏️ [SIMULATED] Updating family member | Patient: {patient_id} | Member: {member_id}")
+    logger.info(f"   Update data: {request.model_dump(exclude_none=True)}")
+    
+    # بناء قائمة الحقول المحدثة
+    updated_fields = []
+    if request.name is not None:
+        updated_fields.append('name')
+    if request.age is not None:
+        updated_fields.append('age')
+    if request.is_alive is not None:
+        updated_fields.append('is_alive')
+    if request.genetic_conditions is not None:
+        updated_fields.append('genetic_conditions')
+    if request.notes is not None:
+        updated_fields.append('notes')
+    
+    processing_time = (datetime.now() - start_time).total_seconds() * 1000
+    
+    return {
+        'success': True,
+        'simulated': True,  # علم توضيحي للهاكاثون
+        'message': '[SIMULATED] Family member updated successfully - Data would be persisted in production',
+        'hackathon_note': 'In production, this would update the encrypted database via queue system',
+        'patient_id': patient_id,
+        'member_id': member_id,
+        'updated_fields': updated_fields,
+        'processing_time_ms': round(processing_time, 2)
+    }
 
 
 # =========================================================================
@@ -685,15 +649,18 @@ async def health_check():
     return {
         'status': 'healthy',
         'service': 'RIVA-Maternal Family Links API',
-        'version': '4.0.0',
-        'security_version': 'v4.0',
+        'version': '4.1.0',
+        'security_version': 'v4.1',
+        'security_approach': 'Decorator-only (no Depends conflict)',
         'features': [
             'family_tree',
             'genetic_risk_calculation',
             'risk_assessment',
             'recommendations'
         ],
+        'data_parsing': 'Compatible with seed_all_databases.py structure',
         'supported_conditions': len(GeneticCondition),
+        'db_loader_integrated': True,
         'timestamp': datetime.now().isoformat()
     }
 
@@ -703,40 +670,11 @@ async def health_check():
 # =========================================================================
 
 @router.get("/family-links/conditions")
-async def get_genetic_conditions(
-    fastapi_request: Request,
-    access: get_access_control = Depends(get_access_control)
-):
+@require_any_role([Role.GENETIC_COUNSELOR, Role.DOCTOR, Role.ADMIN])
+async def get_genetic_conditions():
     """📚 قاموس الحالات الوراثية المدعومة"""
-    try:
-        access.authenticate()
-        
-        conditions = [
-            {
-                'code': c.value,
-                'name_en': c.value.replace('_', ' ').title(),
-                'name_ar': _get_arabic_name(c),
-                'risk_multiplier': 2.5,
-                'screening_available': True
-            }
-            for c in GeneticCondition
-        ]
-        
-        return {
-            'success': True,
-            'conditions': conditions,
-            'total': len(conditions)
-        }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-def _get_arabic_name(condition: GeneticCondition) -> str:
-    """الحصول على الاسم العربي للحالة الوراثية"""
-    names = {
+    
+    arabic_names = {
         GeneticCondition.DIABETES_TYPE_1: 'السكري من النوع الأول',
         GeneticCondition.DIABETES_TYPE_2: 'السكري من النوع الثاني',
         GeneticCondition.HYPERTENSION: 'ارتفاع ضغط الدم',
@@ -749,7 +687,21 @@ def _get_arabic_name(condition: GeneticCondition) -> str:
         GeneticCondition.CYSTIC_FIBROSIS: 'التليف الكيسي',
         GeneticCondition.HUNTINGTON: 'هنتنغتون'
     }
-    return names.get(condition, condition.value.replace('_', ' '))
+    
+    conditions = []
+    for c in GeneticCondition:
+        conditions.append({
+            'code': c.value,
+            'name_en': c.value.replace('_', ' ').title(),
+            'name_ar': arabic_names.get(c, c.value.replace('_', ' ')),
+            'screening_available': True
+        })
+    
+    return {
+        'success': True,
+        'conditions': conditions,
+        'total': len(conditions)
+    }
 
 
 # =========================================================================
@@ -761,10 +713,14 @@ async def test_endpoint():
     """نقطة نهاية بسيطة للاختبار"""
     return {
         'message': 'Family Links API is working',
-        'version': '4.0.0',
+        'version': '4.1.0',
+        'security': 'Decorator-based @require_any_role (no Depends conflict)',
+        'data_source': 'db_loader.load_family_links()',
+        'data_parsing': 'Compatible with seed_all_databases.py structure',
+        'update_mode': 'Simulated (Hackathon mode)',
         'endpoints': [
             'GET /family-links/{patient_id}',
-            'PUT /family-links/{patient_id}/member/{member_id}',
+            'PUT /family-links/{patient_id}/member/{member_id} (Simulated)',
             'GET /family-links/conditions',
             'GET /family-links/health'
         ]
