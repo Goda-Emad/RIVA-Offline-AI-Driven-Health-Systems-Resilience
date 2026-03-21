@@ -1,1 +1,786 @@
+/* ============================================================
+   RIVA Health Platform - Dashboard Styles
+   ============================================================
+   تصميم لوحات التحكم:
+   - 09_doctor_dashboard.html (لوحة الدكتور)
+   - 10_mother_dashboard.html (لوحة الأم)
+   - 11_school_dashboard.html (لوحة المدرسة)
+   ============================================================ */
 
+/* ──────────────────────────────────────────────────────────
+   1. Dashboard Layout
+   ────────────────────────────────────────────────────────── */
+.dashboard-container {
+    display: flex;
+    min-height: calc(100vh - 120px);
+    background: var(--light);
+}
+
+/* الشريط الجانبي */
+.dashboard-sidebar {
+    width: 280px;
+    background: var(--white);
+    border-left: 1px solid var(--gray-lighter);
+    padding: var(--spacing-lg) 0;
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.dashboard-sidebar-header {
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
+    border-bottom: 1px solid var(--gray-lighter);
+    margin-bottom: var(--spacing-lg);
+}
+
+.dashboard-avatar {
+    width: 80px;
+    height: 80px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.dashboard-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.dashboard-avatar span {
+    font-size: 32px;
+    color: var(--white);
+}
+
+.dashboard-user-name {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.dashboard-user-role {
+    font-size: var(--font-size-sm);
+    color: var(--gray);
+}
+
+/* قائمة التنقل الجانبية */
+.dashboard-nav {
+    list-style: none;
+    padding: 0;
+}
+
+.dashboard-nav-item {
+    margin-bottom: var(--spacing-xs);
+}
+
+.dashboard-nav-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: var(--gray-dark);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    border-right: 3px solid transparent;
+}
+
+.dashboard-nav-link:hover {
+    background: var(--light);
+    color: var(--primary);
+}
+
+.dashboard-nav-link.active {
+    background: rgba(26, 115, 232, 0.1);
+    border-right-color: var(--primary);
+    color: var(--primary);
+}
+
+.dashboard-nav-icon {
+    width: 24px;
+    text-align: center;
+    font-size: 18px;
+}
+
+/* المحتوى الرئيسي */
+.dashboard-main {
+    flex: 1;
+    padding: var(--spacing-lg);
+    overflow-x: auto;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.dashboard-title h1 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-xs);
+}
+
+.dashboard-title p {
+    color: var(--gray);
+    margin-bottom: 0;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+/* ──────────────────────────────────────────────────────────
+   2. Stats Cards (بطاقات الإحصائيات)
+   ────────────────────────────────────────────────────────── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary);
+}
+
+.stat-card.primary::before { background: var(--primary); }
+.stat-card.success::before { background: var(--success); }
+.stat-card.warning::before { background: var(--warning); }
+.stat-card.danger::before { background: var(--danger); }
+.stat-card.info::before { background: var(--info); }
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(26, 115, 232, 0.1);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--gray);
+}
+
+.stat-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+}
+
+.stat-trend.up {
+    background: rgba(52, 168, 83, 0.1);
+    color: var(--success);
+}
+
+.stat-trend.down {
+    background: rgba(234, 67, 53, 0.1);
+    color: var(--danger);
+}
+
+/* ──────────────────────────────────────────────────────────
+   3. Patient List (قائمة المرضى - للدكتور)
+   ────────────────────────────────────────────────────────── */
+.patients-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.section-title i {
+    color: var(--primary);
+}
+
+.patients-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.patients-table th,
+.patients-table td {
+    padding: var(--spacing-md);
+    text-align: right;
+    border-bottom: 1px solid var(--gray-lighter);
+}
+
+.patients-table th {
+    font-weight: 600;
+    color: var(--gray);
+    font-size: var(--font-size-sm);
+}
+
+.patients-table tr:hover {
+    background: var(--light);
+}
+
+.patient-status {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.status-critical {
+    background: rgba(234, 67, 53, 0.1);
+    color: var(--danger);
+}
+
+.status-warning {
+    background: rgba(251, 188, 4, 0.1);
+    color: var(--warning);
+}
+
+.status-stable {
+    background: rgba(52, 168, 83, 0.1);
+    color: var(--success);
+}
+
+/* ──────────────────────────────────────────────────────────
+   4. Pregnancy Monitoring (متابعة الحمل - للأم)
+   ────────────────────────────────────────────────────────── */
+.pregnancy-timeline {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.week-progress {
+    margin: var(--spacing-lg) 0;
+}
+
+.week-progress-bar {
+    height: 8px;
+    background: var(--gray-lighter);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.week-progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+.week-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    color: var(--gray);
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+}
+
+.vital-card {
+    background: var(--light);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
+.vital-value {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.vital-label {
+    font-size: var(--font-size-sm);
+    color: var(--gray);
+    margin-top: var(--spacing-xs);
+}
+
+/* ──────────────────────────────────────────────────────────
+   5. School Health (الصحة المدرسية)
+   ────────────────────────────────────────────────────────── */
+.school-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.school-stat-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.school-stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.school-stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--gray);
+    margin-top: var(--spacing-xs);
+}
+
+/* قائمة الطلاب */
+.students-list {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.student-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--gray-lighter);
+    transition: background var(--transition-fast);
+}
+
+.student-item:hover {
+    background: var(--light);
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.student-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--gray-lighter);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--gray);
+}
+
+.student-details h4 {
+    font-size: var(--font-size-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+.student-details p {
+    font-size: var(--font-size-xs);
+    color: var(--gray);
+    margin-bottom: 0;
+}
+
+.student-bmi {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.bmi-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.bmi-normal { background: var(--success); }
+.bmi-underweight { background: var(--warning); }
+.bmi-overweight { background: var(--warning); }
+.bmi-obese { background: var(--danger); }
+
+/* ──────────────────────────────────────────────────────────
+   6. Appointments (المواعيد)
+   ────────────────────────────────────────────────────────── */
+.appointments-list {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.appointment-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--gray-lighter);
+}
+
+.appointment-date {
+    min-width: 80px;
+    text-align: center;
+    padding: var(--spacing-sm);
+    background: var(--light);
+    border-radius: var(--radius-md);
+}
+
+.appointment-day {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.appointment-month {
+    font-size: var(--font-size-xs);
+    color: var(--gray);
+}
+
+.appointment-details {
+    flex: 1;
+}
+
+.appointment-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.appointment-time {
+    font-size: var(--font-size-xs);
+    color: var(--gray);
+}
+
+/* ──────────────────────────────────────────────────────────
+   7. Quick Actions (إجراءات سريعة)
+   ────────────────────────────────────────────────────────── */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.quick-action-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    text-decoration: none;
+    color: var(--dark);
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+
+.quick-action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    color: var(--primary);
+}
+
+.quick-action-icon {
+    font-size: 32px;
+    margin-bottom: var(--spacing-md);
+}
+
+.quick-action-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.quick-action-desc {
+    font-size: var(--font-size-xs);
+    color: var(--gray);
+}
+
+/* ──────────────────────────────────────────────────────────
+   8. Notifications (إشعارات)
+   ────────────────────────────────────────────────────────── */
+.notifications-list {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--gray-lighter);
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(26, 115, 232, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.notification-message {
+    font-size: var(--font-size-sm);
+    color: var(--gray);
+    margin-bottom: var(--spacing-xs);
+}
+
+.notification-time {
+    font-size: var(--font-size-xs);
+    color: var(--gray-light);
+}
+
+.notification-unread {
+    background: rgba(26, 115, 232, 0.05);
+    border-right: 3px solid var(--primary);
+}
+
+/* ──────────────────────────────────────────────────────────
+   9. Responsive Design
+   ────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .dashboard-sidebar {
+        width: 240px;
+    }
+    
+    .dashboard-main {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+    }
+    
+    .dashboard-sidebar {
+        width: 100%;
+        position: static;
+        height: auto;
+        border-left: none;
+        border-bottom: 1px solid var(--gray-lighter);
+        padding: var(--spacing-md);
+    }
+    
+    .dashboard-sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+    }
+    
+    .dashboard-avatar {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 0;
+    }
+    
+    .dashboard-nav {
+        display: flex;
+        overflow-x: auto;
+        gap: var(--spacing-sm);
+        padding-bottom: var(--spacing-sm);
+    }
+    
+    .dashboard-nav-item {
+        margin-bottom: 0;
+    }
+    
+    .dashboard-nav-link {
+        padding: var(--spacing-sm) var(--spacing-md);
+        white-space: nowrap;
+        border-right: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .dashboard-nav-link.active {
+        border-right-color: transparent;
+        border-bottom-color: var(--primary);
+    }
+    
+    .dashboard-nav-icon {
+        margin-left: var(--spacing-xs);
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .patients-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .vitals-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .appointment-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .student-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .student-info {
+        width: 100%;
+    }
+    
+    .student-bmi {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   10. Dark Mode Support (اختياري)
+   ────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    .dashboard-sidebar,
+    .stat-card,
+    .patients-section,
+    .pregnancy-timeline,
+    .school-stat-card,
+    .students-list,
+    .appointments-list,
+    .quick-action-card,
+    .notifications-list {
+        background: var(--gray-dark);
+    }
+    
+    .dashboard-nav-link:hover {
+        background: rgba(255,255,255,0.05);
+    }
+    
+    .patients-table tr:hover {
+        background: rgba(255,255,255,0.05);
+    }
+}
+
+/* ──────────────────────────────────────────────────────────
+   11. Animations
+   ────────────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-card,
+.student-item,
+.appointment-item,
+.notification-item {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0s; }
+.stat-card:nth-child(2) { animation-delay: 0.05s; }
+.stat-card:nth-child(3) { animation-delay: 0.1s; }
+.stat-card:nth-child(4) { animation-delay: 0.15s; }
