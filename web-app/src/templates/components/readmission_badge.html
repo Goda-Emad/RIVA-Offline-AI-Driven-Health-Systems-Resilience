@@ -1,1 +1,165 @@
+<div class="readmission-wrapper" id="readmission-wrapper">
+    <div class="readmission-badge risk-pending" id="readmission-badge">
+        <div class="badge-icon-container">
+            <span class="badge-icon" id="badge-icon">🔄</span>
+        </div>
+        <div class="badge-info">
+            <span class="badge-label">مؤشر الذكاء الاصطناعي</span>
+            <span class="badge-title">احتمالية إعادة الإدخال</span>
+        </div>
+        <div class="badge-data">
+            <span class="badge-percentage" id="risk-percentage">--%</span>
+            <span class="badge-status-text" id="risk-status">جاري التحليل...</span>
+        </div>
+    </div>
+</div>
 
+<style>
+/* إعدادات الحاوية والمؤشر */
+.readmission-wrapper {
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    direction: rtl;
+    margin: 10px 0;
+}
+
+.readmission-badge {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-radius: 16px;
+    background: var(--white, #ffffff);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-right: 4px solid var(--gray, #9aa0a6);
+    transition: all 0.3s ease;
+    gap: 16px;
+}
+
+/* الألوان الديناميكية حسب حالة الخطر */
+.readmission-badge.risk-low {
+    border-right-color: var(--success, #34a853);
+    background: linear-gradient(to left, rgba(52,168,83,0.05), transparent);
+}
+.readmission-badge.risk-medium {
+    border-right-color: var(--warning, #fbbc04);
+    background: linear-gradient(to left, rgba(251,188,4,0.05), transparent);
+}
+.readmission-badge.risk-high {
+    border-right-color: var(--danger, #ea4335);
+    background: linear-gradient(to left, rgba(234,67,53,0.05), transparent);
+}
+
+.badge-icon-container {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light, #f8f9fa);
+}
+
+.risk-low .badge-icon-container { background: rgba(52,168,83,0.1); }
+.risk-medium .badge-icon-container { background: rgba(251,188,4,0.1); }
+.risk-high .badge-icon-container { background: rgba(234,67,53,0.1); }
+
+.badge-icon {
+    font-size: 20px;
+}
+
+.badge-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.badge-label {
+    font-size: 11px;
+    color: var(--gray, #5f6368);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.badge-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark, #202124);
+}
+
+.badge-data {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.badge-percentage {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--dark, #202124);
+    line-height: 1.2;
+}
+
+.badge-status-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray, #5f6368);
+}
+
+.risk-low .badge-status-text { color: var(--success, #34a853); }
+.risk-medium .badge-status-text { color: var(--warning, #fbbc04); }
+.risk-high .badge-status-text { color: var(--danger, #ea4335); }
+
+/* دعم الشاشات الصغيرة */
+@media (max-width: 480px) {
+    .readmission-badge {
+        flex-wrap: wrap;
+    }
+    .badge-data {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--gray-lighter, #e8eaed);
+        padding-top: 8px;
+        margin-top: 4px;
+    }
+}
+</style>
+
+<script>
+/**
+ * دالة لتحديث مؤشر إعادة الإدخال برمجياً
+ * @param {number} percentage - نسبة الخطر من 0 إلى 100
+ */
+function updateReadmissionRisk(percentage) {
+    const badge = document.getElementById('readmission-badge');
+    const percentageEl = document.getElementById('risk-percentage');
+    const statusEl = document.getElementById('risk-status');
+    const iconEl = document.getElementById('badge-icon');
+    
+    // تنظيف الكلاسات القديمة
+    badge.classList.remove('risk-pending', 'risk-low', 'risk-medium', 'risk-high');
+    
+    // تحديث النسبة المئوية
+    percentageEl.textContent = percentage + '%';
+    
+    // تحديد الحالة بناءً على النسبة
+    if (percentage < 30) {
+        badge.classList.add('risk-low');
+        statusEl.textContent = 'خطر منخفض';
+        iconEl.textContent = '✅';
+    } else if (percentage < 60) {
+        badge.classList.add('risk-medium');
+        statusEl.textContent = 'خطر متوسط';
+        iconEl.textContent = '⚠️';
+    } else {
+        badge.classList.add('risk-high');
+        statusEl.textContent = 'خطر مرتفع';
+        iconEl.textContent = '🚨';
+    }
+}
+
+// مثال للاختبار: تقدر تمسح السطر ده بعدين، هو بس عشان تشوف شكله لما يشتغل
+// setTimeout(() => updateReadmissionRisk(24), 1000); 
+</script>
