@@ -1,1 +1,194 @@
+<div class="explanation-box" id="explanation-box">
+    <div class="explanation-header">
+        <span class="explanation-icon">🧠</span>
+        <span class="explanation-title">شرح قرار الذكاء الاصطناعي</span>
+        <button class="explanation-toggle" id="explanation-toggle">🔽</button>
+    </div>
+    <div class="explanation-content" id="explanation-content">
+        <div class="explanation-summary" id="explanation-summary">
+            تم تحليل الحالة بناءً على العوامل التالية...
+        </div>
+        <div class="explanation-factors" id="explanation-factors">
+            <div class="factor-item">
+                <span class="factor-name">فشل القلب</span>
+                <div class="factor-bar"><div class="factor-bar-fill" style="width: 65%"></div></div>
+                <span class="factor-impact">+25%</span>
+            </div>
+            <div class="factor-item">
+                <span class="factor-name">السكري</span>
+                <div class="factor-bar"><div class="factor-bar-fill" style="width: 48%"></div></div>
+                <span class="factor-impact">+15%</span>
+            </div>
+            <div class="factor-item">
+                <span class="factor-name">عدد الأدوية</span>
+                <div class="factor-bar"><div class="factor-bar-fill" style="width: 32%"></div></div>
+                <span class="factor-impact">+10%</span>
+            </div>
+        </div>
+        <div class="explanation-recommendation" id="explanation-recommendation">
+            <strong>💡 التوصية:</strong> متابعة مكثفة خلال الأسبوع الأول بعد الخروج
+        </div>
+    </div>
+</div>
 
+<style>
+.explanation-box {
+    background: var(--white, #ffffff);
+    border-radius: 16px;
+    padding: 16px;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-right: 3px solid var(--primary, #1a73e8);
+    transition: all 0.2s ease;
+}
+
+.explanation-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.explanation-icon {
+    font-size: 20px;
+}
+
+.explanation-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark, #202124);
+}
+
+.explanation-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--gray, #5f6368);
+    transition: transform 0.2s ease;
+}
+
+.explanation-toggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+.explanation-content {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-lighter, #e8eaed);
+    transition: all 0.2s ease;
+}
+
+.explanation-content.collapsed {
+    display: none;
+}
+
+.explanation-summary {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--gray-dark, #3c4043);
+    margin-bottom: 12px;
+}
+
+.explanation-factors {
+    margin: 12px 0;
+}
+
+.factor-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.factor-name {
+    width: 100px;
+    font-weight: 500;
+    color: var(--dark, #202124);
+}
+
+.factor-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--gray-lighter, #e8eaed);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.factor-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--warning, #fbbc04), var(--danger, #ea4335));
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.factor-impact {
+    width: 45px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--danger, #ea4335);
+}
+
+.explanation-recommendation {
+    background: rgba(26, 115, 232, 0.05);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--gray-dark, #3c4043);
+    margin-top: 12px;
+}
+
+.explanation-recommendation strong {
+    color: var(--primary, #1a73e8);
+}
+
+@media (max-width: 768px) {
+    .factor-name {
+        width: 80px;
+    }
+    .factor-impact {
+        width: 40px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('explanation-toggle');
+    const content = document.getElementById('explanation-content');
+    
+    if (toggleBtn && content) {
+        toggleBtn.addEventListener('click', function() {
+            content.classList.toggle('collapsed');
+            toggleBtn.classList.toggle('collapsed');
+        });
+    }
+});
+
+function updateExplanation(data) {
+    const summaryEl = document.getElementById('explanation-summary');
+    const factorsEl = document.getElementById('explanation-factors');
+    const recommendationEl = document.getElementById('explanation-recommendation');
+    
+    if (summaryEl && data.summary) {
+        summaryEl.textContent = data.summary;
+    }
+    
+    if (factorsEl && data.factors) {
+        factorsEl.innerHTML = data.factors.map(f => `
+            <div class="factor-item">
+                <span class="factor-name">${f.name}</span>
+                <div class="factor-bar"><div class="factor-bar-fill" style="width: ${f.impact}%"></div></div>
+                <span class="factor-impact">${f.label || '+' + f.impact + '%'}</span>
+            </div>
+        `).join('');
+    }
+    
+    if (recommendationEl && data.recommendation) {
+        recommendationEl.innerHTML = `<strong>💡 التوصية:</strong> ${data.recommendation}`;
+    }
+}
+</script>
