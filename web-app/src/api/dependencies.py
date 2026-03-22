@@ -37,7 +37,7 @@ AI_CORE_PATH = PROJECT_ROOT / "ai-core"
 # مسار security داخل ai-core
 SECURITY_PATH = AI_CORE_PATH / "security"
 
-# مسار storage داخل ai-core
+# ✅ مسار storage داخل ai-core (للـ db_loader)
 STORAGE_PATH = AI_CORE_PATH / "storage"
 
 # إضافة المسارات إلى sys.path
@@ -58,7 +58,6 @@ try:
 except ImportError as e:
     print(f"⚠️ Warning: Security module error: {e}")
     
-    # تعريفات بديلة في حالة عدم وجود الملفات
     class Role(str, Enum):
         DOCTOR = "doctor"
         NURSE = "nurse"
@@ -95,25 +94,32 @@ except ImportError as e:
     
     logging.warning("Using fallback security (no ai-core/security found)")
 
-# استيراد db_loader من المسار الصحيح
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. 🗄️ DATABASE LOADER (من ai-core/storage)
+# ─────────────────────────────────────────────────────────────────────────────
+
 try:
+    import db_loader
     from db_loader import get_db_loader, DBLoader
-    print("✅ DB Loader loaded successfully from ai-core/storage")
+    print("✅ Storage module (db_loader) loaded successfully from ai-core/storage")
 except ImportError as e:
-    print(f"⚠️ Warning: DB Loader error: {e}")
-    raise ImportError("db_loader module is required for production")
+    print(f"⚠️ Warning: db_loader error: {e}")
+    db_loader = None
+    
+    def get_db_loader():
+        return None
+    
+    DBLoader = None
+    logging.warning("Using fallback db_loader (no ai-core/storage found)")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. باقي الكود (زي ما هو)
+# 3. 🔐 AUTHENTICATION FUNCTIONS
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def get_current_user(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
 ) -> AccessControl:
-    """
-    🔐 استخراج المستخدم الحالي من الـ JWT Token
-    """
     token = None
     if credentials:
         token = credentials.credentials
@@ -166,7 +172,7 @@ async def get_admin_user(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. 🗄️ DATABASE DEPENDENCIES
+# 4. 🗄️ DATABASE DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 DATABASE_URL = "sqlite+aiosqlite:///./data-storage/databases/riva.db"
@@ -196,16 +202,22 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 @lru_cache()
-def get_db_loader_instance() -> DBLoader:
+def get_db_loader_instance():
     return get_db_loader()
 
 
 async def get_patient_context(
     patient_id: str,
-    db_loader: DBLoader = Depends(get_db_loader_instance)
+    db_loader_instance = Depends(get_db_loader_instance)
 ) -> Dict[str, Any]:
+    if db_loader_instance is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database loader not available"
+        )
+    
     try:
-        patient_context = db_loader.load_patient_context(patient_id, include_encrypted=True)
+        patient_context = db_loader_instance.load_patient_context(patient_id, include_encrypted=True)
         if not patient_context:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -221,7 +233,7 @@ async def get_patient_context(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. 🧠 AI MODEL DEPENDENCIES (Singletons)
+# 5. 🧠 AI MODEL DEPENDENCIES (Singletons)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @lru_cache()
@@ -331,7 +343,7 @@ def get_prescription_generator():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. 🎤 VOICE DEPENDENCIES
+# 6. 🎤 VOICE DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 @lru_cache()
@@ -358,7 +370,7 @@ def get_voice_encoder():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6. 🚀 ORCHESTRATOR DEPENDENCIES
+# 7. 🚀 ORCHESTRATOR DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def get_orchestrator():
@@ -371,7 +383,7 @@ async def get_orchestrator():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 7. 📝 LOGGING & MONITORING
+# 8. 📝 LOGGING & MONITORING
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def log_request(request: Request) -> None:
@@ -382,13 +394,13 @@ async def log_request(request: Request) -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 8. 🏥 PATIENT CONTEXT WITH AUTH
+# 9. 🏥 PATIENT CONTEXT WITH AUTH
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def get_patient_context_with_auth(
     patient_id: str,
     current_user: AccessControl = Depends(get_current_active_user),
-    db_loader: DBLoader = Depends(get_db_loader_instance)
+    db_loader_instance = Depends(get_db_loader_instance)
 ) -> Dict[str, Any]:
     user_role = current_user.get_user_role()
     user_id = current_user.get_user_id()
@@ -399,7 +411,13 @@ async def get_patient_context_with_auth(
             detail="You can only access your own medical records"
         )
     
-    patient_context = db_loader.load_patient_context(patient_id, include_encrypted=True)
+    if db_loader_instance is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database loader not available"
+        )
+    
+    patient_context = db_loader_instance.load_patient_context(patient_id, include_encrypted=True)
     if not patient_context:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -410,7 +428,7 @@ async def get_patient_context_with_auth(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 9. 🏥 SCHOOL CONTEXT
+# 10. 🏥 SCHOOL CONTEXT
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def get_school_context(
@@ -423,8 +441,14 @@ async def get_school_context(
         pass
     
     try:
-        db_loader = get_db_loader()
-        school_data = db_loader.load_school_context(school_id)
+        db_loader_instance = get_db_loader()
+        if db_loader_instance is None:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Database loader not available"
+            )
+        
+        school_data = db_loader_instance.load_school_context(school_id)
         if not school_data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -440,7 +464,7 @@ async def get_school_context(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 10. 📊 HEALTH CHECK DEPENDENCIES
+# 11. 📊 HEALTH CHECK DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def get_system_status() -> Dict[str, Any]:
@@ -452,8 +476,8 @@ async def get_system_status() -> Dict[str, Any]:
     }
     
     try:
-        db_loader = get_db_loader()
-        if db_loader:
+        db_loader_instance = get_db_loader()
+        if db_loader_instance:
             status["database"] = "ok"
     except Exception:
         status["database"] = "error"
@@ -469,7 +493,7 @@ async def get_system_status() -> Dict[str, Any]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 11. 📦 EXPORT ALL DEPENDENCIES
+# 12. 📦 EXPORT ALL DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 __all__ = [
