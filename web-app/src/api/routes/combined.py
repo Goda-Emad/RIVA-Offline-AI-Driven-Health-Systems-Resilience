@@ -38,7 +38,7 @@ except ImportError:
     FeatureEngineering = None
 
 # استيراد أنظمة الأمان v4.0
-from access_control import get_access_control, Role, require_role
+from access_control import require_any_role, Role
 
 # إعداد التسجيل
 logging.basicConfig(level=logging.INFO)
