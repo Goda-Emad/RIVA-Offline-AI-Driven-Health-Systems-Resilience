@@ -1,1 +1,382 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - نتيجة التقييم الطبي">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | نتيجة التقييم الطبي</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    <link rel="stylesheet" href="/static/css/prediction_dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل النتيجة...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="result-main">
+        <div class="container">
+            <!-- بطاقة النتيجة الرئيسية -->
+            <div class="result-card" id="result-card">
+                <div class="result-header">
+                    <div class="result-icon">
+                        <img src="/static/assets/images/success-check.svg" alt="نتيجة" id="result-icon">
+                    </div>
+                    <h1 id="result-title">نتيجة التقييم الطبي</h1>
+                    <p id="result-subtitle">تم تحليل حالتك بنجاح</p>
+                </div>
+                
+                <!-- مؤشر الخطر الدائري -->
+                <div class="risk-gauge-container">
+                    <div id="risk-gauge"></div>
+                </div>
+                
+                <!-- تفاصيل النتيجة -->
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span class="detail-label">مستوى الطوارئ:</span>
+                        <span class="detail-value" id="triage-level">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">درجة الخطورة:</span>
+                        <span class="detail-value" id="risk-score">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">نسبة الثقة:</span>
+                        <span class="detail-value" id="confidence">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">وقت التقييم:</span>
+                        <span class="detail-value" id="timestamp">-</span>
+                    </div>
+                </div>
+                
+                <!-- التشخيص والتوصيات -->
+                <div class="result-section diagnosis-section">
+                    <h3>📋 التشخيص الأولي</h3>
+                    <p id="diagnosis-text">-</p>
+                </div>
+                
+                <div class="result-section action-section">
+                    <h3>🚑 الإجراء الموصى به</h3>
+                    <p id="action-text">-</p>
+                </div>
+                
+                <div class="result-section specialty-section">
+                    <h3>🏥 التخصص المناسب</h3>
+                    <p id="specialty-text">-</p>
+                </div>
+                
+                <!-- عوامل الخطر -->
+                <div class="risk-factors-section" id="risk-factors-section" style="display: none;">
+                    <h3>⚠️ عوامل الخطر المؤثرة</h3>
+                    <div id="risk-factors-list" class="risk-factors-list"></div>
+                </div>
+                
+                <!-- التنبيهات -->
+                <div class="alerts-section" id="alerts-section" style="display: none;">
+                    <h3>🔔 تنبيهات</h3>
+                    <div id="alerts-list" class="alerts-list"></div>
+                </div>
+                
+                <!-- شرح القرار -->
+                <div class="explanation-section" id="explanation-section" style="display: none;">
+                    <h3>🧠 شرح قرار الذكاء الاصطناعي</h3>
+                    <p id="explanation-text"></p>
+                    <button class="btn btn-outline" id="more-explanation-btn">
+                        <span>🔍</span> عرض شرح مفصل
+                    </button>
+                </div>
+                
+                <!-- QR Code -->
+                <div class="qr-section">
+                    <h3>📱 رمز QR للمريض</h3>
+                    <div class="qr-container">
+                        <div id="qr-code"></div>
+                        <p class="qr-note">امسح الرمز لمشاركة النتيجة مع الطبيب</p>
+                    </div>
+                    <div class="qr-actions">
+                        <button class="btn btn-secondary" id="download-qr-btn">
+                            <span>📥</span> تنزيل QR
+                        </button>
+                        <button class="btn btn-secondary" id="share-qr-btn">
+                            <span>📤</span> مشاركة
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- أزرار الإجراءات -->
+                <div class="result-actions">
+                    <button class="btn btn-primary" id="share-result-btn">
+                        <span>📤</span> مشاركة النتيجة
+                    </button>
+                    <button class="btn btn-secondary" id="print-result-btn">
+                        <span>🖨️</span> طباعة
+                    </button>
+                    <button class="btn btn-outline" id="new-assessment-btn">
+                        <span>🔄</span> تقييم جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import qrHandler from '/static/js/qr_handler.js';
+        
+        // بيانات النتيجة (سيتم استلامها من الصفحة السابقة)
+        const urlParams = new URLSearchParams(window.location.search);
+        const resultData = {
+            triage_level: urlParams.get('level') || 'طارئ',
+            risk_score: parseFloat(urlParams.get('score')) || 85,
+            confidence: parseFloat(urlParams.get('confidence')) || 92,
+            diagnosis: urlParams.get('diagnosis') || 'تقييم أولي بناءً على الأعراض',
+            action: urlParams.get('action') || 'مراجعة الطبيب خلال 24 ساعة',
+            specialty: urlParams.get('specialty') || 'طوارئ',
+            patient_id: urlParams.get('patient_id') || 'غير محدد',
+            timestamp: new Date().toLocaleString('ar-EG')
+        };
+        
+        // تحديد الألوان حسب مستوى الطوارئ
+        const levelColors = {
+            'طارئ': '#ea4335',
+            'عاجل': '#fbbc04',
+            'نصف عاجل': '#34a853',
+            'غير عاجل': '#1a73e8'
+        };
+        const levelColor = levelColors[resultData.triage_level] || '#5f6368';
+        
+        // تحديث واجهة النتائج
+        document.getElementById('result-title').textContent = 
+            resultData.triage_level === 'طارئ' ? '🚨 حالة طارئة - تدخل فوري مطلوب' :
+            resultData.triage_level === 'عاجل' ? '⚠️ حالة عاجلة - متابعة سريعة' :
+            resultData.triage_level === 'نصف عاجل' ? '📋 حالة تحتاج متابعة' :
+            '✅ حالة مستقرة';
+        
+        document.getElementById('result-subtitle').textContent = 
+            `تم التقييم بنجاح - ${resultData.triage_level}`;
+        
+        document.getElementById('triage-level').innerHTML = 
+            `<span style="color: ${levelColor}; font-weight: bold;">${resultData.triage_level}</span>`;
+        document.getElementById('risk-score').textContent = `${Math.round(resultData.risk_score)}%`;
+        document.getElementById('confidence').textContent = `${Math.round(resultData.confidence)}%`;
+        document.getElementById('timestamp').textContent = resultData.timestamp;
+        document.getElementById('diagnosis-text').textContent = resultData.diagnosis;
+        document.getElementById('action-text').textContent = resultData.action;
+        document.getElementById('specialty-text').textContent = resultData.specialty;
+        
+        // تغيير أيقونة النتيجة حسب المستوى
+        const resultIcon = document.getElementById('result-icon');
+        if (resultData.triage_level === 'طارئ') {
+            resultIcon.src = '/static/assets/images/warning-icon.svg';
+        } else if (resultData.triage_level === 'عاجل') {
+            resultIcon.src = '/static/assets/images/warning-icon.svg';
+        } else {
+            resultIcon.src = '/static/assets/images/success-check.svg';
+        }
+        
+        // رسم المؤشر الدائري
+        if (typeof ApexCharts !== 'undefined') {
+            const options = {
+                chart: { type: 'radialBar', height: 280 },
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -135,
+                        endAngle: 135,
+                        hollow: { size: '65%' },
+                        track: { background: '#e8eaed' },
+                        dataLabels: {
+                            name: { show: true, fontSize: '14px', offsetY: -10 },
+                            value: { fontSize: '36px', fontWeight: 'bold', color: levelColor, offsetY: 10 }
+                        }
+                    }
+                },
+                colors: [levelColor],
+                series: [resultData.risk_score],
+                labels: ['نسبة الخطر']
+            };
+            new ApexCharts(document.getElementById('risk-gauge'), options).render();
+        } else {
+            document.getElementById('risk-gauge').innerHTML = 
+                `<div class="risk-placeholder" style="color: ${levelColor}">${Math.round(resultData.risk_score)}%</div>`;
+        }
+        
+        // توليد QR Code
+        const qrContent = JSON.stringify({
+            type: 'triage_result',
+            patient: resultData.patient_id,
+            triage_level: resultData.triage_level,
+            risk_score: resultData.risk_score,
+            diagnosis: resultData.diagnosis,
+            action: resultData.action,
+            specialty: resultData.specialty,
+            timestamp: resultData.timestamp
+        });
+        
+        setTimeout(() => {
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(document.getElementById('qr-code'), {
+                    text: qrContent,
+                    width: 180,
+                    height: 180,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } else {
+                document.getElementById('qr-code').innerHTML = 
+                    `<div class="qr-placeholder">رمز QR</div>`;
+            }
+        }, 100);
+        
+        // تنزيل QR
+        document.getElementById('download-qr-btn').addEventListener('click', () => {
+            const qrElement = document.querySelector('#qr-code canvas');
+            if (qrElement) {
+                const link = document.createElement('a');
+                link.download = `riva_result_${Date.now()}.png`;
+                link.href = qrElement.toDataURL();
+                link.click();
+            } else {
+                alert('جاري تحميل QR، يرجى المحاولة مرة أخرى');
+            }
+        });
+        
+        // مشاركة النتيجة
+        document.getElementById('share-result-btn').addEventListener('click', async () => {
+            const shareData = {
+                title: 'نتيجة التقييم الطبي - RIVA',
+                text: `مستوى الطوارئ: ${resultData.triage_level}\nنسبة الخطر: ${resultData.risk_score}%\nالتشخيص: ${resultData.diagnosis}\nالإجراء: ${resultData.action}`,
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (e) {
+                    console.log('Share cancelled');
+                }
+            } else {
+                navigator.clipboard.writeText(shareData.text);
+                alert('تم نسخ النتيجة إلى الحافظة');
+            }
+        });
+        
+        // طباعة
+        document.getElementById('print-result-btn').addEventListener('click', () => {
+            window.print();
+        });
+        
+        // تقييم جديد
+        document.getElementById('new-assessment-btn').addEventListener('click', () => {
+            window.location.href = '/03_triage.html';
+        });
+        
+        // شرح مفصل
+        document.getElementById('more-explanation-btn').addEventListener('click', () => {
+            window.location.href = '/12_ai_explanation.html';
+        });
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- QRCode Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
