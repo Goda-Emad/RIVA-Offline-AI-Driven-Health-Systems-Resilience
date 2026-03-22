@@ -20,30 +20,21 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 
-# إضافة المسار الرئيسي
 import sys
 from pathlib import Path
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 0. 🔗 ربط المسارات الصحيحة لمشروع RIVA
+# 0. 🔗 ربط المسارات الصحيحة
 # ─────────────────────────────────────────────────────────────────────────────
 
-# الحصول على الجذر الرئيسي للمشروع (RIVA-Offline-AI-Driven-Health-Systems-Resilience)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
-
-# مسار ai-core
 AI_CORE_PATH = PROJECT_ROOT / "ai-core"
-
-# مسار security داخل ai-core
 SECURITY_PATH = AI_CORE_PATH / "security"
+STORAGE_PATH  = AI_CORE_PATH / "storage"
 
-# ✅ مسار storage داخل ai-core (للـ db_loader)
-STORAGE_PATH = AI_CORE_PATH / "storage"
-
-# إضافة المسارات إلى sys.path
 for path in [SECURITY_PATH, STORAGE_PATH, AI_CORE_PATH]:
     if str(path) not in sys.path:
-        sys.path.append(str(path))
+        sys.path.insert(0, str(path))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. 🔐 SECURITY & AUTHENTICATION
@@ -51,65 +42,56 @@ for path in [SECURITY_PATH, STORAGE_PATH, AI_CORE_PATH]:
 
 security = HTTPBearer(auto_error=False)
 
-# استيراد أنظمة الأمان من المسار الصحيح
 try:
     from access_control import get_access_control, Role, AccessControl
     print("✅ Security modules loaded successfully from ai-core/security")
 except ImportError as e:
     print(f"⚠️ Warning: Security module error: {e}")
-    
+
     class Role(str, Enum):
-        DOCTOR = "doctor"
-        NURSE = "nurse"
-        ADMIN = "admin"
-        SUPERVISOR = "supervisor"
-        PATIENT = "patient"
+        DOCTOR            = "doctor"
+        NURSE             = "nurse"
+        ADMIN             = "admin"
+        SUPERVISOR        = "supervisor"
+        PATIENT           = "patient"
         GENETIC_COUNSELOR = "genetic_counselor"
-        SCHOOL_NURSE = "school_nurse"
-        PHARMACIST = "pharmacist"
-        PSYCHOLOGIST = "psychologist"
-    
+        SCHOOL_NURSE      = "school_nurse"
+        PHARMACIST        = "pharmacist"
+        PSYCHOLOGIST      = "psychologist"
+        SCHOOL            = "school"
+        READONLY          = "readonly"
+
     class AccessControl:
         def __init__(self, request=None):
-            self._user_id = "guest"
+            self._user_id   = "guest"
             self._user_role = Role.PATIENT
-        
-        def authenticate(self):
-            return True
-        
-        def get_user_role(self):
-            return self._user_role
-        
-        def get_user_id(self):
-            return self._user_id
-        
-        def require_role(self, role):
-            return self._user_role == role
-        
-        def require_any_role(self, roles):
-            return self._user_role in roles
-    
+
+        def authenticate(self):      return True
+        def get_user_role(self):     return self._user_role
+        def get_user_id(self):       return self._user_id
+        def require_role(self, r):   return self._user_role == r
+        def require_any_role(self, roles): return self._user_role in roles
+
     def get_access_control(request):
         return AccessControl(request)
-    
+
     logging.warning("Using fallback security (no ai-core/security found)")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. 🗄️ DATABASE LOADER (من ai-core/storage)
+# 2. 🗄️ DATABASE LOADER
 # ─────────────────────────────────────────────────────────────────────────────
 
 try:
-    import db_loader
-    from db_loader import get_db_loader, DBLoader
+    # ✅ الاسم الصحيح هو DbLoader مش DBLoader
+    from db_loader import get_db_loader, DbLoader as DBLoader
     print("✅ Storage module (db_loader) loaded successfully from ai-core/storage")
 except ImportError as e:
     print(f"⚠️ Warning: db_loader error: {e}")
-    db_loader = None
-    
+    DBLoader = None
+
     def get_db_loader():
         return None
-    
-    DBLoader = None
+
     logging.warning("Using fallback db_loader (no ai-core/storage found)")
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -123,17 +105,13 @@ async def get_current_user(
     token = None
     if credentials:
         token = credentials.credentials
-    
     if not token:
         token = request.cookies.get("access_token")
-    
     try:
         access = get_access_control(request)
         access.authenticate()
-        
         logging.info(f"✅ User authenticated: {access.get_user_id()} | Role: {access.get_user_role()}")
         return access
-        
     except Exception as e:
         logging.warning(f"❌ Authentication failed: {e}")
         raise HTTPException(
@@ -170,24 +148,16 @@ async def get_admin_user(
         )
     return current_user
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. 🗄️ DATABASE DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 DATABASE_URL = "sqlite+aiosqlite:///./data-storage/databases/riva.db"
 
-# ✅ تم التعديل - إزالة pool_size و max_overflow (غير مدعومين في SQLite)
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=False
-)
+engine = create_async_engine(DATABASE_URL, echo=False)
 
 AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False
+    engine, class_=AsyncSession, expire_on_commit=False
 )
 
 Base = declarative_base()
@@ -208,16 +178,15 @@ def get_db_loader_instance():
 
 async def get_patient_context(
     patient_id: str,
-    db_loader_instance = Depends(get_db_loader_instance)
+    db_loader_instance=Depends(get_db_loader_instance)
 ) -> Dict[str, Any]:
     if db_loader_instance is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Database loader not available"
         )
-    
     try:
-        patient_context = db_loader_instance.load_patient_context(patient_id, include_encrypted=True)
+        patient_context = db_loader_instance.load_patient_context(patient_id)
         if not patient_context:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -230,8 +199,9 @@ async def get_patient_context(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to load patient data: {str(e)}"
         )
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. 🧠 AI MODEL DEPENDENCIES (Singletons)
+# 5. 🧠 AI MODEL DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 @lru_cache()
@@ -259,21 +229,19 @@ def get_triage_engine():
     try:
         from ai_core.local_inference.triage_engine import TriageEngine
         from pydantic_settings import BaseSettings
-        
+
         class TriageSettings(BaseSettings):
-            model_path: str = "ai-core/models/triage/model_int8.onnx"
-            features_path: str = "ai-core/models/triage/features.json"
-            imputer_path: str = "ai-core/models/triage/imputer.pkl"
-            scaler_path: str = "ai-core/models/triage/scaler.pkl"
-            conflicts_path: str = "business-intelligence/medical-content/drug_conflicts.json"
-        
-        settings = TriageSettings()
+            model_path:      str = "ai-core/models/triage/model_int8.onnx"
+            features_path:   str = "ai-core/models/triage/features.json"
+            imputer_path:    str = "ai-core/models/triage/imputer.pkl"
+            scaler_path:     str = "ai-core/models/triage/scaler.pkl"
+            conflicts_path:  str = "business-intelligence/medical-content/drug_conflicts.json"
+
+        s = TriageSettings()
         return TriageEngine(
-            model_path=settings.model_path,
-            imputer_path=settings.imputer_path,
-            scaler_path=settings.scaler_path,
-            features_path=settings.features_path,
-            conflicts_path=settings.conflicts_path
+            model_path=s.model_path, imputer_path=s.imputer_path,
+            scaler_path=s.scaler_path, features_path=s.features_path,
+            conflicts_path=s.conflicts_path
         )
     except ImportError:
         logging.warning("TriageEngine not available")
@@ -295,15 +263,14 @@ def get_school_health_analyzer():
     try:
         from ai_core.local_inference.school_health import SchoolHealthAnalyzer
         from pydantic_settings import BaseSettings
-        
+
         class SchoolSettings(BaseSettings):
             standards_path: str = "data/raw/who_growth/who_growth_standards.json"
-            clusters_path: str = "ai-core/models/school/cluster_centers.json"
-        
-        settings = SchoolSettings()
+            clusters_path:  str = "ai-core/models/school/cluster_centers.json"
+
+        s = SchoolSettings()
         return SchoolHealthAnalyzer(
-            standards_path=settings.standards_path,
-            clusters_path=settings.clusters_path
+            standards_path=s.standards_path, clusters_path=s.clusters_path
         )
     except ImportError:
         logging.warning("SchoolHealthAnalyzer not available")
@@ -315,15 +282,14 @@ def get_drug_interaction_checker():
     try:
         from ai_core.local_inference.drug_interaction import DrugInteractionChecker
         from pydantic_settings import BaseSettings
-        
+
         class DrugSettings(BaseSettings):
-            csv_path: str = "data/raw/drug_bank/drug_interactions.csv"
+            csv_path:          str = "data/raw/drug_bank/drug_interactions.csv"
             interactions_path: str = "ai-core/data/interactions.json"
-        
-        settings = DrugSettings()
+
+        s = DrugSettings()
         return DrugInteractionChecker(
-            csv_path=settings.csv_path,
-            data_path=settings.interactions_path
+            csv_path=s.csv_path, data_path=s.interactions_path
         )
     except ImportError:
         logging.warning("DrugInteractionChecker not available")
@@ -339,7 +305,6 @@ def get_prescription_generator():
         logging.warning("PrescriptionGenerator not available")
         return None
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # 6. 🎤 VOICE DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
@@ -347,28 +312,24 @@ def get_prescription_generator():
 @lru_cache()
 def get_voice_encoder():
     ENCODER_PATH = AI_CORE_PATH / "models" / "chatbot" / "whisper_int8" / "encoder_model_quantized.onnx"
-    
     if not ENCODER_PATH.exists():
         logging.warning(f"Voice encoder not found at {ENCODER_PATH}")
         return None
-    
     try:
         import onnxruntime as ort
         opts = ort.SessionOptions()
         opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
         opts.intra_op_num_threads = 2
         return ort.InferenceSession(
-            str(ENCODER_PATH),
-            sess_options=opts,
+            str(ENCODER_PATH), sess_options=opts,
             providers=["CPUExecutionProvider"],
         )
     except Exception as e:
         logging.error(f"Failed to load voice encoder: {e}")
         return None
 
-
 # ─────────────────────────────────────────────────────────────────────────────
-# 7. 🚀 ORCHESTRATOR DEPENDENCIES
+# 7. 🚀 ORCHESTRATOR
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def get_orchestrator():
@@ -378,7 +339,6 @@ async def get_orchestrator():
     except ImportError:
         logging.error("Orchestrator not available")
         return None
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8. 📝 LOGGING & MONITORING
@@ -390,7 +350,6 @@ async def log_request(request: Request) -> None:
         f"Client: {request.client.host if request.client else 'unknown'}"
     )
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # 9. 🏥 PATIENT CONTEXT WITH AUTH
 # ─────────────────────────────────────────────────────────────────────────────
@@ -398,32 +357,28 @@ async def log_request(request: Request) -> None:
 async def get_patient_context_with_auth(
     patient_id: str,
     current_user: AccessControl = Depends(get_current_active_user),
-    db_loader_instance = Depends(get_db_loader_instance)
+    db_loader_instance=Depends(get_db_loader_instance)
 ) -> Dict[str, Any]:
     user_role = current_user.get_user_role()
-    user_id = current_user.get_user_id()
-    
+    user_id   = current_user.get_user_id()
+
     if user_role == Role.PATIENT and user_id != patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You can only access your own medical records"
         )
-    
     if db_loader_instance is None:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Database loader not available"
         )
-    
-    patient_context = db_loader_instance.load_patient_context(patient_id, include_encrypted=True)
+    patient_context = db_loader_instance.load_patient_context(patient_id)
     if not patient_context:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Patient {patient_id} not found"
         )
-    
     return patient_context
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. 🏥 SCHOOL CONTEXT
@@ -433,11 +388,6 @@ async def get_school_context(
     school_id: str,
     current_user: AccessControl = Depends(get_current_active_user)
 ) -> Dict[str, Any]:
-    user_role = current_user.get_user_role()
-    
-    if user_role == Role.SCHOOL_NURSE:
-        pass
-    
     try:
         db_loader_instance = get_db_loader()
         if db_loader_instance is None:
@@ -445,7 +395,6 @@ async def get_school_context(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Database loader not available"
             )
-        
         school_data = db_loader_instance.load_school_context(school_id)
         if not school_data:
             raise HTTPException(
@@ -460,38 +409,33 @@ async def get_school_context(
             detail=f"Failed to load school data: {str(e)}"
         )
 
-
 # ─────────────────────────────────────────────────────────────────────────────
-# 11. 📊 HEALTH CHECK DEPENDENCIES
+# 11. 📊 HEALTH CHECK
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def get_system_status() -> Dict[str, Any]:
-    status = {
-        "database": "unknown",
-        "ai_models": {},
-        "voice_models": {},
-        "security": "ok"
+    result = {
+        "database":    "unknown",
+        "ai_models":   {},
+        "voice_models":{},
+        "security":    "ok"
     }
-    
     try:
         db_loader_instance = get_db_loader()
-        if db_loader_instance:
-            status["database"] = "ok"
+        result["database"] = "ok" if db_loader_instance else "unavailable"
     except Exception:
-        status["database"] = "error"
-    
-    status["ai_models"]["readmission"] = "ok" if get_readmission_predictor() else "missing"
-    status["ai_models"]["los"] = "ok" if get_los_predictor() else "missing"
-    status["ai_models"]["triage"] = "ok" if get_triage_engine() else "missing"
-    status["ai_models"]["sentiment"] = "ok" if get_sentiment_analyzer() else "missing"
-    
-    status["voice_models"]["encoder"] = "ok" if get_voice_encoder() else "missing"
-    
-    return status
+        result["database"] = "error"
 
+    result["ai_models"]["readmission"] = "ok" if get_readmission_predictor() else "missing"
+    result["ai_models"]["los"]         = "ok" if get_los_predictor()          else "missing"
+    result["ai_models"]["triage"]      = "ok" if get_triage_engine()          else "missing"
+    result["ai_models"]["sentiment"]   = "ok" if get_sentiment_analyzer()     else "missing"
+    result["voice_models"]["encoder"]  = "ok" if get_voice_encoder()          else "missing"
+
+    return result
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 12. 📦 EXPORT ALL DEPENDENCIES
+# 12. 📦 EXPORTS
 # ─────────────────────────────────────────────────────────────────────────────
 
 __all__ = [
@@ -516,4 +460,5 @@ __all__ = [
     "get_system_status",
     "get_school_context",
     "Role",
+    "DBLoader",
 ]
