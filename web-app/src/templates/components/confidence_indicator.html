@@ -1,1 +1,113 @@
+<div class="confidence-indicator" id="confidence-indicator">
+    <div class="confidence-header">
+        <span class="confidence-icon">🎯</span>
+        <span class="confidence-title">درجة الثقة في القرار</span>
+    </div>
+    <div class="confidence-meter">
+        <div class="confidence-bar" id="confidence-bar" style="width: 0%"></div>
+        <span class="confidence-value" id="confidence-value">0%</span>
+    </div>
+    <div class="confidence-level" id="confidence-level">
+        <span class="level-low">منخفض</span>
+        <span class="level-medium">متوسط</span>
+        <span class="level-high">مرتفع</span>
+    </div>
+    <p class="confidence-note" id="confidence-note">
+        تعكس درجة الثقة مدى دقة النموذج في هذا التوقع بناءً على البيانات المتاحة.
+    </p>
+</div>
 
+<style>
+.confidence-indicator {
+    background: var(--white, #ffffff);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-right: 4px solid #1a73e8;
+}
+
+.confidence-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.confidence-icon {
+    font-size: 20px;
+}
+
+.confidence-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark, #202124);
+}
+
+.confidence-meter {
+    position: relative;
+    height: 8px;
+    background: var(--gray-lighter, #e8eaed);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 12px 0 8px;
+}
+
+.confidence-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #34a853, #1a73e8);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+.confidence-value {
+    position: absolute;
+    right: 0;
+    top: -20px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--gray, #5f6368);
+}
+
+.confidence-level {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--gray, #5f6368);
+    margin-bottom: 12px;
+}
+
+.level-low { color: #ea4335; }
+.level-medium { color: #fbbc04; }
+.level-high { color: #34a853; }
+
+.confidence-note {
+    font-size: 11px;
+    color: var(--gray, #5f6368);
+    margin: 8px 0 0;
+    line-height: 1.4;
+}
+</style>
+
+<script>
+function updateConfidence(percentage) {
+    const bar = document.getElementById('confidence-bar');
+    const value = document.getElementById('confidence-value');
+    if (bar && value) {
+        const percent = Math.min(100, Math.max(0, percentage));
+        bar.style.width = percent + '%';
+        value.textContent = percent + '%';
+        
+        let levelText = '';
+        if (percent < 40) levelText = 'منخفض';
+        else if (percent < 70) levelText = 'متوسط';
+        else levelText = 'مرتفع';
+        
+        const note = document.getElementById('confidence-note');
+        if (note) {
+            note.innerHTML = `درجة الثقة: ${levelText} - ${percent}%`;
+        }
+    }
+}
+</script>
