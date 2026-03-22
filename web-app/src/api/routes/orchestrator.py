@@ -64,7 +64,7 @@ sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
 # 🔒 استيراد أنظمة الأمان v4.2
 try:
-    from access_control import require_role, require_any_role, Role
+    from access_control import require_any_role, Role
 except ImportError as e:
     logging.critical(f"❌ CRITICAL: access_control module not found: {e}")
     logging.critical("Server cannot start without security module")
