@@ -1,1 +1,164 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ريفا | وضع عدم الاتصال</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cairo', 'Tahoma', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .offline-container {
+            background: white;
+            border-radius: 32px;
+            padding: 48px 32px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #202124;
+            margin-bottom: 16px;
+        }
+        
+        p {
+            color: #5f6368;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        
+        .offline-features {
+            text-align: right;
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .offline-features h3 {
+            color: #1a73e8;
+            margin-bottom: 12px;
+        }
+        
+        .offline-features ul {
+            list-style: none;
+            padding-right: 0;
+        }
+        
+        .offline-features li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .offline-features li:before {
+            content: "✓";
+            color: #34a853;
+            font-weight: bold;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #1a73e8;
+            color: white;
+            text-decoration: none;
+            border-radius: 40px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin: 8px;
+        }
+        
+        .btn:hover {
+            background: #0d47a1;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #1a73e8;
+            color: #1a73e8;
+        }
+        
+        .btn-outline:hover {
+            background: #1a73e8;
+            color: white;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .offline-container {
+                padding: 32px 20px;
+            }
+            
+            .offline-icon {
+                font-size: 60px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        <h1>لا يوجد اتصال بالإنترنت</h1>
+        <p>عذراً، لا يمكن الاتصال بالخادم حالياً.<br>لكن لا تقلق! ريفا تعمل بدون إنترنت.</p>
+        
+        <div class="offline-features">
+            <h3>✨ الخدمات المتاحة بدون إنترنت</h3>
+            <ul>
+                <li>المساعد الطبي الذكي (محادثة)</li>
+                <li>الفرز الطبي الأولي</li>
+                <li>عرض السجل الطبي المحلي</li>
+                <li>متابعة الحمل والصحة المدرسية</li>
+                <li>جميع البيانات محفوظة ومشفرة</li>
+            </ul>
+        </div>
+        
+        <div>
+            <a href="/" class="btn">🏠 الصفحة الرئيسية</a>
+            <a href="/02_chatbot.html" class="btn btn-outline">💬 المساعد الطبي</a>
+        </div>
+        
+        <p style="font-size: 12px; margin-top: 24px;">
+            🔒 سيتم مزامنة جميع البيانات تلقائياً عند عودة الاتصال
+        </p>
+    </div>
+</body>
+</html>
