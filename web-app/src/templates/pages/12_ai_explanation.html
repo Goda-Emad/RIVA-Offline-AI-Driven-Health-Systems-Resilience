@@ -1,1 +1,732 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - شرح قرارات الذكاء الاصطناعي">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | شرح قرارات الذكاء الاصطناعي</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل شرح القرار...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="explanation-main">
+        <div class="container">
+            <div class="explanation-header">
+                <h1>🧠 كيف يعمل الذكاء الاصطناعي في ريفا؟</h1>
+                <p>الشفافية الطبية - شرح قرارات الذكاء الاصطناعي</p>
+            </div>
+            
+            <!-- بطاقة شرح عام -->
+            <div class="explanation-card">
+                <div class="explanation-icon">🤖</div>
+                <div class="explanation-content">
+                    <h2>لماذا نقدم شرح القرارات؟</h2>
+                    <p>في ريفا، نؤمن بأن الذكاء الاصطناعي يجب أن يكون شفافاً ومفهوماً. عندما يقوم النظام بتقييم حالة مريض أو التنبؤ بمخاطر معينة، نعرض لك العوامل التي أثرت في هذا القرار حتى تتمكن من الثقة في النتائج واتخاذ القرارات الطبية المناسبة.</p>
+                </div>
+            </div>
+            
+            <!-- نماذج التنبؤ -->
+            <div class="models-section">
+                <h2>نماذج الذكاء الاصطناعي في ريفا</h2>
+                <div class="models-grid">
+                    <div class="model-card" data-model="readmission">
+                        <div class="model-icon">🏥</div>
+                        <div class="model-name">نموذج إعادة الدخول</div>
+                        <div class="model-desc">يتنبأ باحتمالية عودة المريض للمستشفى خلال 30 يوماً</div>
+                        <div class="model-metrics">دقة: 91.7%</div>
+                    </div>
+                    <div class="model-card" data-model="los">
+                        <div class="model-icon">⏱️</div>
+                        <div class="model-name">نموذج مدة الإقامة</div>
+                        <div class="model-desc">يقدر عدد الأيام المتوقعة لإقامة المريض في المستشفى</div>
+                        <div class="model-metrics">MAE: 7.11 يوم</div>
+                    </div>
+                    <div class="model-card" data-model="triage">
+                        <div class="model-icon">🚑</div>
+                        <div class="model-name">نموذج الفرز الطبي</div>
+                        <div class="model-desc">يصنف الحالات حسب درجة الطوارئ</div>
+                        <div class="model-metrics">دقة التصنيف: 89.2%</div>
+                    </div>
+                    <div class="model-card" data-model="pregnancy">
+                        <div class="model-icon">🤰</div>
+                        <div class="model-name">نموذج مخاطر الحمل</div>
+                        <div class="model-desc">يقيم مخاطر الحمل بناءً على العلامات الحيوية</div>
+                        <div class="model-metrics">دقة: 87.5%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- شرح نموذج إعادة الدخول -->
+            <div id="readmission-explanation" class="explanation-detail" style="display: none;">
+                <div class="detail-header">
+                    <h2>📊 شرح نموذج إعادة الدخول (Readmission Prediction)</h2>
+                    <button class="close-detail">✕</button>
+                </div>
+                <div class="detail-content">
+                    <div class="explanation-text">
+                        <p>نموذج إعادة الدخول يستخدم خوارزمية XGBoost Classifier تم تدريبها على بيانات 129 مريض. النموذج يحلل 22 ميزة مختلفة لتوقع احتمالية عودة المريض للمستشفى خلال 30 يوماً من الخروج.</p>
+                        
+                        <h3>عوامل الخطر الرئيسية:</h3>
+                        <div id="readmission-factors" class="factors-list"></div>
+                        
+                        <h3>كيفية عمل النموذج:</h3>
+                        <ul>
+                            <li>يتم استخراج الميزات من سجل المريض (العمر، الأمراض المزمنة، عدد الأدوية، عدد الأعراض)</li>
+                            <li>يتم تطبيع البيانات وإدخالها إلى النموذج المدرب</li>
+                            <li>يقوم XGBoost بحساب احتمالية إعادة الدخول (0-100%)</li>
+                            <li>يتم عرض العوامل الأكثر تأثيراً باستخدام قيم SHAP</li>
+                        </ul>
+                    </div>
+                    <div id="readmission-shap" class="shap-container"></div>
+                </div>
+            </div>
+            
+            <!-- شرح نموذج مدة الإقامة -->
+            <div id="los-explanation" class="explanation-detail" style="display: none;">
+                <div class="detail-header">
+                    <h2>⏱️ شرح نموذج مدة الإقامة (LOS Prediction)</h2>
+                    <button class="close-detail">✕</button>
+                </div>
+                <div class="detail-content">
+                    <div class="explanation-text">
+                        <p>نموذج مدة الإقامة يستخدم XGBoost Regressor للتنبؤ بعدد الأيام التي سيقضيها المريض في المستشفى. النموذج تم تدريبه على 129 حالة سريرية.</p>
+                        
+                        <h3>العوامل المؤثرة على مدة الإقامة:</h3>
+                        <div id="los-factors" class="factors-list"></div>
+                        
+                        <h3>كيفية عمل النموذج:</h3>
+                        <ul>
+                            <li>تحليل البيانات السريرية للمريض (العلامات الحيوية، التشخيصات، التاريخ الطبي)</li>
+                            <li>تطبيق تحويل لوغاريتمي للبيانات لتحسين دقة التنبؤ</li>
+                            <li>حساب المدة المتوقعة مع هامش خطأ ±2 أيام</li>
+                            <li>عرض التوصيات بناءً على المدة المتوقعة</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- شرح نموذج الفرز الطبي -->
+            <div id="triage-explanation" class="explanation-detail" style="display: none;">
+                <div class="detail-header">
+                    <h2>🚑 شرح نموذج الفرز الطبي (Triage System)</h2>
+                    <button class="close-detail">✕</button>
+                </div>
+                <div class="detail-content">
+                    <div class="explanation-text">
+                        <p>نظام الفرز الطبي يعتمد على قواعد سريرية مدعومة بالذكاء الاصطناعي لتصنيف الحالات حسب درجة الطوارئ. يستخدم النظام نموذج ONNX محسن للعمل بدون إنترنت.</p>
+                        
+                        <h3>مستويات الطوارئ:</h3>
+                        <div class="triage-levels">
+                            <div class="level-item level-emergency">
+                                <span class="level-icon">🔴</span>
+                                <span class="level-name">طارئ</span>
+                                <span class="level-desc">تدخل فوري - دقائق</span>
+                            </div>
+                            <div class="level-item level-urgent">
+                                <span class="level-icon">🟠</span>
+                                <span class="level-name">عاجل</span>
+                                <span class="level-desc">تدخل خلال ساعات</span>
+                            </div>
+                            <div class="level-item level-semi">
+                                <span class="level-icon">🟡</span>
+                                <span class="level-name">نصف عاجل</span>
+                                <span class="level-desc">تدخل خلال 24 ساعة</span>
+                            </div>
+                            <div class="level-item level-non">
+                                <span class="level-icon">🟢</span>
+                                <span class="level-name">غير عاجل</span>
+                                <span class="level-desc">متابعة روتينية</span>
+                            </div>
+                        </div>
+                        
+                        <h3>العوامل المؤثرة في التصنيف:</h3>
+                        <ul>
+                            <li>الأعراض المصاحبة (ضيق تنفس، ألم صدر، فقدان وعي)</li>
+                            <li>العلامات الحيوية (ضغط الدم، نبضات القلب، درجة الحرارة)</li>
+                            <li>الأمراض المزمنة (السكري، الضغط، القلب)</li>
+                            <li>العمر ومستوى الألم</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- شرح نموذج مخاطر الحمل -->
+            <div id="pregnancy-explanation" class="explanation-detail" style="display: none;">
+                <div class="detail-header">
+                    <h2>🤰 شرح نموذج مخاطر الحمل</h2>
+                    <button class="close-detail">✕</button>
+                </div>
+                <div class="detail-content">
+                    <div class="explanation-text">
+                        <p>نموذج مخاطر الحمل يستخدم خوارزمية Random Forest Classifier تم تدريبها على بيانات الحمل من منظمة الصحة العالمية. النموذج يقيم مستوى خطورة الحمل بناءً على العلامات الحيوية والأمراض المصاحبة.</p>
+                        
+                        <h3>المعايير المستخدمة في التقييم:</h3>
+                        <ul>
+                            <li>ضغط الدم الانقباضي والانبساطي (ارتفاع ضغط الدم يزيد الخطر)</li>
+                            <li>مستوى السكر في الدم (للكشف عن سكري الحمل)</li>
+                            <li>درجة الحرارة (ارتفاعها قد يشير إلى التهاب)</li>
+                            <li>العمر (الحمل فوق 35 سنة أو تحت 18 سنة يزيد الخطر)</li>
+                            <li>مؤشر كتلة الجسم (BMI)</li>
+                        </ul>
+                        
+                        <h3>نطاقات الخطورة:</h3>
+                        <ul>
+                            <li><strong>منخفض:</strong> جميع القراءات ضمن النطاق الطبيعي</li>
+                            <li><strong>متوسط:</strong> وجود عامل خطر واحد أو اثنين</li>
+                            <li><strong>مرتفع:</strong> وجود عوامل خطر متعددة أو قراءات حرجة</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- شفافية البيانات -->
+            <div class="transparency-section">
+                <h2>🔍 شفافية البيانات (Explainable AI - XAI)</h2>
+                <p>نستخدم تقنية <strong>SHAP (SHapley Additive exPlanations)</strong> لتوضيح مساهمة كل ميزة في القرار النهائي. هذه التقنية مبنية على نظرية الألعاب وتضمن تفسيراً عادلاً لكل عامل مؤثر.</p>
+                
+                <div class="shap-example">
+                    <h3>مثال: تفسير قرار نموذج إعادة الدخول</h3>
+                    <div class="shap-visualization" id="shap-example"></div>
+                    <p class="shap-note">القيم الموجبة (بالأحمر) تزيد من خطر إعادة الدخول، والقيم السالبة (بالأخضر) تقلل من الخطر.</p>
+                </div>
+            </div>
+            
+            <!-- ثقة النموذج -->
+            <div class="confidence-section">
+                <h2>🎯 ثقة النموذج وحدود الاستخدام</h2>
+                <div class="confidence-grid">
+                    <div class="confidence-card">
+                        <div class="confidence-value">0.917 AUC</div>
+                        <div class="confidence-label">نموذج إعادة الدخول</div>
+                    </div>
+                    <div class="confidence-card">
+                        <div class="confidence-value">7.11 MAE</div>
+                        <div class="confidence-label">نموذج مدة الإقامة</div>
+                    </div>
+                    <div class="confidence-card">
+                        <div class="confidence-value">0.892 AUC</div>
+                        <div class="confidence-label">نموذج الفرز الطبي</div>
+                    </div>
+                </div>
+                <div class="confidence-note">
+                    <p>⚠️ <strong>ملاحظة مهمة:</strong> هذه النماذج هي أدوات مساعدة للطبيب وليست بديلاً عن التشخيص السريري. القرار الطبي النهائي يعود للطبيب المختص.</p>
+                </div>
+            </div>
+            
+            <!-- أزرار الإجراءات -->
+            <div class="explanation-actions">
+                <a href="/02_chatbot.html" class="btn btn-primary">💬 العودة للشات بوت</a>
+                <a href="/03_triage.html" class="btn btn-secondary">🚑 الذهاب للفرز الطبي</a>
+                <button class="btn btn-outline" id="print-explanation">🖨️ طباعة الشرح</button>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html" class="active">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import explainability from '/static/js/explainability.js';
+        import explanationViewer from '/static/js/explanation_viewer.js';
+        
+        // عناصر DOM
+        const modelCards = document.querySelectorAll('.model-card');
+        const detailPanels = document.querySelectorAll('.explanation-detail');
+        const closeButtons = document.querySelectorAll('.close-detail');
+        
+        // بيانات عوامل الخطر
+        const readmissionFactors = [
+            { name: 'فشل القلب', impact: '+25%', description: 'يزيد خطر إعادة الدخول بشكل كبير' },
+            { name: 'السكري', impact: '+15%', description: 'يؤثر على التئام الجروح ويزيد خطر العدوى' },
+            { name: 'تعدد الأدوية (>5)', impact: '+10%', description: 'يزيد خطر التفاعلات الدوائية' },
+            { name: 'العمر (>65)', impact: '+8%', description: 'كبار السن يحتاجون وقت أطول للتعافي' }
+        ];
+        
+        const losFactors = [
+            { name: 'فشل القلب', impact: '+3.0 أيام' },
+            { name: 'السكري', impact: '+1.5 أيام' },
+            { name: 'عدد الأعراض (>3)', impact: '+1.0 أيام' },
+            { name: 'العمر (>65)', impact: '+2.0 أيام' }
+        ];
+        
+        // عرض عوامل الخطر
+        function renderFactors(containerId, factors) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = factors.map(f => `
+                <div class="factor-item">
+                    <span class="factor-name">${f.name}</span>
+                    <span class="factor-impact">${f.impact}</span>
+                    <div class="factor-description">${f.description || ''}</div>
+                </div>
+            `).join('');
+        }
+        
+        renderFactors('readmission-factors', readmissionFactors);
+        renderFactors('los-factors', losFactors);
+        
+        // عرض SHAP Visualization
+        function renderShapExample() {
+            const container = document.getElementById('shap-example');
+            if (!container) return;
+            
+            const factors = [
+                { name: 'فشل القلب', value: 0.24, direction: 'positive' },
+                { name: 'السكري', value: 0.19, direction: 'positive' },
+                { name: 'عدد الأدوية', value: 0.12, direction: 'positive' },
+                { name: 'العمر', value: 0.08, direction: 'positive' },
+                { name: 'نسبة الأكسجين', value: -0.05, direction: 'negative' }
+            ];
+            
+            container.innerHTML = `
+                <div class="shap-bars">
+                    ${factors.map(f => `
+                        <div class="shap-bar-item">
+                            <span class="shap-name">${f.name}</span>
+                            <div class="shap-bar-container">
+                                <div class="shap-bar ${f.direction}" style="width: ${Math.abs(f.value * 100)}%"></div>
+                            </div>
+                            <span class="shap-value ${f.direction}">${f.direction === 'positive' ? '+' : '-'}${(f.value * 100).toFixed(0)}%</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        renderShapExample();
+        
+        // فتح شرح النموذج
+        modelCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const model = card.dataset.model;
+                
+                // إخفاء جميع الشروحات
+                detailPanels.forEach(panel => panel.style.display = 'none');
+                
+                // إظهار الشرح المطلوب
+                const targetPanel = document.getElementById(`${model}-explanation`);
+                if (targetPanel) {
+                    targetPanel.style.display = 'block';
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        
+        // إغلاق الشرح
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.closest('.explanation-detail').style.display = 'none';
+            });
+        });
+        
+        // طباعة الشرح
+        document.getElementById('print-explanation')?.addEventListener('click', () => {
+            window.print();
+        });
+        
+        // إضافة أنماط إضافية
+        const style = document.createElement('style');
+        style.textContent = `
+            .explanation-main {
+                padding: 40px 0;
+                min-height: calc(100vh - 200px);
+            }
+            
+            .explanation-header {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+            
+            .explanation-header h1 {
+                font-size: 28px;
+                margin-bottom: 12px;
+            }
+            
+            .explanation-card {
+                display: flex;
+                gap: 24px;
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+                color: white;
+                border-radius: 24px;
+                padding: 32px;
+                margin-bottom: 40px;
+            }
+            
+            .explanation-icon {
+                font-size: 64px;
+            }
+            
+            .explanation-content h2 {
+                margin-bottom: 16px;
+            }
+            
+            .models-section h2 {
+                text-align: center;
+                margin-bottom: 32px;
+            }
+            
+            .models-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 24px;
+                margin-bottom: 40px;
+            }
+            
+            .model-card {
+                background: var(--white, #ffffff);
+                border-radius: 20px;
+                padding: 24px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+            
+            .model-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            }
+            
+            .model-icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+            }
+            
+            .model-name {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 8px;
+            }
+            
+            .model-desc {
+                font-size: 13px;
+                color: #5f6368;
+                margin-bottom: 12px;
+            }
+            
+            .model-metrics {
+                font-size: 12px;
+                color: #1a73e8;
+                font-weight: 500;
+            }
+            
+            .explanation-detail {
+                background: var(--white, #ffffff);
+                border-radius: 24px;
+                padding: 24px;
+                margin-bottom: 40px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            }
+            
+            .detail-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid #e8eaed;
+            }
+            
+            .close-detail {
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #5f6368;
+            }
+            
+            .factors-list {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin: 20px 0;
+            }
+            
+            .factor-item {
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 12px 16px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .factor-name {
+                font-weight: 600;
+                min-width: 120px;
+            }
+            
+            .factor-impact {
+                font-weight: bold;
+                color: #ea4335;
+                min-width: 80px;
+            }
+            
+            .factor-description {
+                font-size: 12px;
+                color: #5f6368;
+                flex: 1;
+            }
+            
+            .triage-levels {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 16px;
+                margin: 20px 0;
+            }
+            
+            .level-item {
+                flex: 1;
+                min-width: 120px;
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 16px;
+                text-align: center;
+            }
+            
+            .level-emergency { border-top: 4px solid #ea4335; }
+            .level-urgent { border-top: 4px solid #fbbc04; }
+            .level-semi { border-top: 4px solid #fbbc04; }
+            .level-non { border-top: 4px solid #34a853; }
+            
+            .level-icon {
+                font-size: 32px;
+                display: block;
+                margin-bottom: 8px;
+            }
+            
+            .level-name {
+                font-weight: bold;
+                display: block;
+            }
+            
+            .transparency-section, .confidence-section {
+                background: var(--white, #ffffff);
+                border-radius: 24px;
+                padding: 32px;
+                margin-bottom: 32px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+            
+            .shap-example {
+                background: #f8f9fa;
+                border-radius: 16px;
+                padding: 20px;
+                margin-top: 20px;
+            }
+            
+            .shap-bars {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .shap-bar-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            
+            .shap-name {
+                width: 100px;
+                font-size: 14px;
+            }
+            
+            .shap-bar-container {
+                flex: 1;
+                height: 24px;
+                background: #e8eaed;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+            
+            .shap-bar {
+                height: 100%;
+                border-radius: 12px;
+                transition: width 0.5s ease;
+            }
+            
+            .shap-bar.positive {
+                background: #ea4335;
+            }
+            
+            .shap-bar.negative {
+                background: #34a853;
+            }
+            
+            .shap-value {
+                width: 50px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            
+            .shap-value.positive {
+                color: #ea4335;
+            }
+            
+            .shap-value.negative {
+                color: #34a853;
+            }
+            
+            .confidence-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin: 20px 0;
+            }
+            
+            .confidence-card {
+                background: #f8f9fa;
+                border-radius: 16px;
+                padding: 20px;
+                text-align: center;
+            }
+            
+            .confidence-value {
+                font-size: 28px;
+                font-weight: bold;
+                color: #1a73e8;
+            }
+            
+            .confidence-note {
+                background: rgba(251, 188, 4, 0.1);
+                border-radius: 12px;
+                padding: 16px;
+                margin-top: 20px;
+            }
+            
+            .explanation-actions {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                margin-top: 32px;
+                flex-wrap: wrap;
+            }
+            
+            @media (max-width: 768px) {
+                .explanation-card {
+                    flex-direction: column;
+                    text-align: center;
+                }
+                
+                .models-grid {
+                    grid-template-columns: 1fr;
+                }
+                
+                .shap-bar-item {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                
+                .shap-name {
+                    width: 100%;
+                }
+                
+                .shap-bar-container {
+                    width: 100%;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
