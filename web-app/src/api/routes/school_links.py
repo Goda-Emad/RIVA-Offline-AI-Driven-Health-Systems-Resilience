@@ -45,7 +45,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 # استيراد أنظمة الأمان v4.1
 try:
-    from access_control import require_role, require_any_role, Role
+    from access_control import require_any_role, Role
 except ImportError:
     class Role(str, Enum):
         SCHOOL_NURSE = "school_nurse"
