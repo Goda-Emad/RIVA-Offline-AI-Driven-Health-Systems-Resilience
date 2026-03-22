@@ -1,1 +1,208 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - المساعد الطبي الذكي بالعامية المصرية">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | المساعد الطبي الذكي</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل المساعد الطبي...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html" class="active">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content - Chat Container -->
+    <main class="chat-main">
+        <div class="chat-container" id="chat-container">
+            <!-- سيتم إنشاء العناصر بواسطة chat_ui.js -->
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript Modules -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import offlineManager from '/static/js/offline-detection.js';
+        import voiceRecorder from '/static/js/voice_recorder.js';
+        import getChatUI from '/static/js/chat_ui.js';
+        
+        // تهيئة الشات بوت
+        const chatUI = getChatUI();
+        
+        // عرض حالة الاتصال
+        function updateConnectionStatus() {
+            const isOnline = offlineManager ? offlineManager.isOnline : navigator.onLine;
+            const statusIndicator = document.createElement('div');
+            statusIndicator.className = 'connection-status-badge';
+            statusIndicator.innerHTML = isOnline ? '🟢 متصل' : '🔴 غير متصل';
+            
+            const existing = document.querySelector('.connection-status-badge');
+            if (existing) existing.remove();
+            
+            const chatContainer = document.querySelector('.chat-container');
+            if (chatContainer && chatContainer.firstChild) {
+                chatContainer.insertBefore(statusIndicator, chatContainer.firstChild);
+            }
+        }
+        
+        // تشغيل عند التحميل
+        window.addEventListener('load', () => {
+            updateConnectionStatus();
+            
+            // إخفاء شاشة التحميل بعد ثانية
+            setTimeout(() => {
+                const loader = document.getElementById('loading-overlay');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 300);
+                }
+            }, 500);
+        });
+        
+        // مراقبة تغيير حالة الاتصال
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+        
+        // إضافة أنماط إضافية للشات
+        const style = document.createElement('style');
+        style.textContent = `
+            .chat-main {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                min-height: calc(100vh - 140px);
+                background: var(--light, #f8f9fa);
+            }
+            
+            .chat-container {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                max-width: 900px;
+                margin: 0 auto;
+                width: 100%;
+                background: var(--white, #ffffff);
+                border-radius: 24px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                overflow: hidden;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .connection-status-badge {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: var(--white, #ffffff);
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                z-index: 1000;
+                font-weight: 500;
+            }
+            
+            @media (max-width: 768px) {
+                .chat-container {
+                    margin-top: 12px;
+                    margin-bottom: 12px;
+                    border-radius: 16px;
+                }
+                
+                .connection-status-badge {
+                    bottom: 80px;
+                    right: 16px;
+                    font-size: 10px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
