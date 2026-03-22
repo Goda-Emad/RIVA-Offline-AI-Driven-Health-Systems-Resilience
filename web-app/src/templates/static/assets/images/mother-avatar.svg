@@ -1,1 +1,14 @@
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <linearGradient id="rivaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0056b3;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#00d2ff;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    
+    <circle cx="50" cy="35" r="14" fill="url(#rivaGrad)"/>
+    
+    <path d="M 25 85 C 25 60, 35 50, 50 50 C 65 50, 75 60, 75 85 Z" fill="url(#rivaGrad)"/>
+    
+    <path d="M 50 75 C 50 75, 43 68, 43 64 C 43 61, 46 59, 48 59 C 50 59, 50 61, 50 61 C 50 61, 50 59, 52 59 C 54 59, 57 61, 57 64 C 57 68, 50 75, 50 75 Z" fill="#ffffff"/>
+</svg>
