@@ -507,3 +507,41 @@ def require_role(*roles: Role):
         wrapper.__name__ = func.__name__
         return wrapper
     return decorator
+
+
+# ✅ إضافة require_any_role (لأن chat.py يحتاجها)
+def require_any_role(roles: list):
+    """
+    FastAPI decorator — requires any of the specified roles.
+    
+    Usage:
+        @require_any_role([Role.DOCTOR, Role.NURSE, Role.ADMIN])
+        async def my_endpoint(...):
+            ...
+    """
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            # محاولة استخراج session_id
+            session_id = kwargs.get("session_id")
+            
+            if not session_id:
+                for arg in args:
+                    if hasattr(arg, "headers"):
+                        session_id = arg.headers.get("X-Session-ID")
+                        break
+            
+            ac = get_access_control()
+            session = ac.get_session(session_id) if session_id else None
+            
+            if not session or session.user.role not in roles:
+                raise PermissionError(
+                    f"هذه العملية تتطلب أحد الأدوار: {[r.value for r in roles]}"
+                )
+            
+            # إضافة access إلى kwargs
+            kwargs["access"] = session.user
+            return await func(*args, **kwargs)
+        
+        wrapper.__name__ = func.__name__
+        return wrapper
+    return decorator
