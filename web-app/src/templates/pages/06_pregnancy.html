@@ -1,1 +1,432 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - متابعة الحمل وصحة الأم">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | متابعة الحمل - صحة الأم</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل متابعة الحمل...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html" class="active">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="pregnancy-main">
+        <div class="container">
+            <div class="pregnancy-header">
+                <h1>🤰 متابعة الحمل وصحة الأم</h1>
+                <p>تقييم مخاطر الحمل ومتابعة العلامات الحيوية والتوصيات</p>
+            </div>
+            
+            <!-- بطاقة إدخال البيانات -->
+            <div class="pregnancy-form-card">
+                <h2>📝 بيانات الحامل</h2>
+                
+                <form id="pregnancy-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patient-id">معرف المريضة *</label>
+                            <input type="text" id="patient-id" class="form-control" placeholder="أدخل معرف المريضة" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">العمر *</label>
+                            <input type="number" id="age" class="form-control" placeholder="بالسنوات" min="15" max="50" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gestational-age">عمر الحمل (أسابيع) *</label>
+                            <input type="number" id="gestational-age" class="form-control" placeholder="أسبوع" min="4" max="42" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bmi">مؤشر كتلة الجسم (BMI)</label>
+                            <input type="number" id="bmi" class="form-control" placeholder="kg/m²" step="0.1">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="systolic-bp">الضغط الانقباضي *</label>
+                            <input type="number" id="systolic-bp" class="form-control" placeholder="mmHg" min="60" max="200" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="diastolic-bp">الضغط الانبساطي *</label>
+                            <input type="number" id="diastolic-bp" class="form-control" placeholder="mmHg" min="40" max="130" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="blood-sugar">مستوى السكر (mg/dL) *</label>
+                            <input type="number" id="blood-sugar" class="form-control" placeholder="mg/dL" step="0.1" min="3" max="25" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="heart-rate">نبض القلب (bpm)</label>
+                            <input type="number" id="heart-rate" class="form-control" placeholder="نبضة/دقيقة" min="40" max="180">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="body-temp">درجة الحرارة (C°)</label>
+                            <input type="number" id="body-temp" class="form-control" placeholder="درجة مئوية" step="0.1" min="35" max="42">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>⚠️ عوامل الخطر الإضافية</h3>
+                        <div class="risk-factors-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="gestational_diabetes"> سكري الحمل سابق
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="preeclampsia"> تسمم حمل سابق
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="preterm_birth"> ولادة مبكرة سابقة
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="multiple_pregnancy"> حمل متعدد (توأم)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="thyroid"> مشاكل الغدة الدرقية
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="anemia"> أنيميا (فقر دم)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg" id="assess-btn">
+                        <span>🩺</span> تقييم مخاطر الحمل
+                    </button>
+                </form>
+            </div>
+            
+            <!-- منطقة النتائج -->
+            <div id="result-card" class="result-card" style="display: none;">
+                <div class="result-header">
+                    <h2>📊 نتيجة تقييم مخاطر الحمل</h2>
+                </div>
+                
+                <div class="risk-gauge-container">
+                    <div id="risk-gauge"></div>
+                </div>
+                
+                <div class="result-details">
+                    <div class="detail-row">
+                        <span class="detail-label">مستوى الخطر:</span>
+                        <span class="detail-value" id="risk-level">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">نسبة الثقة:</span>
+                        <span class="detail-value" id="confidence">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">الضغط النبضي:</span>
+                        <span class="detail-value" id="pulse-pressure">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">نسبة الضغط:</span>
+                        <span class="detail-value" id="bp-ratio">-</span>
+                    </div>
+                </div>
+                
+                <div class="recommendations-section">
+                    <h3>💡 التوصيات</h3>
+                    <div id="recommendations-list" class="recommendations-list"></div>
+                </div>
+                
+                <div class="alerts-section" id="alerts-section" style="display: none;">
+                    <h3>⚠️ تنبيهات</h3>
+                    <div id="alerts-list" class="alerts-list"></div>
+                </div>
+                
+                <div class="timeline-section">
+                    <h3>📅 الخط الزمني للحمل</h3>
+                    <div id="timeline-container"></div>
+                </div>
+                
+                <div class="result-actions">
+                    <button class="btn btn-secondary" id="save-result-btn">
+                        <span>💾</span> حفظ التقرير
+                    </button>
+                    <button class="btn btn-secondary" id="share-result-btn">
+                        <span>📤</span> مشاركة
+                    </button>
+                    <button class="btn btn-outline" id="new-assessment-btn">
+                        <span>🔄</span> تقييم جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import predictionClient from '/static/js/prediction_client.js';
+        import timelineViewer from '/static/js/timeline_viewer.js';
+        
+        // عناصر DOM
+        const form = document.getElementById('pregnancy-form');
+        const resultCard = document.getElementById('result-card');
+        const assessBtn = document.getElementById('assess-btn');
+        const saveBtn = document.getElementById('save-result-btn');
+        const shareBtn = document.getElementById('share-result-btn');
+        const newBtn = document.getElementById('new-assessment-btn');
+        
+        // ألوان حسب مستوى الخطر
+        const riskColors = {
+            'منخفض': '#34a853',
+            'متوسط': '#fbbc04',
+            'مرتفع': '#ea4335'
+        };
+        
+        // معالجة submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            assessBtn.disabled = true;
+            assessBtn.innerHTML = '<span>⏳</span> جاري التقييم...';
+            
+            try {
+                const data = {
+                    patient_id: document.getElementById('patient-id').value,
+                    age: parseInt(document.getElementById('age').value),
+                    gestational_age_weeks: parseInt(document.getElementById('gestational-age').value),
+                    bmi: parseFloat(document.getElementById('bmi').value) || null,
+                    systolic_bp: parseInt(document.getElementById('systolic-bp').value),
+                    diastolic_bp: parseInt(document.getElementById('diastolic-bp').value),
+                    bs: parseFloat(document.getElementById('blood-sugar').value),
+                    body_temp: parseFloat(document.getElementById('body-temp').value) || 37,
+                    heart_rate: parseInt(document.getElementById('heart-rate').value) || 80,
+                    language: 'ar'
+                };
+                
+                const result = await predictionClient.predictPregnancyRisk(data);
+                
+                if (result.success && result.data) {
+                    const riskData = result.data;
+                    const riskLevel = riskData.risk_level_ar || 'متوسط';
+                    const riskColor = riskColors[riskLevel] || '#fbbc04';
+                    const riskScore = riskData.risk_level_encoded === 2 ? 85 : riskData.risk_level_encoded === 1 ? 45 : 15;
+                    
+                    resultCard.style.display = 'block';
+                    
+                    document.getElementById('risk-level').innerHTML = `<span style="color: ${riskColor}; font-weight: bold;">${riskLevel}</span>`;
+                    document.getElementById('confidence').textContent = `${Math.round(riskData.confidence * 100)}%`;
+                    document.getElementById('pulse-pressure').textContent = `${riskData.pulse_pressure} mmHg`;
+                    document.getElementById('bp-ratio').textContent = riskData.bp_ratio.toFixed(2);
+                    
+                    // عرض التوصيات
+                    const recommendations = riskData.risk_level_encoded === 2 
+                        ? ['🩺 متابعة أسبوعية في وحدة الحمل عالي الخطورة', '📊 مراقبة الضغط والسكر يومياً', '💊 الالتزام بالأدوية الموصوفة', '🚑 الاتصال بالطبيب فوراً عند ظهور أي أعراض']
+                        : riskData.risk_level_encoded === 1
+                        ? ['👩‍⚕️ متابعة كل أسبوعين', '🩸 تحليل سكر تراكمي كل 3 أشهر', '🏃‍♀️ نشاط بدني خفيف منتظم', '🥗 نظام غذائي متوازن']
+                        : ['✅ متابعة روتينية كل 4 أسابيع', '🥗 نظام غذائي صحي', '💊 حمض الفوليك يومياً', '🏃‍♀️ مشي خفيف يومي'];
+                    
+                    document.getElementById('recommendations-list').innerHTML = recommendations.map(rec => `<div class="recommendation-item">${rec}</div>`).join('');
+                    
+                    // عرض التنبيهات
+                    const alerts = [];
+                    if (data.systolic_bp >= 140 || data.diastolic_bp >= 90) alerts.push('⚠️ ارتفاع ضغط الدم - خطر تسمم الحمل');
+                    if (data.bs > 7) alerts.push('⚠️ ارتفاع السكر - خطر سكري الحمل');
+                    if (data.body_temp > 38) alerts.push('⚠️ ارتفاع درجة الحرارة - خطر التهاب');
+                    if (data.age > 35) alerts.push('⚠️ عمر متقدم - خطر مضاعفات');
+                    
+                    const alertsSection = document.getElementById('alerts-section');
+                    const alertsList = document.getElementById('alerts-list');
+                    if (alerts.length > 0) {
+                        alertsList.innerHTML = alerts.map(alert => `<div class="alert-item">${alert}</div>`).join('');
+                        alertsSection.style.display = 'block';
+                    } else {
+                        alertsSection.style.display = 'none';
+                    }
+                    
+                    // رسم المؤشر الدائري
+                    if (typeof ApexCharts !== 'undefined') {
+                        const options = {
+                            chart: { type: 'radialBar', height: 280 },
+                            plotOptions: {
+                                radialBar: {
+                                    startAngle: -135,
+                                    endAngle: 135,
+                                    hollow: { size: '65%' },
+                                    track: { background: '#e8eaed' },
+                                    dataLabels: {
+                                        name: { show: true, fontSize: '14px', offsetY: -10 },
+                                        value: { fontSize: '36px', fontWeight: 'bold', color: riskColor, offsetY: 10 }
+                                    }
+                                }
+                            },
+                            colors: [riskColor],
+                            series: [riskScore],
+                            labels: ['مخاطر الحمل']
+                        };
+                        new ApexCharts(document.getElementById('risk-gauge'), options).render();
+                    } else {
+                        document.getElementById('risk-gauge').innerHTML = `<div class="risk-placeholder" style="color: ${riskColor}">${riskScore}%</div>`;
+                    }
+                    
+                    // عرض الخط الزمني للحمل
+                    const pregnancyData = {
+                        gestational_age_weeks: data.gestational_age_weeks,
+                        due_date: new Date(Date.now() + (40 - data.gestational_age_weeks) * 7 * 24 * 60 * 60 * 1000).toISOString(),
+                        risk_level: riskData.risk_level_ar,
+                        events: []
+                    };
+                    timelineViewer.renderPregnancyTimeline('timeline-container', pregnancyData);
+                    
+                    // تمرير للنتائج
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    alert('حدث خطأ في التقييم. يرجى المحاولة مرة أخرى.');
+                }
+            } catch (error) {
+                console.error('Pregnancy assessment error:', error);
+                alert('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
+            } finally {
+                assessBtn.disabled = false;
+                assessBtn.innerHTML = '<span>🩺</span> تقييم مخاطر الحمل';
+            }
+        });
+        
+        // حفظ التقرير
+        saveBtn?.addEventListener('click', () => {
+            const patientId = document.getElementById('patient-id').value;
+            const riskLevel = document.getElementById('risk-level').innerText;
+            const content = document.getElementById('result-card').cloneNode(true);
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html><head><title>تقرير تقييم الحمل - ${patientId}</title>
+                <style>body{font-family:sans-serif;padding:20px}</style></head>
+                <body>${content.innerHTML}</body></html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        });
+        
+        // مشاركة النتيجة
+        shareBtn?.addEventListener('click', async () => {
+            const riskLevel = document.getElementById('risk-level').innerText;
+            const text = `تقييم مخاطر الحمل: ${riskLevel}\nتم التقييم بواسطة RIVA Health Platform`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'تقرير الحمل', text });
+                } catch (e) {}
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('تم نسخ النتيجة إلى الحافظة');
+            }
+        });
+        
+        // تقييم جديد
+        newBtn?.addEventListener('click', () => {
+            resultCard.style.display = 'none';
+            form.reset();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
