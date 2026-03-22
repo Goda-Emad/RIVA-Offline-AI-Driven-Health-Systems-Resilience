@@ -52,19 +52,6 @@ from pydantic import BaseModel, Field
 import sys
 sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
-# ✅ تعريف require_any_role مؤقتًا (لحين إضافته في access_control.py)
-def require_any_role(roles):
-    """
-    Temporary decorator until require_any_role is added to access_control.py
-    """
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
-            # في الإصدار النهائي، سيتم التحقق من الصلاحيات هنا
-            # حالياً: تمرير كل الطلبات
-            return await func(*args, **kwargs)
-        return wrapper
-    return decorator
-
 # 🔒 استيراد أنظمة الأمان v4.2
 try:
     from access_control import require_role, require_any_role, Role
