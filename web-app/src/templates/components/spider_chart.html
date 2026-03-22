@@ -1,1 +1,132 @@
+<div class="chart-card">
+    <div class="chart-header">
+        <div class="header-main">
+            <span class="chart-icon">🕸️</span>
+            <h3 class="chart-title">تحليل المؤشرات الحيوية</h3>
+        </div>
+        <span class="chart-period">آخر 30 يوم</span>
+    </div>
 
+    <div class="chart-container">
+        <canvas id="vitalSpiderChart"></canvas>
+    </div>
+
+    <div class="chart-footer">
+        <p class="chart-note">تم تحديث البيانات بناءً على آخر الفحوصات المعملية.</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+.chart-card {
+    background: var(--white, #ffffff);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    direction: rtl;
+    font-family: 'Cairo', sans-serif;
+    max-width: 500px;
+    border: 1px solid var(--gray-lighter, #e8eaed);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chart-icon { font-size: 20px; }
+
+.chart-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark, #202124);
+}
+
+.chart-period {
+    font-size: 12px;
+    color: var(--primary, #1a73e8);
+    background: rgba(26, 115, 232, 0.1);
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.chart-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f1f3f4;
+}
+
+.chart-note {
+    font-size: 11px;
+    color: var(--gray, #5f6368);
+    margin: 0;
+    text-align: center;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('vitalSpiderChart').getContext('2d');
+    
+    // الألوان المتناسقة مع مشروع ريفا
+    const primaryBlue = '#1a73e8';
+    const primaryBlueLight = 'rgba(26, 115, 232, 0.2)';
+
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['الضغط', 'السكر', 'النبض', 'التنفس', 'الكوليسترول', 'الوزن'],
+            datasets: [{
+                label: 'المستوى الحالي',
+                data: [85, 70, 90, 65, 80, 75], // قيم تجريبية
+                fill: true,
+                backgroundColor: primaryBlueLight,
+                borderColor: primaryBlue,
+                pointBackgroundColor: primaryBlue,
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: primaryBlue,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { display: true, color: '#e8eaed' },
+                    suggestedMin: 0,
+                    suggestedMax: 100,
+                    ticks: { display: false },
+                    pointLabels: {
+                        font: {
+                            family: 'Cairo',
+                            size: 12
+                        },
+                        color: '#5f6368'
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false } // إخفاء الليجند لشكل أنظف
+            }
+        }
+    });
+});
+</script>
