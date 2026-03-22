@@ -1,1 +1,487 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - التاريخ الطبي للمريض">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | التاريخ الطبي</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل التاريخ الطبي...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html" class="active">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="history-main">
+        <div class="container">
+            <div class="history-header">
+                <h1>📋 التاريخ الطبي للمريض</h1>
+                <p>عرض السجل الطبي الكامل والتشخيصات والأدوية والتحاليل</p>
+            </div>
+            
+            <!-- بطاقة البحث عن المريض -->
+            <div class="search-card">
+                <div class="search-form">
+                    <div class="form-group">
+                        <label for="patient-search">معرف المريض أو الاسم</label>
+                        <div class="search-input-group">
+                            <input type="text" id="patient-search" class="form-control" placeholder="أدخل معرف المريض أو الاسم">
+                            <button id="search-btn" class="btn btn-primary">🔍 بحث</button>
+                        </div>
+                    </div>
+                    <div class="search-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-details"> عرض التفاصيل الكاملة
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="include-lab"> تضمين التحاليل
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- معلومات المريض -->
+            <div id="patient-info" class="patient-info-card" style="display: none;">
+                <div class="patient-avatar">
+                    <img src="/static/assets/images/patient-avatar.svg" alt="Patient">
+                </div>
+                <div class="patient-details">
+                    <h2 id="patient-name">-</h2>
+                    <div class="patient-meta">
+                        <span class="meta-item">🆔 <span id="patient-id">-</span></span>
+                        <span class="meta-item">🎂 <span id="patient-age">-</span> سنة</span>
+                        <span class="meta-item">⚥ <span id="patient-gender">-</span></span>
+                        <span class="meta-item">🩸 <span id="patient-blood">-</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويبات التاريخ الطبي -->
+            <div id="history-tabs" class="history-tabs" style="display: none;">
+                <button class="tab-btn active" data-tab="diagnoses">📋 التشخيصات</button>
+                <button class="tab-btn" data-tab="medications">💊 الأدوية</button>
+                <button class="tab-btn" data-tab="allergies">⚠️ الحساسيات</button>
+                <button class="tab-btn" data-tab="lab-results">🔬 التحاليل</button>
+                <button class="tab-btn" data-tab="visits">🏥 الزيارات</button>
+                <button class="tab-btn" data-tab="procedures">⚕️ الإجراءات</button>
+                <button class="tab-btn" data-tab="immunizations">💉 التطعيمات</button>
+            </div>
+            
+            <!-- محتوى التشخيصات -->
+            <div id="diagnoses-tab" class="tab-content active">
+                <div class="section-card">
+                    <h3>📋 التشخيصات الطبية</h3>
+                    <div id="diagnoses-list" class="diagnoses-list">
+                        <div class="empty-state">🔍 ابحث عن مريض لعرض التشخيصات</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- محتوى الأدوية -->
+            <div id="medications-tab" class="tab-content">
+                <div class="section-card">
+                    <h3>💊 الأدوية الحالية والسابقة</h3>
+                    <div id="medications-list" class="medications-list">
+                        <div class="empty-state">🔍 ابحث عن مريض لعرض الأدوية</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- محتوى الحساسيات -->
+            <div id="allergies-tab" class="tab-content">
+                <div class="section-card">
+                    <h3>⚠️ الحساسيات المسجلة</h3>
+                    <div id="allergies-list" class="allergies-list">
+                        <div class="empty-state">🔍 ابحث عن مريض لعرض الحساسيات</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- محتوى التحاليل -->
+            <div id="lab-results-tab" class="tab-content">
+                <div class="section-card">
+                    <h3>🔬 نتائج التحاليل المخبرية</h3>
+                    <div id="lab-results-list" class="lab-results-list">
+                        <div class="empty-state">🔍 ابحث عن مريض لعرض التحاليل</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- محتوى الزيارات -->
+            <div id="visits-tab" class="tab-content">
+                <div class="section-card">
+                    <h3>🏥 سجل الزيارات</h3>
+                    <div id="visits-list" class="visits-list">
+                        <div class="empty-state">🔍 ابحث عن مريض لعرض الزيارات</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- محتوى الإجراءات -->
+            <div id="procedures-tab" class="tab-content">
+                <div class="section-card">
+                    <h3>⚕️ الإجراءات الطبية</h3>
+                    <div id="procedures-list" class="procedures-list">
+                        <div class="empty-state">🔍 ابحث عن مريض لعرض الإجراءات</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- محتوى التطعيمات -->
+            <div id="immunizations-tab" class="tab-content">
+                <div class="section-card">
+                    <h3>💉 التطعيمات</h3>
+                    <div id="immunizations-list" class="immunizations-list">
+                        <div class="empty-state">🔍 ابحث عن مريض لعرض التطعيمات</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import predictionClient from '/static/js/prediction_client.js';
+        
+        // عناصر DOM
+        const searchBtn = document.getElementById('search-btn');
+        const patientSearch = document.getElementById('patient-search');
+        const includeDetails = document.getElementById('include-details');
+        const includeLab = document.getElementById('include-lab');
+        const patientInfo = document.getElementById('patient-info');
+        const historyTabs = document.getElementById('history-tabs');
+        
+        let currentPatientId = null;
+        let currentHistory = null;
+        
+        // عرض البيانات
+        function displayPatientInfo(patient) {
+            document.getElementById('patient-name').textContent = patient.patient_name || 'غير معروف';
+            document.getElementById('patient-id').textContent = patient.patient_id || '-';
+            document.getElementById('patient-age').textContent = patient.age || '-';
+            document.getElementById('patient-gender').textContent = patient.gender === 'male' ? 'ذكر' : patient.gender === 'female' ? 'أنثى' : '-';
+            document.getElementById('patient-blood').textContent = patient.blood_type || 'غير محدد';
+            patientInfo.style.display = 'block';
+            historyTabs.style.display = 'flex';
+        }
+        
+        function displayDiagnoses(diagnoses) {
+            const container = document.getElementById('diagnoses-list');
+            if (!diagnoses || diagnoses.length === 0) {
+                container.innerHTML = '<div class="empty-state">📋 لا توجد تشخيصات مسجلة</div>';
+                return;
+            }
+            
+            container.innerHTML = diagnoses.map(dx => `
+                <div class="diagnosis-item">
+                    <div class="diagnosis-header">
+                        <span class="diagnosis-name">${escapeHtml(dx.condition)}</span>
+                        <span class="diagnosis-status status-${dx.status}">${dx.status === 'active' ? 'نشط' : dx.status === 'chronic' ? 'مزمن' : 'منتهي'}</span>
+                    </div>
+                    <div class="diagnosis-details">
+                        <span class="detail">📅 ${dx.diagnosed_date}</span>
+                        ${dx.icd10_code ? `<span class="detail">🔢 ${dx.icd10_code}</span>` : ''}
+                        ${dx.diagnosed_by ? `<span class="detail">👨‍⚕️ ${dx.diagnosed_by}</span>` : ''}
+                    </div>
+                    ${dx.notes ? `<div class="diagnosis-notes">📝 ${escapeHtml(dx.notes)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function displayMedications(medications) {
+            const container = document.getElementById('medications-list');
+            if (!medications || medications.length === 0) {
+                container.innerHTML = '<div class="empty-state">💊 لا توجد أدوية مسجلة</div>';
+                return;
+            }
+            
+            container.innerHTML = medications.map(med => `
+                <div class="medication-item">
+                    <div class="medication-header">
+                        <span class="medication-name">${escapeHtml(med.name)}</span>
+                        <span class="medication-status status-${med.status}">${med.status === 'active' ? 'نشط' : 'منتهي'}</span>
+                    </div>
+                    <div class="medication-details">
+                        <span class="detail">💊 ${med.dosage}</span>
+                        <span class="detail">⏰ ${med.frequency}</span>
+                        <span class="detail">📅 بداية: ${med.start_date}</span>
+                        ${med.end_date ? `<span class="detail">📅 نهاية: ${med.end_date}</span>` : ''}
+                    </div>
+                    ${med.notes ? `<div class="medication-notes">📝 ${escapeHtml(med.notes)}</div>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function displayAllergies(allergies) {
+            const container = document.getElementById('allergies-list');
+            if (!allergies || allergies.length === 0) {
+                container.innerHTML = '<div class="empty-state">⚠️ لا توجد حساسيات مسجلة</div>';
+                return;
+            }
+            
+            container.innerHTML = allergies.map(alg => `
+                <div class="allergy-item severity-${alg.severity}">
+                    <div class="allergy-header">
+                        <span class="allergy-name">${escapeHtml(alg.allergen)}</span>
+                        <span class="allergy-severity">${alg.severity === 'severe' ? 'شديد' : alg.severity === 'moderate' ? 'متوسط' : 'خفيف'}</span>
+                    </div>
+                    <div class="allergy-details">
+                        <span class="detail">🤧 رد الفعل: ${escapeHtml(alg.reaction)}</span>
+                        <span class="detail">📅 ${alg.diagnosed_date}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function displayLabResults(labResults) {
+            const container = document.getElementById('lab-results-list');
+            if (!labResults || labResults.length === 0) {
+                container.innerHTML = '<div class="empty-state">🔬 لا توجد تحاليل مسجلة</div>';
+                return;
+            }
+            
+            container.innerHTML = labResults.map(lab => `
+                <div class="lab-item status-${lab.status}">
+                    <div class="lab-header">
+                        <span class="lab-name">${escapeHtml(lab.test_name)}</span>
+                        <span class="lab-status">${lab.status === 'abnormal' ? 'غير طبيعي' : lab.status === 'critical' ? 'حرج' : 'طبيعي'}</span>
+                    </div>
+                    <div class="lab-details">
+                        <span class="detail">📊 القيمة: ${lab.value} ${lab.unit || ''}</span>
+                        <span class="detail">📈 النطاق: ${lab.reference_range || '-'}</span>
+                        <span class="detail">📅 ${new Date(lab.performed_date).toLocaleDateString('ar-EG')}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function displayVisits(visits) {
+            const container = document.getElementById('visits-list');
+            if (!visits || visits.length === 0) {
+                container.innerHTML = '<div class="empty-state">🏥 لا توجد زيارات مسجلة</div>';
+                return;
+            }
+            
+            container.innerHTML = visits.map(visit => `
+                <div class="visit-item">
+                    <div class="visit-header">
+                        <span class="visit-date">📅 ${new Date(visit.visit_date).toLocaleDateString('ar-EG')}</span>
+                        <span class="visit-doctor">👨‍⚕️ ${escapeHtml(visit.doctor_name)}</span>
+                    </div>
+                    <div class="visit-details">
+                        <div class="detail-row"><strong>الشكوى:</strong> ${escapeHtml(visit.chief_complaint)}</div>
+                        <div class="detail-row"><strong>التقييم:</strong> ${escapeHtml(visit.assessment)}</div>
+                        <div class="detail-row"><strong>الخطة:</strong> ${escapeHtml(visit.plan)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // التبديل بين التبويبات
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`${tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // البحث عن المريض
+        searchBtn.addEventListener('click', async () => {
+            const query = patientSearch.value.trim();
+            if (!query) {
+                alert('يرجى إدخال معرف المريض أو الاسم');
+                return;
+            }
+            
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '⏳ جاري البحث...';
+            
+            try {
+                // البحث عن المريض (افتراضياً نستخدم المعرف)
+                const history = await predictionClient.getMedicalHistory(query, {
+                    include_lab_results: includeLab.checked,
+                    include_vitals: includeDetails.checked,
+                    include_procedures: includeDetails.checked,
+                    include_immunizations: includeDetails.checked
+                });
+                
+                if (history.success && history.medical_history) {
+                    currentHistory = history.medical_history;
+                    currentPatientId = query;
+                    
+                    displayPatientInfo(currentHistory);
+                    displayDiagnoses(currentHistory.diagnoses || []);
+                    displayMedications(currentHistory.medications || []);
+                    displayAllergies(currentHistory.allergies || []);
+                    displayLabResults(currentHistory.lab_results || []);
+                    displayVisits(currentHistory.visits || []);
+                    displayProcedures(currentHistory.procedures || []);
+                    displayImmunizations(currentHistory.immunizations || []);
+                } else {
+                    alert('لم يتم العثور على مريض بهذا المعرف');
+                    patientInfo.style.display = 'none';
+                    historyTabs.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('حدث خطأ في البحث. يرجى المحاولة مرة أخرى.');
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '🔍 بحث';
+            }
+        });
+        
+        // دوال الإجراءات والتحاليل والتطعيمات
+        function displayProcedures(procedures) {
+            const container = document.getElementById('procedures-list');
+            if (!procedures || procedures.length === 0) {
+                container.innerHTML = '<div class="empty-state">⚕️ لا توجد إجراءات مسجلة</div>';
+                return;
+            }
+            container.innerHTML = procedures.map(proc => `
+                <div class="procedure-item">
+                    <div class="procedure-header">
+                        <span class="procedure-name">${escapeHtml(proc.procedure_name)}</span>
+                        <span class="procedure-date">📅 ${proc.performed_date}</span>
+                    </div>
+                    <div class="procedure-details">
+                        ${proc.outcome ? `<div class="detail-row"><strong>النتيجة:</strong> ${escapeHtml(proc.outcome)}</div>` : ''}
+                        ${proc.complications ? `<div class="detail-row"><strong>المضاعفات:</strong> ${escapeHtml(proc.complications)}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function displayImmunizations(immunizations) {
+            const container = document.getElementById('immunizations-list');
+            if (!immunizations || immunizations.length === 0) {
+                container.innerHTML = '<div class="empty-state">💉 لا توجد تطعيمات مسجلة</div>';
+                return;
+            }
+            container.innerHTML = immunizations.map(imm => `
+                <div class="immunization-item">
+                    <div class="immunization-header">
+                        <span class="vaccine-name">${escapeHtml(imm.vaccine_name)}</span>
+                        <span class="vaccine-dose">الجرعة ${imm.dose_number}</span>
+                    </div>
+                    <div class="immunization-details">
+                        <span class="detail">📅 ${imm.administered_date}</span>
+                        ${imm.next_dose_date ? `<span class="detail">⏰ الجرعة القادمة: ${imm.next_dose_date}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Enter key search
+        patientSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchBtn.click();
+        });
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
