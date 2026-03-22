@@ -1,1 +1,467 @@
+<div class="mother-card" id="mother-card">
+    <div class="card-header">
+        <div class="header-icon">🤰</div>
+        <div class="header-info">
+            <h3 class="mother-name" id="mother-name">أميرة محمد</h3>
+            <p class="mother-info" id="mother-info">العمر: 28 سنة | الأسبوع: 24</p>
+        </div>
+        <div class="risk-badge" id="risk-badge">منخفض</div>
+    </div>
+    
+    <div class="card-body">
+        <div class="vitals-grid">
+            <div class="vital-item">
+                <span class="vital-icon">❤️</span>
+                <div class="vital-info">
+                    <span class="vital-label">الضغط الانقباضي</span>
+                    <span class="vital-value" id="systolic-bp">118</span>
+                    <span class="vital-unit">mmHg</span>
+                </div>
+            </div>
+            <div class="vital-item">
+                <span class="vital-icon">🩸</span>
+                <div class="vital-info">
+                    <span class="vital-label">الضغط الانبساطي</span>
+                    <span class="vital-value" id="diastolic-bp">78</span>
+                    <span class="vital-unit">mmHg</span>
+                </div>
+            </div>
+            <div class="vital-item">
+                <span class="vital-icon">🍬</span>
+                <div class="vital-info">
+                    <span class="vital-label">مستوى السكر</span>
+                    <span class="vital-value" id="blood-sugar">92</span>
+                    <span class="vital-unit">mg/dL</span>
+                </div>
+            </div>
+            <div class="vital-item">
+                <span class="vital-icon">💪</span>
+                <div class="vital-info">
+                    <span class="vital-label">مؤشر الكتلة</span>
+                    <span class="vital-value" id="bmi">24.5</span>
+                    <span class="vital-unit">BMI</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pregnancy-progress">
+            <div class="progress-label">
+                <span>الأسبوع الحالي</span>
+                <span class="week-number" id="current-week">24</span>
+                <span>/ 40</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="pregnancy-progress" style="width: 60%"></div>
+            </div>
+            <div class="progress-milestones">
+                <span>الثلث الأول</span>
+                <span>الثلث الثاني</span>
+                <span>الثلث الثالث</span>
+            </div>
+        </div>
+        
+        <div class="risk-factors">
+            <div class="risk-header">
+                <span class="risk-icon">⚠️</span>
+                <span class="risk-title">عوامل الخطر</span>
+            </div>
+            <div class="risk-list" id="risk-list">
+                <div class="risk-item low">
+                    <span class="risk-name">العمر</span>
+                    <span class="risk-status">طبيعي</span>
+                </div>
+                <div class="risk-item low">
+                    <span class="risk-name">الضغط</span>
+                    <span class="risk-status">طبيعي</span>
+                </div>
+                <div class="risk-item low">
+                    <span class="risk-name">السكر</span>
+                    <span class="risk-status">طبيعي</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="recommendations">
+            <div class="rec-header">
+                <span class="rec-icon">💡</span>
+                <span class="rec-title">التوصيات</span>
+            </div>
+            <ul class="rec-list" id="rec-list">
+                <li>✅ متابعة دورية كل 4 أسابيع</li>
+                <li>✅ تناول حمض الفوليك يومياً</li>
+                <li>✅ مراقبة ضغط الدم أسبوعياً</li>
+            </ul>
+        </div>
+        
+        <div class="next-appointment">
+            <span class="appointment-icon">📅</span>
+            <span class="appointment-label">موعد الفحص القادم:</span>
+            <span class="appointment-date" id="next-appointment">15 أبريل 2026</span>
+        </div>
+    </div>
+    
+    <div class="card-footer">
+        <button class="btn-view" id="view-details-btn">
+            <span>👁️</span> عرض التفاصيل
+        </button>
+        <button class="btn-update" id="update-vitals-btn">
+            <span>📝</span> تحديث القراءات
+        </button>
+    </div>
+</div>
 
+<style>
+.mother-card {
+    background: var(--white, #ffffff);
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 16px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+    border-top: 4px solid var(--primary, #1a73e8);
+}
+
+.mother-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(26,115,232,0.05), rgba(66,133,244,0.02));
+    border-bottom: 1px solid var(--gray-lighter, #e8eaed);
+}
+
+.header-icon {
+    font-size: 48px;
+}
+
+.header-info {
+    flex: 1;
+}
+
+.mother-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dark, #202124);
+    margin: 0 0 4px;
+}
+
+.mother-info {
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+    margin: 0;
+}
+
+.risk-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--success, #34a853);
+    color: white;
+}
+
+.risk-badge.medium {
+    background: var(--warning, #fbbc04);
+    color: var(--dark, #202124);
+}
+
+.risk-badge.high {
+    background: var(--danger, #ea4335);
+}
+
+.card-body {
+    padding: 20px 24px;
+}
+
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.vital-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--light, #f8f9fa);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.vital-item:hover {
+    background: rgba(26,115,232,0.05);
+}
+
+.vital-icon {
+    font-size: 24px;
+}
+
+.vital-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.vital-label {
+    font-size: 11px;
+    color: var(--gray, #5f6368);
+}
+
+.vital-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dark, #202124);
+}
+
+.vital-unit {
+    font-size: 10px;
+    color: var(--gray, #5f6368);
+}
+
+.pregnancy-progress {
+    margin: 20px 0;
+    padding: 16px;
+    background: var(--light, #f8f9fa);
+    border-radius: 16px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+    margin-bottom: 8px;
+}
+
+.week-number {
+    font-weight: 600;
+    color: var(--primary, #1a73e8);
+}
+
+.progress-track {
+    height: 8px;
+    background: var(--gray-lighter, #e8eaed);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-milestones {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--gray, #5f6368);
+}
+
+.risk-factors {
+    margin: 20px 0;
+}
+
+.risk-header, .rec-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.risk-icon, .rec-icon {
+    font-size: 16px;
+}
+
+.risk-title, .rec-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark, #202124);
+}
+
+.risk-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.risk-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--light, #f8f9fa);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.risk-name {
+    color: var(--gray-dark, #3c4043);
+}
+
+.risk-status {
+    font-weight: 500;
+}
+
+.risk-item.low .risk-status {
+    color: var(--success, #34a853);
+}
+
+.risk-item.medium .risk-status {
+    color: var(--warning, #fbbc04);
+}
+
+.risk-item.high .risk-status {
+    color: var(--danger, #ea4335);
+}
+
+.recommendations {
+    margin: 20px 0;
+}
+
+.rec-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rec-list li {
+    padding: 6px 0;
+    font-size: 12px;
+    color: var(--gray-dark, #3c4043);
+}
+
+.next-appointment {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(26,115,232,0.05);
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.appointment-icon {
+    font-size: 18px;
+}
+
+.appointment-label {
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+}
+
+.appointment-date {
+    font-weight: 600;
+    color: var(--primary, #1a73e8);
+}
+
+.card-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-lighter, #e8eaed);
+    background: var(--light, #f8f9fa);
+}
+
+.btn-view, .btn-update {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-view {
+    background: var(--white, #ffffff);
+    border: 1px solid var(--primary, #1a73e8);
+    color: var(--primary, #1a73e8);
+}
+
+.btn-view:hover {
+    background: rgba(26,115,232,0.05);
+    transform: translateY(-1px);
+}
+
+.btn-update {
+    background: var(--primary, #1a73e8);
+    color: white;
+}
+
+.btn-update:hover {
+    background: var(--primary-dark, #0d47a1);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .card-header {
+        flex-wrap: wrap;
+    }
+    .vitals-grid {
+        grid-template-columns: 1fr;
+    }
+    .card-footer {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+function updateMotherCard(data) {
+    if (data.name) document.getElementById('mother-name').textContent = data.name;
+    if (data.age) document.getElementById('mother-info').textContent = `العمر: ${data.age} سنة | الأسبوع: ${data.week || '-'}`;
+    if (data.risk) {
+        const badge = document.getElementById('risk-badge');
+        badge.textContent = data.risk;
+        badge.className = 'risk-badge';
+        if (data.risk === 'متوسط') badge.classList.add('medium');
+        if (data.risk === 'مرتفع') badge.classList.add('high');
+    }
+    if (data.systolic_bp) document.getElementById('systolic-bp').textContent = data.systolic_bp;
+    if (data.diastolic_bp) document.getElementById('diastolic-bp').textContent = data.diastolic_bp;
+    if (data.blood_sugar) document.getElementById('blood-sugar').textContent = data.blood_sugar;
+    if (data.bmi) document.getElementById('bmi').textContent = data.bmi;
+    if (data.current_week) {
+        const week = data.current_week;
+        document.getElementById('current-week').textContent = week;
+        const progress = (week / 40) * 100;
+        document.getElementById('pregnancy-progress').style.width = progress + '%';
+    }
+    if (data.risk_factors) {
+        const riskList = document.getElementById('risk-list');
+        riskList.innerHTML = data.risk_factors.map(r => `
+            <div class="risk-item ${r.level}">
+                <span class="risk-name">${r.name}</span>
+                <span class="risk-status">${r.status}</span>
+            </div>
+        `).join('');
+    }
+    if (data.recommendations) {
+        const recList = document.getElementById('rec-list');
+        recList.innerHTML = data.recommendations.map(r => `<li>${r}</li>`).join('');
+    }
+    if (data.next_appointment) document.getElementById('next-appointment').textContent = data.next_appointment;
+}
+
+document.getElementById('view-details-btn')?.addEventListener('click', () => {
+    window.location.href = '/10_mother_dashboard.html';
+});
+
+document.getElementById('update-vitals-btn')?.addEventListener('click', () => {
+    window.location.href = '/06_pregnancy.html';
+});
+</script>
