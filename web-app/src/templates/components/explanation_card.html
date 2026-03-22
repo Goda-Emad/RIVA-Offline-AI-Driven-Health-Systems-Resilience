@@ -1,1 +1,192 @@
+<div class="explanation-card" id="explanation-card">
+    <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div class="card-title">تفاصيل العوامل المؤثرة</div>
+    </div>
+    <div class="card-body">
+        <div class="shap-values-container" id="shap-values">
+            <div class="shap-item">
+                <span class="shap-name">فشل القلب</span>
+                <div class="shap-bar positive" style="width: 65%"></div>
+                <span class="shap-value">+0.24</span>
+            </div>
+            <div class="shap-item">
+                <span class="shap-name">السكري</span>
+                <div class="shap-bar positive" style="width: 48%"></div>
+                <span class="shap-value">+0.19</span>
+            </div>
+            <div class="shap-item">
+                <span class="shap-name">عدد الأدوية</span>
+                <div class="shap-bar positive" style="width: 32%"></div>
+                <span class="shap-value">+0.12</span>
+            </div>
+            <div class="shap-item">
+                <span class="shap-name">نسبة الأكسجين</span>
+                <div class="shap-bar negative" style="width: 28%"></div>
+                <span class="shap-value">-0.08</span>
+            </div>
+            <div class="shap-item">
+                <span class="shap-name">العمر</span>
+                <div class="shap-bar positive" style="width: 22%"></div>
+                <span class="shap-value">+0.06</span>
+            </div>
+        </div>
+        <div class="card-footer-note">
+            <div class="note-positive">⬆️ القيم الموجبة تزيد من خطر إعادة الدخول</div>
+            <div class="note-negative">⬇️ القيم السالبة تقلل من خطر إعادة الدخول</div>
+        </div>
+    </div>
+</div>
 
+<style>
+.explanation-card {
+    background: var(--white, #ffffff);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+}
+
+.explanation-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--primary-light, #4285f4), var(--primary, #1a73e8));
+    color: white;
+}
+
+.card-icon {
+    font-size: 24px;
+}
+
+.card-title {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.shap-values-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.shap-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.shap-name {
+    width: 110px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dark, #202124);
+}
+
+.shap-bar {
+    flex: 1;
+    height: 24px;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.shap-bar.positive {
+    background: linear-gradient(90deg, #ea4335, #c5221f);
+}
+
+.shap-bar.negative {
+    background: linear-gradient(90deg, #34a853, #0f9d58);
+}
+
+.shap-value {
+    width: 55px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    font-family: monospace;
+}
+
+.shap-bar.positive + .shap-value {
+    color: var(--danger, #ea4335);
+}
+
+.shap-bar.negative + .shap-value {
+    color: var(--success, #34a853);
+}
+
+.card-footer-note {
+    background: var(--light, #f8f9fa);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 11px;
+    margin-top: 8px;
+}
+
+.note-positive {
+    color: var(--danger, #ea4335);
+    margin-bottom: 6px;
+}
+
+.note-negative {
+    color: var(--success, #34a853);
+}
+
+@media (max-width: 768px) {
+    .shap-name {
+        width: 100%;
+    }
+    .shap-bar {
+        width: 100%;
+        margin: 4px 0;
+    }
+    .shap-value {
+        width: 100%;
+        text-align: right;
+    }
+}
+</style>
+
+<script>
+function updateShapValues(shapData) {
+    const container = document.getElementById('shap-values');
+    if (!container || !shapData) return;
+    
+    container.innerHTML = shapData.map(item => {
+        const percentage = Math.min(100, Math.abs(item.value) * 100);
+        const barClass = item.value > 0 ? 'positive' : 'negative';
+        const sign = item.value > 0 ? '+' : '';
+        return `
+            <div class="shap-item">
+                <span class="shap-name">${item.name}</span>
+                <div class="shap-bar ${barClass}" style="width: ${percentage}%"></div>
+                <span class="shap-value">${sign}${item.value.toFixed(3)}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function setCardTitle(title) {
+    const titleEl = document.querySelector('.explanation-card .card-title');
+    if (titleEl) titleEl.textContent = title;
+}
+
+function setCardIcon(icon) {
+    const iconEl = document.querySelector('.explanation-card .card-icon');
+    if (iconEl) iconEl.textContent = icon;
+}
+</script>
