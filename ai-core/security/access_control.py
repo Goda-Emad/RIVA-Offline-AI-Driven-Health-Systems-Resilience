@@ -510,20 +510,14 @@ def require_role(*roles: Role):
 
 
 # ✅ إضافة require_any_role (لأن chat.py يحتاجها)
+# ✅ إضافة require_any_role
 def require_any_role(roles: list):
     """
     FastAPI decorator — requires any of the specified roles.
-    
-    Usage:
-        @require_any_role([Role.DOCTOR, Role.NURSE, Role.ADMIN])
-        async def my_endpoint(...):
-            ...
     """
     def decorator(func):
         async def wrapper(*args, **kwargs):
-            # محاولة استخراج session_id
             session_id = kwargs.get("session_id")
-            
             if not session_id:
                 for arg in args:
                     if hasattr(arg, "headers"):
@@ -538,7 +532,6 @@ def require_any_role(roles: list):
                     f"هذه العملية تتطلب أحد الأدوار: {[r.value for r in roles]}"
                 )
             
-            # إضافة access إلى kwargs
             kwargs["access"] = session.user
             return await func(*args, **kwargs)
         
