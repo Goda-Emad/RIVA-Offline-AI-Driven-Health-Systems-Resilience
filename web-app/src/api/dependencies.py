@@ -172,16 +172,16 @@ async def get_admin_user(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
 # 4. 🗄️ DATABASE DEPENDENCIES
 # ─────────────────────────────────────────────────────────────────────────────
 
 DATABASE_URL = "sqlite+aiosqlite:///./data-storage/databases/riva.db"
 
+# ✅ تم التعديل - إزالة pool_size و max_overflow (غير مدعومين في SQLite)
 engine = create_async_engine(
     DATABASE_URL,
-    echo=False,
-    pool_size=10,
-    max_overflow=20
+    echo=False
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -230,8 +230,6 @@ async def get_patient_context(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to load patient data: {str(e)}"
         )
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. 🧠 AI MODEL DEPENDENCIES (Singletons)
 # ─────────────────────────────────────────────────────────────────────────────
