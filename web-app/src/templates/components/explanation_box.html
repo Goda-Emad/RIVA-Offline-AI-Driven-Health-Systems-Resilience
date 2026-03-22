@@ -120,7 +120,7 @@
 
 .factor-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--warning, #fbbc04), var(--danger, #ea4335));
+    background: linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4));
     border-radius: 3px;
     transition: width 0.3s ease;
 }
@@ -178,17 +178,35 @@ function updateExplanation(data) {
     }
     
     if (factorsEl && data.factors) {
-        factorsEl.innerHTML = data.factors.map(f => `
-            <div class="factor-item">
-                <span class="factor-name">${f.name}</span>
-                <div class="factor-bar"><div class="factor-bar-fill" style="width: ${f.impact}%"></div></div>
-                <span class="factor-impact">${f.label || '+' + f.impact + '%'}</span>
-            </div>
-        `).join('');
+        factorsEl.innerHTML = data.factors.map(f => {
+            const impactValue = Math.abs(f.impact);
+            const impactSign = f.impact > 0 ? '+' : '';
+            const barColor = f.impact > 0 
+                ? 'linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4))'
+                : 'linear-gradient(90deg, var(--success, #34a853), var(--success, #34a853))';
+            const impactColor = f.impact > 0 ? 'var(--danger, #ea4335)' : 'var(--success, #34a853)';
+            
+            return `
+                <div class="factor-item">
+                    <span class="factor-name">${f.name}</span>
+                    <div class="factor-bar"><div class="factor-bar-fill" style="width: ${Math.min(100, impactValue)}%; background: ${barColor}"></div></div>
+                    <span class="factor-impact" style="color: ${impactColor}">${impactSign}${impactValue}%</span>
+                </div>
+            `;
+        }).join('');
     }
     
     if (recommendationEl && data.recommendation) {
         recommendationEl.innerHTML = `<strong>💡 التوصية:</strong> ${data.recommendation}`;
+    }
+}
+
+function toggleExplanation() {
+    const content = document.getElementById('explanation-content');
+    const toggle = document.getElementById('explanation-toggle');
+    if (content && toggle) {
+        content.classList.toggle('collapsed');
+        toggle.classList.toggle('collapsed');
     }
 }
 </script>
