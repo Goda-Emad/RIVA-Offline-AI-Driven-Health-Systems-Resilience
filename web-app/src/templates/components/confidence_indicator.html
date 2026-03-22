@@ -24,7 +24,7 @@
     padding: 16px 20px;
     margin: 12px 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-right: 4px solid #1a73e8;
+    border-right: 4px solid var(--primary, #1a73e8);
 }
 
 .confidence-header {
@@ -55,7 +55,7 @@
 
 .confidence-bar {
     height: 100%;
-    background: linear-gradient(90deg, #34a853, #1a73e8);
+    background: linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4));
     border-radius: 4px;
     transition: width 0.5s ease;
     width: 0%;
@@ -74,13 +74,18 @@
     display: flex;
     justify-content: space-between;
     font-size: 10px;
-    color: var(--gray, #5f6368);
     margin-bottom: 12px;
 }
 
-.level-low { color: #ea4335; }
-.level-medium { color: #fbbc04; }
-.level-high { color: #34a853; }
+.level-low { 
+    color: var(--danger, #ea4335); 
+}
+.level-medium { 
+    color: var(--warning, #fbbc04); 
+}
+.level-high { 
+    color: var(--primary, #1a73e8); 
+}
 
 .confidence-note {
     font-size: 11px;
@@ -88,26 +93,66 @@
     margin: 8px 0 0;
     line-height: 1.4;
 }
+
+@media (max-width: 768px) {
+    .confidence-indicator {
+        padding: 12px 16px;
+    }
+    .confidence-title {
+        font-size: 13px;
+    }
+}
 </style>
 
 <script>
 function updateConfidence(percentage) {
     const bar = document.getElementById('confidence-bar');
     const value = document.getElementById('confidence-value');
+    const note = document.getElementById('confidence-note');
+    
     if (bar && value) {
         const percent = Math.min(100, Math.max(0, percentage));
         bar.style.width = percent + '%';
         value.textContent = percent + '%';
         
         let levelText = '';
-        if (percent < 40) levelText = 'منخفض';
-        else if (percent < 70) levelText = 'متوسط';
-        else levelText = 'مرتفع';
+        let levelClass = '';
+        if (percent < 40) {
+            levelText = 'منخفض';
+            levelClass = 'level-low';
+        } else if (percent < 70) {
+            levelText = 'متوسط';
+            levelClass = 'level-medium';
+        } else {
+            levelText = 'مرتفع';
+            levelClass = 'level-high';
+        }
         
-        const note = document.getElementById('confidence-note');
         if (note) {
-            note.innerHTML = `درجة الثقة: ${levelText} - ${percent}%`;
+            note.innerHTML = `درجة الثقة: ${levelText} (${percent}%) - تعكس مدى دقة التوقع بناءً على البيانات المتاحة.`;
+        }
+        
+        // تحديث لون الشريط بناءً على النسبة
+        if (percent < 40) {
+            bar.style.background = `linear-gradient(90deg, var(--danger, #ea4335), var(--danger, #ea4335))`;
+        } else if (percent < 70) {
+            bar.style.background = `linear-gradient(90deg, var(--warning, #fbbc04), var(--warning, #fbbc04))`;
+        } else {
+            bar.style.background = `linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4))`;
         }
     }
+}
+
+function resetConfidence() {
+    const bar = document.getElementById('confidence-bar');
+    const value = document.getElementById('confidence-value');
+    const note = document.getElementById('confidence-note');
+    
+    if (bar) {
+        bar.style.width = '0%';
+        bar.style.background = `linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4))`;
+    }
+    if (value) value.textContent = '0%';
+    if (note) note.innerHTML = 'تعكس درجة الثقة مدى دقة النموذج في هذا التوقع بناءً على البيانات المتاحة.';
 }
 </script>
