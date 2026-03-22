@@ -1,1 +1,249 @@
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">جاري التحميل...</div>
+        <div class="loading-progress">
+            <div class="loading-progress-bar" id="loading-progress-bar"></div>
+        </div>
+    </div>
+</div>
 
+<style>
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(32, 33, 36, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.loading-container {
+    background: var(--white, #ffffff);
+    border-radius: 20px;
+    padding: 32px 40px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    animation: fadeInUp 0.3s ease;
+    min-width: 280px;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border: 4px solid var(--gray-lighter, #e8eaed);
+    border-top: 4px solid var(--primary, #1a73e8);
+    border-right: 4px solid var(--primary-light, #4285f4);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--dark, #202124);
+    margin-bottom: 16px;
+}
+
+.loading-progress {
+    width: 200px;
+    height: 4px;
+    background: var(--gray-lighter, #e8eaed);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.loading-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.loading-overlay.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+/* متغيرات للتحكم في سرعة التحميل */
+.loading-spinner.fast {
+    animation-duration: 0.5s;
+}
+
+.loading-spinner.slow {
+    animation-duration: 1.2s;
+}
+
+/* وضع التحميل الطويل */
+.loading-long .loading-text {
+    font-size: 14px;
+    color: var(--gray, #5f6368);
+}
+
+.loading-long .loading-spinner {
+    width: 48px;
+    height: 48px;
+}
+
+/* دعم الوضع المظلم */
+@media (prefers-color-scheme: dark) {
+    .loading-container {
+        background: var(--gray-dark, #3c4043);
+    }
+    .loading-text {
+        color: var(--white, #ffffff);
+    }
+    .loading-progress {
+        background: var(--gray, #5f6368);
+    }
+}
+
+@media (max-width: 768px) {
+    .loading-container {
+        padding: 24px 32px;
+        min-width: 240px;
+    }
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+    }
+    .loading-text {
+        font-size: 14px;
+    }
+    .loading-progress {
+        width: 160px;
+    }
+}
+</style>
+
+<script>
+let loadingTimeout = null;
+let progressInterval = null;
+
+function showLoading(message = 'جاري التحميل...', showProgress = false) {
+    const overlay = document.getElementById('loading-overlay');
+    const textEl = document.querySelector('.loading-text');
+    const progressContainer = document.querySelector('.loading-progress');
+    const progressBar = document.getElementById('loading-progress-bar');
+    
+    if (!overlay) return;
+    
+    if (textEl) textEl.textContent = message;
+    
+    if (showProgress && progressContainer) {
+        progressContainer.style.display = 'block';
+        if (progressBar) {
+            progressBar.style.width = '0%';
+            // محاكاة تقدم التحميل
+            if (progressInterval) clearInterval(progressInterval);
+            let progress = 0;
+            progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 90) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+                if (progressBar) progressBar.style.width = Math.min(progress, 90) + '%';
+            }, 300);
+        }
+    } else if (progressContainer) {
+        progressContainer.style.display = 'none';
+    }
+    
+    overlay.style.display = 'flex';
+    overlay.classList.remove('fade-out');
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (!overlay) return;
+    
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+    
+    overlay.classList.add('fade-out');
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        overlay.classList.remove('fade-out');
+        // إعادة تعيين شريط التقدم
+        const progressBar = document.getElementById('loading-progress-bar');
+        if (progressBar) progressBar.style.width = '0%';
+    }, 300);
+}
+
+function updateLoadingProgress(percent) {
+    const progressBar = document.getElementById('loading-progress-bar');
+    if (progressBar) {
+        const p = Math.min(100, Math.max(0, percent));
+        progressBar.style.width = p + '%';
+        if (p >= 100) {
+            setTimeout(() => hideLoading(), 500);
+        }
+    }
+}
+
+function setLoadingSpeed(speed) {
+    const spinner = document.querySelector('.loading-spinner');
+    if (spinner) {
+        spinner.classList.remove('fast', 'slow');
+        if (speed === 'fast') spinner.classList.add('fast');
+        else if (speed === 'slow') spinner.classList.add('slow');
+    }
+}
+
+function setLoadingLongMode(isLong) {
+    const container = document.querySelector('.loading-container');
+    if (container) {
+        if (isLong) {
+            container.classList.add('loading-long');
+        } else {
+            container.classList.remove('loading-long');
+        }
+    }
+}
+
+// دالة لعرض التحميل مع وقت محدد
+function showLoadingWithTimeout(message, timeoutMs = 5000) {
+    showLoading(message);
+    if (loadingTimeout) clearTimeout(loadingTimeout);
+    loadingTimeout = setTimeout(() => {
+        hideLoading();
+        loadingTimeout = null;
+    }, timeoutMs);
+}
+</script>
