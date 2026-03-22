@@ -1,1 +1,493 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - الاستدامة في الرعاية الصحية">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | الاستدامة في الرعاية الصحية</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل صفحة الاستدامة...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="sustainability-main">
+        <div class="container">
+            <div class="sustainability-header">
+                <h1>🌍 الاستدامة في الرعاية الصحية</h1>
+                <p>ريفة: رعاية صحية ذكية للجميع، في كل مكان، مع الحفاظ على كوكبنا</p>
+            </div>
+            
+            <!-- القيم والمبادئ -->
+            <div class="values-section">
+                <h2>🎯 رؤيتنا للاستدامة</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="value-icon">🌱</div>
+                        <h3>صديقة للبيئة</h3>
+                        <p>تقليل البصمة الكربونية عبر تقليل السفر غير الضروري والاعتماد على الحلول الرقمية</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">🏥</div>
+                        <h3>رعاية صحية للجميع</h3>
+                        <p>توفير خدمات صحية متساوية للمناطق الحضرية والريفية والنائية</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">⚡</div>
+                        <h3>كفاءة الطاقة</h3>
+                        <p>نماذج AI محسنة تعمل على أجهزة منخفضة الاستهلاك للطاقة</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">📡</div>
+                        <h3>عمل بدون إنترنت</h3>
+                        <p>تقليل الاعتماد على البنية التحتية للإنترنت والكهرباء</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- التأثير البيئي -->
+            <div class="impact-section">
+                <h2>📊 التأثير البيئي</h2>
+                <div class="impact-stats">
+                    <div class="impact-card">
+                        <div class="impact-number" data-count="85">0</div>
+                        <div class="impact-label">% تقليل في السفر غير الضروري</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-number" data-count="120">0</div>
+                        <div class="impact-label">طن كربون مخفض سنوياً</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-number" data-count="100">0</div>
+                        <div class="impact-label">% تشغيل بدون إنترنت</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-number" data-count="30">0</div>
+                        <div class="impact-label">% توفير في الطاقة</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- الميزات المستدامة -->
+            <div class="features-section">
+                <h2>♻️ كيف نحقق الاستدامة؟</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">📱</div>
+                        <div class="feature-content">
+                            <h3>التشغيل بدون إنترنت</h3>
+                            <p>يعمل ريفا بالكامل بدون اتصال بالإنترنت، مما يجعله مثالياً للمناطق النائية ويقلل الاعتماد على البنية التحتية للاتصالات.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔋</div>
+                        <div class="feature-content">
+                            <h3>كفاءة الطاقة</h3>
+                            <p>نماذج الذكاء الاصطناعي محسنة للعمل على أجهزة منخفضة الاستهلاك (Intel Core i3) مع استهلاك طاقة منخفض.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💾</div>
+                        <div class="feature-content">
+                            <h3>تخزين محلي مشفر</h3>
+                            <p>جميع البيانات تخزن محلياً ومشفرة، مما يقلل الحاجة لمراكز بيانات ضخمة ويوفر الطاقة.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-content">
+                            <h3>إطالة عمر الأجهزة</h3>
+                            <p>تصميم خفيف الوزن يسمح بتشغيل النظام على أجهزة قديمة، مما يطيل عمرها الافتراضي ويقلل النفايات الإلكترونية.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🌿</div>
+                        <div class="feature-content">
+                            <h3>تقليل الورق</h3>
+                            <p>روشتات إلكترونية، سجلات طبية رقمية، وتقارير PDF بدلاً من الورق.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🚑</div>
+                        <div class="feature-content">
+                            <h3>تقليل السفر غير الضروري</h3>
+                            <p>الاستشارات الطبية عن بعد والفرز الذكي يقللان من الزيارات غير الضرورية للمستشفيات.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- نموذج الاستدامة -->
+            <div class="model-section">
+                <h2>🏆 نموذج ريفا للاستدامة</h2>
+                <div class="model-diagram">
+                    <div class="diagram-row">
+                        <div class="diagram-node">🧠 AI محسن</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node">⚡ طاقة منخفضة</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node">📱 يعمل بدون إنترنت</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node">🌍 وصول للجميع</div>
+                    </div>
+                    <div class="diagram-row">
+                        <div class="diagram-node">📄 روشتات رقمية</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node">🌳 تقليل الورق</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node">💚 حماية الغابات</div>
+                    </div>
+                    <div class="diagram-row">
+                        <div class="diagram-node">🏠 استشارات عن بعد</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node">🚗 تقليل السفر</div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node">⬇️ خفض الكربون</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- الشركاء والشهادات -->
+            <div class="certifications-section">
+                <h2>📜 شراكات وشهادات</h2>
+                <div class="certifications-grid">
+                    <div class="cert-card">
+                        <div class="cert-icon">🌍</div>
+                        <div class="cert-name">UN SDG</div>
+                        <div class="cert-desc">دعم أهداف التنمية المستدامة</div>
+                    </div>
+                    <div class="cert-card">
+                        <div class="cert-icon">🏥</div>
+                        <div class="cert-name">WHO</div>
+                        <div class="cert-desc">معايير منظمة الصحة العالمية</div>
+                    </div>
+                    <div class="cert-card">
+                        <div class="cert-icon">🔋</div>
+                        <div class="cert-name">Energy Star</div>
+                        <div class="cert-desc">كفاءة الطاقة المعتمدة</div>
+                    </div>
+                    <div class="cert-card">
+                        <div class="cert-icon">♻️</div>
+                        <div class="cert-name">Green IT</div>
+                        <div class="cert-desc">تكنولوجيا خضراء</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- التزامنا -->
+            <div class="commitment-section">
+                <h2>💚 التزامنا تجاه المستقبل</h2>
+                <div class="commitment-content">
+                    <p>في ريفا، نؤمن بأن التكنولوجيا يجب أن تكون في خدمة الإنسانية والكوكب. نحن نعمل باستمرار على تحسين كفاءة نماذجنا، تقليل استهلاك الطاقة، وتوسيع نطاق الوصول للخدمات الصحية في المناطق الأقل حظاً. نهدف بحلول عام 2030 إلى:</p>
+                    <ul>
+                        <li>🎯 خدمة 10 ملايين مستخدم في المناطق النائية</li>
+                        <li>🌳 تقليل 10,000 طن من انبعاثات الكربون سنوياً</li>
+                        <li>📉 تقليل استهلاك الطاقة بنسبة 50% إضافية</li>
+                        <li>🌍 التوسع في 20 دولة نامية</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- أزرار الإجراءات -->
+            <div class="sustainability-actions">
+                <a href="/01_home.html" class="btn btn-primary">🏠 العودة للرئيسية</a>
+                <a href="/12_ai_explanation.html" class="btn btn-secondary">🧠 كيف يعمل الـ AI</a>
+                <button class="btn btn-outline" id="share-sustainability">📤 مشاركة</button>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html" class="active">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        
+        // تأثير الأعداد المتحركة
+        function animateNumbers() {
+            const numbers = document.querySelectorAll('.impact-number');
+            numbers.forEach(el => {
+                const target = parseInt(el.dataset.count);
+                let current = 0;
+                const increment = target / 50;
+                const updateNumber = () => {
+                    current += increment;
+                    if (current < target) {
+                        el.textContent = Math.floor(current);
+                        requestAnimationFrame(updateNumber);
+                    } else {
+                        el.textContent = target;
+                    }
+                };
+                updateNumber();
+            });
+        }
+        
+        // مشاركة الصفحة
+        document.getElementById('share-sustainability')?.addEventListener('click', async () => {
+            const shareData = {
+                title: 'ريفا - الاستدامة في الرعاية الصحية',
+                text: 'ريفا: منصة صحية ذكية تعمل بدون إنترنت، صديقة للبيئة، وتوفر الرعاية الصحية للجميع في كل مكان',
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (e) {
+                    console.log('Share cancelled');
+                }
+            } else {
+                navigator.clipboard.writeText(shareData.text);
+                alert('تم نسخ النص إلى الحافظة');
+            }
+        });
+        
+        // إضافة أنماط إضافية
+        const style = document.createElement('style');
+        style.textContent = `
+            .sustainability-main { padding: 40px 0; min-height: calc(100vh - 200px); }
+            .sustainability-header { text-align: center; margin-bottom: 48px; }
+            .sustainability-header h1 { font-size: 32px; margin-bottom: 16px; }
+            .values-section, .impact-section, .features-section, .model-section, .certifications-section, .commitment-section {
+                margin-bottom: 48px;
+            }
+            h2 { text-align: center; margin-bottom: 32px; font-size: 24px; }
+            .values-grid, .features-grid, .certifications-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 24px;
+            }
+            .value-card, .feature-item, .cert-card {
+                background: var(--white, #ffffff);
+                border-radius: 20px;
+                padding: 24px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                transition: all 0.2s ease;
+            }
+            .value-card:hover, .feature-item:hover, .cert-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            }
+            .value-icon, .feature-icon, .cert-icon {
+                font-size: 48px;
+                margin-bottom: 16px;
+            }
+            .value-card h3, .feature-item h3, .cert-name {
+                font-size: 18px;
+                font-weight: bold;
+                margin-bottom: 12px;
+            }
+            .value-card p, .feature-item p, .cert-desc {
+                font-size: 14px;
+                color: #5f6368;
+                line-height: 1.6;
+            }
+            .impact-stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 24px;
+            }
+            .impact-card {
+                background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+                border-radius: 20px;
+                padding: 32px;
+                text-align: center;
+                color: white;
+            }
+            .impact-number {
+                font-size: 48px;
+                font-weight: bold;
+                margin-bottom: 8px;
+            }
+            .impact-label {
+                font-size: 14px;
+                opacity: 0.9;
+            }
+            .feature-item {
+                display: flex;
+                text-align: right;
+                gap: 16px;
+            }
+            .feature-icon {
+                font-size: 32px;
+                margin-bottom: 0;
+            }
+            .feature-content {
+                flex: 1;
+                text-align: right;
+            }
+            .model-diagram {
+                background: var(--white, #ffffff);
+                border-radius: 24px;
+                padding: 32px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+            .diagram-row {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 16px;
+                margin-bottom: 24px;
+            }
+            .diagram-row:last-child { margin-bottom: 0; }
+            .diagram-node {
+                background: #1a73e8;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 40px;
+                font-weight: 500;
+            }
+            .diagram-arrow {
+                font-size: 24px;
+                color: #1a73e8;
+            }
+            .commitment-content {
+                background: linear-gradient(135deg, #34a853 0%, #0f9d58 100%);
+                border-radius: 24px;
+                padding: 32px;
+                color: white;
+            }
+            .commitment-content p {
+                font-size: 16px;
+                line-height: 1.8;
+                margin-bottom: 20px;
+            }
+            .commitment-content ul {
+                padding-right: 20px;
+            }
+            .commitment-content li {
+                margin-bottom: 12px;
+                font-size: 14px;
+            }
+            .sustainability-actions {
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                margin-top: 48px;
+                flex-wrap: wrap;
+            }
+            @media (max-width: 768px) {
+                .feature-item {
+                    flex-direction: column;
+                    text-align: center;
+                }
+                .feature-icon {
+                    text-align: center;
+                }
+                .feature-content {
+                    text-align: center;
+                }
+                .diagram-row {
+                    flex-direction: column;
+                }
+                .diagram-arrow {
+                    transform: rotate(90deg);
+                }
+                .impact-stats {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // تشغيل التأثيرات
+        animateNumbers();
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
