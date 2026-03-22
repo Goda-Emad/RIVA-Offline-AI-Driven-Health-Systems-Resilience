@@ -15,13 +15,17 @@ Version: 4.2.1
 import logging
 from pathlib import Path
 
+# ✅ إنشاء مجلد السجلات إذا لم يكن موجوداً (قبل إعداد logging)
+log_dir = Path(__file__).parent / 'logs'
+log_dir.mkdir(parents=True, exist_ok=True)
+
 # إعداد التسجيل
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(Path(__file__).parent / 'logs' / 'app.log', mode='a')
+        logging.FileHandler(log_dir / 'app.log', mode='a')
     ]
 )
 
@@ -96,9 +100,5 @@ def init_app(app):
     logger.info("Application initialized successfully")
     return app
 
-
-# إنشاء مجلد السجلات إذا لم يكن موجوداً
-log_dir = Path(__file__).parent / 'logs'
-log_dir.mkdir(exist_ok=True)
 
 logger.info("RIVA Web Application package loaded (v%s)", __version__)
