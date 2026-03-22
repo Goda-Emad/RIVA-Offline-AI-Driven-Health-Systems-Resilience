@@ -64,8 +64,8 @@ class Role(str, Enum):
     PATIENT    = "patient"
     SCHOOL     = "school"
     READONLY   = "readonly"
-    SUPERVISOR = "supervisor"   # ✅ أضف هذا السطر
-
+    SUPERVISOR = "supervisor"
+    GENETIC_COUNSELOR = "genetic_counselor"   # ✅ أضف هذا السطر
 
 # ─── Permissions ─────────────────────────────────────────────────────────────
 
