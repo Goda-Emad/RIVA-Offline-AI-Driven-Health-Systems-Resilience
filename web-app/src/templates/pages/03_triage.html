@@ -1,1 +1,482 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - نظام الفرز الطبي الذكي">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | الفرز الطبي الذكي</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل نظام الفرز الطبي...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html" class="active">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="triage-main">
+        <div class="container">
+            <div class="triage-header">
+                <h1>🚑 نظام الفرز الطبي الذكي</h1>
+                <p>أدخل بيانات المريض للحصول على تصنيف الحالة والتوجيه للقسم المناسب</p>
+            </div>
+            
+            <div class="triage-grid">
+                <!-- نموذج إدخال البيانات -->
+                <div class="triage-form-card">
+                    <h2>📋 بيانات المريض</h2>
+                    
+                    <form id="triage-form">
+                        <!-- معلومات أساسية -->
+                        <div class="form-section">
+                            <h3>المعلومات الأساسية</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="patient-id">معرف المريض (اختياري)</label>
+                                    <input type="text" id="patient-id" class="form-control" placeholder="أدخل معرف المريض">
+                                </div>
+                                <div class="form-group">
+                                    <label for="age">العمر *</label>
+                                    <input type="number" id="age" class="form-control" placeholder="بالسنوات" required min="1" max="120">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="gender">الجنس *</label>
+                                    <select id="gender" class="form-control" required>
+                                        <option value="">اختر الجنس</option>
+                                        <option value="male">ذكر</option>
+                                        <option value="female">أنثى</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="pregnancies-group" style="display: none;">
+                                    <label for="pregnancies">عدد مرات الحمل</label>
+                                    <input type="number" id="pregnancies" class="form-control" placeholder="للإناث فقط" min="0" max="20" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- العلامات الحيوية -->
+                        <div class="form-section">
+                            <h3>🩺 العلامات الحيوية</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="glucose">مستوى السكر (mg/dL)</label>
+                                    <input type="number" id="glucose" class="form-control" placeholder="0-500" step="0.1" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blood-pressure">ضغط الدم (mmHg)</label>
+                                    <input type="number" id="blood-pressure" class="form-control" placeholder="ضغط الدم الانقباضي" step="0.1" value="0">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="bmi">مؤشر كتلة الجسم (BMI)</label>
+                                    <input type="number" id="bmi" class="form-control" placeholder="0-70" step="0.1" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pain-level">مستوى الألم (0-10)</label>
+                                    <input type="range" id="pain-level" min="0" max="10" step="1" value="0">
+                                    <span id="pain-value" class="range-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- الأعراض -->
+                        <div class="form-section">
+                            <h3>🤕 الأعراض</h3>
+                            <div class="symptoms-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="ضيق تنفس"> ضيق تنفس
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="ألم صدر"> ألم صدر
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="فقد وعي"> فقد وعي
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="نزيف"> نزيف
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="تشنج"> تشنج
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="صداع شديد"> صداع شديد
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="حمى"> حمى
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="قيء"> قيء
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="other-symptoms">أعراض أخرى</label>
+                                <textarea id="other-symptoms" class="form-control" rows="2" placeholder="أدخل أعراض أخرى..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- الأمراض المزمنة -->
+                        <div class="form-section">
+                            <h3>📋 الأمراض المزمنة</h3>
+                            <div class="chronic-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="diabetes"> السكري
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="hypertension"> ارتفاع ضغط الدم
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="heart_failure"> فشل القلب
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" value="kidney_disease"> أمراض الكلى
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- الأدوية الحالية -->
+                        <div class="form-section">
+                            <h3>💊 الأدوية الحالية</h3>
+                            <div class="form-group">
+                                <textarea id="current-meds" class="form-control" rows="2" placeholder="أدخل الأدوية التي يتناولها المريض..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg" id="predict-btn">
+                            <span>🔍</span> تحليل وتصنيف الحالة
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- عرض النتائج -->
+                <div class="triage-result-card" id="result-card" style="display: none;">
+                    <h2>📊 نتيجة الفرز الطبي</h2>
+                    
+                    <div class="result-risk-gauge" id="risk-gauge-container">
+                        <div id="triage-gauge"></div>
+                    </div>
+                    
+                    <div class="result-info">
+                        <div class="info-row">
+                            <span class="info-label">مستوى الطوارئ:</span>
+                            <span class="info-value" id="triage-level">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">درجة الخطورة:</span>
+                            <span class="info-value" id="risk-score">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">احتمالية السكري:</span>
+                            <span class="info-value" id="diabetes-risk">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-diagnosis" id="diagnosis">
+                        <h3>📝 التشخيص الأولي</h3>
+                        <p id="diagnosis-text">-</p>
+                    </div>
+                    
+                    <div class="result-action">
+                        <h3>🚑 الإجراء الموصى به</h3>
+                        <p id="action-text">-</p>
+                    </div>
+                    
+                    <div class="result-specialty">
+                        <h3>🏥 التخصص المناسب</h3>
+                        <p id="specialty-text">-</p>
+                    </div>
+                    
+                    <div class="result-alerts" id="alerts-container" style="display: none;">
+                        <h3>⚠️ تنبيهات</h3>
+                        <div id="alerts-list"></div>
+                    </div>
+                    
+                    <div class="result-actions">
+                        <button class="btn btn-secondary" id="reset-btn">
+                            <span>🔄</span> تصفير النموذج
+                        </button>
+                        <button class="btn btn-primary" id="new-triage-btn">
+                            <span>📋</span> فرز جديد
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import offlineManager from '/static/js/offline-detection.js';
+        import predictionClient from '/static/js/prediction_client.js';
+        
+        // عناصر DOM
+        const form = document.getElementById('triage-form');
+        const resultCard = document.getElementById('result-card');
+        const predictBtn = document.getElementById('predict-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const newTriageBtn = document.getElementById('new-triage-btn');
+        const genderSelect = document.getElementById('gender');
+        const pregnanciesGroup = document.getElementById('pregnancies-group');
+        const painSlider = document.getElementById('pain-level');
+        const painValue = document.getElementById('pain-value');
+        
+        // تحديث قيمة الألم
+        painSlider.addEventListener('input', () => {
+            painValue.textContent = painSlider.value;
+        });
+        
+        // إظهار/إخفاء عدد مرات الحمل حسب الجنس
+        genderSelect.addEventListener('change', () => {
+            if (genderSelect.value === 'female') {
+                pregnanciesGroup.style.display = 'block';
+            } else {
+                pregnanciesGroup.style.display = 'none';
+                document.getElementById('pregnancies').value = 0;
+            }
+        });
+        
+        // جمع البيانات من النموذج
+        function collectFormData() {
+            // الأعراض
+            const symptoms = [];
+            document.querySelectorAll('.symptoms-grid input:checked').forEach(cb => {
+                symptoms.push(cb.value);
+            });
+            const otherSymptoms = document.getElementById('other-symptoms').value;
+            if (otherSymptoms.trim()) {
+                symptoms.push(...otherSymptoms.split(',').map(s => s.trim()));
+            }
+            
+            // الأمراض المزمنة
+            const conditions = {};
+            document.querySelectorAll('.chronic-grid input:checked').forEach(cb => {
+                conditions[cb.value] = true;
+            });
+            
+            // الأدوية
+            const medicationsText = document.getElementById('current-meds').value;
+            const medications = medicationsText ? medicationsText.split(',').map(m => ({ name: m.trim() })) : [];
+            
+            return {
+                patient_id: document.getElementById('patient-id').value || null,
+                age: parseInt(document.getElementById('age').value),
+                gender: genderSelect.value,
+                pregnancies: parseInt(document.getElementById('pregnancies').value) || 0,
+                glucose: parseFloat(document.getElementById('glucose').value) || 0,
+                blood_pressure: parseFloat(document.getElementById('blood-pressure').value) || 0,
+                bmi: parseFloat(document.getElementById('bmi').value) || 0,
+                pain_level: parseInt(painSlider.value),
+                symptoms: symptoms,
+                conditions: conditions,
+                medications: medications,
+                language: 'ar'
+            };
+        }
+        
+        // عرض النتائج
+        function displayResults(result) {
+            const data = result.data;
+            
+            // تحديد مستوى الطوارئ
+            const triageLevel = data.triage_level || 'غير محدد';
+            const triageColor = {
+                'طارئ': '#ea4335',
+                'عاجل': '#fbbc04',
+                'نصف عاجل': '#34a853',
+                'غير عاجل': '#1a73e8'
+            }[triageLevel] || '#5f6368';
+            
+            // عرض المؤشر الدائري
+            const riskScore = (data.final_score || 0) * 100;
+            
+            // تحديث العناصر
+            document.getElementById('triage-level').innerHTML = `<span style="color: ${triageColor}; font-weight: bold;">${triageLevel}</span>`;
+            document.getElementById('risk-score').textContent = `${Math.round(riskScore)}%`;
+            document.getElementById('diabetes-risk').textContent = data.diabetes ? '⚠️ خطر مرتفع' : '✅ منخفض';
+            document.getElementById('diagnosis-text').textContent = data.diagnosis || 'جاري التقييم...';
+            document.getElementById('action-text').textContent = data.recommended_action || 'متابعة الحالة';
+            document.getElementById('specialty-text').textContent = data.specialty || 'عام';
+            
+            // عرض التنبيهات
+            if (data.alerts && data.alerts.length > 0) {
+                const alertsContainer = document.getElementById('alerts-container');
+                const alertsList = document.getElementById('alerts-list');
+                alertsList.innerHTML = data.alerts.map(alert => `<div class="alert-item">⚠️ ${alert}</div>`).join('');
+                alertsContainer.style.display = 'block';
+            } else {
+                document.getElementById('alerts-container').style.display = 'none';
+            }
+            
+            // رسم المؤشر الدائري (إذا كانت ApexCharts متاحة)
+            if (typeof ApexCharts !== 'undefined') {
+                const options = {
+                    chart: { type: 'radialBar', height: 250 },
+                    plotOptions: {
+                        radialBar: {
+                            startAngle: -135,
+                            endAngle: 135,
+                            hollow: { size: '65%' },
+                            track: { background: '#e8eaed' },
+                            dataLabels: {
+                                name: { show: true, fontSize: '14px' },
+                                value: { fontSize: '28px', fontWeight: 'bold', color: triageColor }
+                            }
+                        }
+                    },
+                    colors: [triageColor],
+                    series: [riskScore],
+                    labels: ['الخطر']
+                };
+                new ApexCharts(document.getElementById('triage-gauge'), options).render();
+            } else {
+                document.getElementById('triage-gauge').innerHTML = `<div class="risk-placeholder">${Math.round(riskScore)}%</div>`;
+            }
+        }
+        
+        // معالجة submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // تعطيل الزر
+            predictBtn.disabled = true;
+            predictBtn.innerHTML = '<span>⏳</span> جاري التحليل...';
+            
+            try {
+                const data = collectFormData();
+                const result = await predictionClient.predictTriage(data);
+                
+                if (result.success) {
+                    resultCard.style.display = 'block';
+                    displayResults(result);
+                    // تمرير إلى النتائج
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    alert('حدث خطأ في التحليل. يرجى المحاولة مرة أخرى.');
+                }
+            } catch (error) {
+                console.error('Triage error:', error);
+                alert('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.innerHTML = '<span>🔍</span> تحليل وتصنيف الحالة';
+            }
+        });
+        
+        // تصفير النموذج
+        resetBtn?.addEventListener('click', () => {
+            form.reset();
+            document.getElementById('pregnancies').value = 0;
+            document.getElementById('pain-value').textContent = '0';
+            pregnanciesGroup.style.display = 'none';
+            resultCard.style.display = 'none';
+        });
+        
+        // فرز جديد
+        newTriageBtn?.addEventListener('click', () => {
+            resultCard.style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
