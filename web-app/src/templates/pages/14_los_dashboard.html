@@ -1,1 +1,553 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - التنبؤ بمدة إقامة المريض">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | التنبؤ بمدة الإقامة في المستشفى</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    <link rel="stylesheet" href="/static/css/prediction_dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل نموذج التنبؤ بمدة الإقامة...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="prediction-dashboard">
+        <div class="container">
+            <div class="prediction-header">
+                <h1>⏱️ التنبؤ بمدة الإقامة في المستشفى</h1>
+                <p>تقدير عدد الأيام المتوقعة لإقامة المريض (Length of Stay - LOS)</p>
+                <div class="model-badge">XGBoost Regressor | MAE: 7.11 يوم</div>
+            </div>
+            
+            <!-- بطاقة إدخال البيانات -->
+            <div class="metric-card">
+                <div class="metric-icon">📝</div>
+                <h3>بيانات المريض</h3>
+                
+                <form id="los-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patient-id">معرف المريض (اختياري)</label>
+                            <input type="text" id="patient-id" class="form-control" placeholder="أدخل معرف المريض">
+                        </div>
+                        <div class="form-group">
+                            <label for="patient-age">العمر *</label>
+                            <input type="number" id="patient-age" class="form-control" placeholder="بالسنوات" min="1" max="120" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="patient-gender">الجنس *</label>
+                            <select id="patient-gender" class="form-control" required>
+                                <option value="">اختر</option>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="admission-type">نوع الدخول</label>
+                            <select id="admission-type" class="form-control">
+                                <option value="1">طارئ</option>
+                                <option value="2">عاجل</option>
+                                <option value="3">مقرر</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>الأمراض المزمنة</h4>
+                        <div class="conditions-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="diabetes"> السكري
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="hypertension"> ارتفاع ضغط الدم
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="heart_failure"> فشل القلب
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="kidney_disease"> أمراض الكلى
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>الأعراض</h4>
+                        <div class="symptoms-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="ضيق تنفس"> ضيق تنفس
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="ألم صدر"> ألم صدر
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="حمى"> حمى
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="تعب عام"> تعب عام
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="غثيان"> غثيان
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="دوخة"> دوخة
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="other-symptoms">أعراض أخرى</label>
+                            <textarea id="other-symptoms" class="form-control" rows="2" placeholder="أدخل أعراض أخرى..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>العلامات الحيوية (اختياري)</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="heart-rate">معدل ضربات القلب (bpm)</label>
+                                <input type="number" id="heart-rate" class="form-control" placeholder="40-180">
+                            </div>
+                            <div class="form-group">
+                                <label for="oxygen">نسبة الأكسجين (%)</label>
+                                <input type="number" id="oxygen" class="form-control" placeholder="70-100">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="temperature">درجة الحرارة (C°)</label>
+                                <input type="number" id="temperature" class="form-control" placeholder="35-42" step="0.1">
+                            </div>
+                            <div class="form-group">
+                                <label for="bmi">مؤشر كتلة الجسم (BMI)</label>
+                                <input type="number" id="bmi" class="form-control" placeholder="15-50" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg" id="predict-btn">
+                        <span>📊</span> توقع مدة الإقامة
+                    </button>
+                </form>
+            </div>
+            
+            <!-- منطقة النتائج -->
+            <div id="result-card" class="result-section" style="display: none;">
+                <div class="metric-card risk-gauge-container">
+                    <div id="los-gauge"></div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-icon">📊</div>
+                    <h3>نتيجة التنبؤ</h3>
+                    <div class="prediction-details">
+                        <div class="detail-row">
+                            <span class="detail-label">مدة الإقامة المتوقعة:</span>
+                            <span class="detail-value" id="los-days">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">الفئة:</span>
+                            <span class="detail-value" id="los-category">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">نسبة الثقة:</span>
+                            <span class="detail-value" id="confidence">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">الحد الأدنى المتوقع:</span>
+                            <span class="detail-value" id="min-days">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">الحد الأقصى المتوقع:</span>
+                            <span class="detail-value" id="max-days">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-card risk-factors-section">
+                    <div class="metric-icon">⚠️</div>
+                    <h3>عوامل الخطر المؤثرة</h3>
+                    <div id="risk-factors-list" class="risk-factors-list"></div>
+                </div>
+                
+                <div class="metric-card recommendations-section">
+                    <div class="metric-icon">💡</div>
+                    <h3>التوصيات الطبية</h3>
+                    <div id="recommendations-list" class="recommendations-list"></div>
+                </div>
+                
+                <div class="metric-card alerts-section" id="alerts-section" style="display: none;">
+                    <div class="metric-icon">⚠️</div>
+                    <h3>تنبيهات</h3>
+                    <div id="alerts-list" class="alerts-list"></div>
+                </div>
+                
+                <div class="explanation-section">
+                    <button class="btn btn-outline" id="explanation-btn">
+                        <span>🧠</span> شرح قرار الذكاء الاصطناعي
+                    </button>
+                </div>
+            </div>
+            
+            <!-- زر تقييم جديد -->
+            <div class="prediction-actions" id="new-assessment" style="display: none;">
+                <button class="btn btn-primary" id="new-assessment-btn">
+                    <span>🔄</span> تقييم جديد
+                </button>
+                <button class="btn btn-secondary" id="save-report-btn">
+                    <span>💾</span> حفظ التقرير
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import predictionClient from '/static/js/prediction_client.js';
+        import losChart from '/static/js/los_chart.js';
+        
+        // عناصر DOM
+        const form = document.getElementById('los-form');
+        const resultCard = document.getElementById('result-card');
+        const newAssessment = document.getElementById('new-assessment');
+        const predictBtn = document.getElementById('predict-btn');
+        
+        // جمع البيانات من النموذج
+        function collectFormData() {
+            const conditions = {};
+            document.querySelectorAll('.conditions-grid input:checked').forEach(cb => {
+                conditions[cb.value] = true;
+            });
+            
+            const symptoms = [];
+            document.querySelectorAll('.symptoms-grid input:checked').forEach(cb => {
+                symptoms.push(cb.value);
+            });
+            const otherSymptoms = document.getElementById('other-symptoms').value;
+            if (otherSymptoms.trim()) {
+                symptoms.push(...otherSymptoms.split(',').map(s => s.trim()));
+            }
+            
+            return {
+                patient_id: document.getElementById('patient-id').value || null,
+                age: parseInt(document.getElementById('patient-age').value),
+                gender: document.getElementById('patient-gender').value,
+                conditions: conditions,
+                symptoms: symptoms,
+                vitals: {
+                    heart_rate: parseInt(document.getElementById('heart-rate').value) || null,
+                    oxygen_saturation: parseInt(document.getElementById('oxygen').value) || null,
+                    temperature: parseFloat(document.getElementById('temperature').value) || null,
+                    bmi: parseFloat(document.getElementById('bmi').value) || null
+                },
+                admission_type: parseInt(document.getElementById('admission-type').value),
+                language: 'ar'
+            };
+        }
+        
+        // تحديد فئة مدة الإقامة
+        function getLOSCategory(days) {
+            if (days <= 3) return { text: 'قصيرة', color: '#34a853', level: 'low' };
+            if (days <= 7) return { text: 'متوسطة', color: '#fbbc04', level: 'medium' };
+            if (days <= 14) return { text: 'طويلة', color: '#ea4335', level: 'high' };
+            return { text: 'طويلة جداً', color: '#c5221f', level: 'critical' };
+        }
+        
+        // عرض النتائج
+        function displayResults(result) {
+            const data = result.data;
+            const days = data.prediction.days || 5.0;
+            const confidence = data.prediction.confidence || 0.7;
+            const minDays = data.prediction.min_days || Math.max(1, days - 2);
+            const maxDays = data.prediction.max_days || days + 2;
+            const category = getLOSCategory(days);
+            
+            // تحديث العناصر
+            document.getElementById('los-days').innerHTML = `<span style="font-size: 28px; font-weight: bold;">${days.toFixed(1)}</span> يوم`;
+            document.getElementById('los-category').innerHTML = `<span style="color: ${category.color}; font-weight: bold;">${category.text}</span>`;
+            document.getElementById('confidence').textContent = `${Math.round(confidence * 100)}%`;
+            document.getElementById('min-days').textContent = `${minDays.toFixed(1)} يوم`;
+            document.getElementById('max-days').textContent = `${maxDays.toFixed(1)} يوم`;
+            
+            // عرض عوامل الخطر
+            const riskFactors = data.risk_factors || [];
+            const riskFactorsContainer = document.getElementById('risk-factors-list');
+            if (riskFactors.length > 0) {
+                riskFactorsContainer.innerHTML = riskFactors.map(f => `
+                    <div class="risk-factor-item">
+                        <span class="risk-factor-name">${f.nameAr || f.name}</span>
+                        <div class="risk-factor-bar"><div class="risk-factor-bar-fill" style="width: ${Math.min(Math.abs(f.impact * 20), 100)}%"></div></div>
+                        <span class="risk-factor-score">${f.impact}</span>
+                    </div>
+                `).join('');
+            } else {
+                riskFactorsContainer.innerHTML = '<div class="empty-state">لا توجد عوامل خطر محددة</div>';
+            }
+            
+            // عرض التوصيات
+            const recommendations = data.recommendations || [];
+            const recContainer = document.getElementById('recommendations-list');
+            if (recommendations.length > 0) {
+                recContainer.innerHTML = recommendations.map(rec => `<div class="recommendation-item">💡 ${rec}</div>`).join('');
+            } else {
+                recContainer.innerHTML = '<div class="empty-state">لا توجد توصيات محددة</div>';
+            }
+            
+            // عرض التنبيهات
+            const alerts = data.alerts || [];
+            const alertsSection = document.getElementById('alerts-section');
+            const alertsList = document.getElementById('alerts-list');
+            if (alerts.length > 0) {
+                alertsList.innerHTML = alerts.map(alert => `<div class="alert-item">⚠️ ${alert}</div>`).join('');
+                alertsSection.style.display = 'block';
+            } else {
+                alertsSection.style.display = 'none';
+            }
+            
+            // رسم المؤشر الدائري
+            if (losChart && typeof losChart.createLOSGauge === 'function') {
+                losChart.createLOSGauge('los-gauge', days);
+            } else if (typeof ApexCharts !== 'undefined') {
+                const percentage = Math.min(100, (days / 30) * 100);
+                const color = days > 14 ? '#ea4335' : days > 7 ? '#fbbc04' : '#34a853';
+                const options = {
+                    chart: { type: 'radialBar', height: 280 },
+                    plotOptions: {
+                        radialBar: {
+                            startAngle: -135,
+                            endAngle: 135,
+                            hollow: { size: '65%' },
+                            track: { background: '#e8eaed' },
+                            dataLabels: {
+                                name: { show: true, fontSize: '14px', offsetY: -10 },
+                                value: { fontSize: '28px', fontWeight: 'bold', color: color, offsetY: 10, formatter: () => `${days.toFixed(1)} يوم` }
+                            }
+                        }
+                    },
+                    colors: [color],
+                    series: [percentage],
+                    labels: ['مدة الإقامة']
+                };
+                new ApexCharts(document.getElementById('los-gauge'), options).render();
+            } else {
+                document.getElementById('los-gauge').innerHTML = `<div class="risk-placeholder">${days.toFixed(1)} يوم</div>`;
+            }
+        }
+        
+        // معالجة submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            predictBtn.disabled = true;
+            predictBtn.innerHTML = '<span>⏳</span> جاري التنبؤ...';
+            
+            try {
+                const data = collectFormData();
+                const result = await predictionClient.predictLOS(data);
+                
+                if (result.success && result.data) {
+                    resultCard.style.display = 'block';
+                    newAssessment.style.display = 'flex';
+                    displayResults(result);
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    alert('حدث خطأ في التنبؤ. يرجى المحاولة مرة أخرى.');
+                }
+            } catch (error) {
+                console.error('Prediction error:', error);
+                alert('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.innerHTML = '<span>📊</span> توقع مدة الإقامة';
+            }
+        });
+        
+        // تقييم جديد
+        document.getElementById('new-assessment-btn')?.addEventListener('click', () => {
+            resultCard.style.display = 'none';
+            newAssessment.style.display = 'none';
+            form.reset();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // حفظ التقرير
+        document.getElementById('save-report-btn')?.addEventListener('click', () => {
+            const days = document.getElementById('los-days').innerText;
+            const category = document.getElementById('los-category').innerText;
+            const content = document.getElementById('result-card').cloneNode(true);
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html><head><title>تقرير مدة الإقامة المتوقعة</title>
+                <style>body{font-family:sans-serif;padding:20px}</style></head>
+                <body>${content.innerHTML}</body></html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        });
+        
+        // شرح القرار
+        document.getElementById('explanation-btn')?.addEventListener('click', () => {
+            window.location.href = '/12_ai_explanation.html';
+        });
+        
+        // إضافة أنماط إضافية
+        const style = document.createElement('style');
+        style.textContent = `
+            .model-badge {
+                display: inline-block;
+                background: #1a73e8;
+                color: white;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                margin-top: 12px;
+            }
+            .form-section {
+                margin-top: 20px;
+                padding-top: 16px;
+                border-top: 1px solid #e8eaed;
+            }
+            .form-section h4 {
+                margin-bottom: 12px;
+                font-size: 14px;
+                color: #5f6368;
+            }
+            .conditions-grid, .symptoms-grid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 16px;
+                margin-bottom: 16px;
+            }
+            .checkbox-label {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+            }
+            .empty-state {
+                text-align: center;
+                padding: 20px;
+                color: #5f6368;
+            }
+            .result-section {
+                margin-top: 32px;
+            }
+            .risk-placeholder {
+                text-align: center;
+                font-size: 32px;
+                font-weight: bold;
+                padding: 60px;
+            }
+            @media (max-width: 768px) {
+                .conditions-grid, .symptoms-grid {
+                    gap: 12px;
+                }
+                .checkbox-label {
+                    width: calc(50% - 12px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
