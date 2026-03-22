@@ -1,1 +1,458 @@
+<div class="prescription-card" id="prescription-card">
+    <div class="card-header">
+        <div class="header-icon">💊</div>
+        <div class="header-info">
+            <h3 class="prescription-id" id="prescription-id">RX-001</h3>
+            <p class="prescription-date" id="prescription-date">15 مارس 2026</p>
+        </div>
+        <div class="prescription-status" id="prescription-status">نشطة</div>
+    </div>
+    
+    <div class="card-body">
+        <div class="patient-info">
+            <div class="info-row">
+                <span class="info-label">المريض:</span>
+                <span class="info-value" id="patient-name">أحمد محمد</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">معرف المريض:</span>
+                <span class="info-value" id="patient-id">P001</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">الطبيب:</span>
+                <span class="info-value" id="doctor-name">د. أحمد</span>
+            </div>
+        </div>
+        
+        <div class="diagnosis-section">
+            <div class="section-title">
+                <span class="title-icon">📋</span>
+                <span>التشخيص</span>
+            </div>
+            <p class="diagnosis-text" id="diagnosis-text">داء السكري من النوع الثاني، ارتفاع ضغط الدم</p>
+        </div>
+        
+        <div class="medications-section">
+            <div class="section-title">
+                <span class="title-icon">💊</span>
+                <span>الأدوية</span>
+            </div>
+            <div class="medications-list" id="medications-list">
+                <div class="medication-item">
+                    <div class="med-name">ميتفورمين</div>
+                    <div class="med-details">
+                        <span class="med-dose">500mg</span>
+                        <span class="med-frequency">مرتين يومياً</span>
+                        <span class="med-duration">30 يوم</span>
+                    </div>
+                </div>
+                <div class="medication-item">
+                    <div class="med-name">ليزينوبريل</div>
+                    <div class="med-details">
+                        <span class="med-dose">10mg</span>
+                        <span class="med-frequency">مرة يومياً</span>
+                        <span class="med-duration">30 يوم</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="interactions-warning" id="interactions-warning" style="display: none;">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text" id="warning-text"></div>
+        </div>
+        
+        <div class="notes-section" id="notes-section" style="display: none;">
+            <div class="section-title">
+                <span class="title-icon">📝</span>
+                <span>ملاحظات</span>
+            </div>
+            <p class="notes-text" id="notes-text"></p>
+        </div>
+    </div>
+    
+    <div class="card-footer">
+        <button class="btn-qr" id="qr-btn">
+            <span>📱</span> عرض QR
+        </button>
+        <button class="btn-download" id="download-btn">
+            <span>📥</span> تحميل
+        </button>
+        <button class="btn-print" id="print-btn">
+            <span>🖨️</span> طباعة
+        </button>
+    </div>
+</div>
 
+<style>
+.prescription-card {
+    background: var(--white, #ffffff);
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 16px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+    border-right: 4px solid var(--primary, #1a73e8);
+}
+
+.prescription-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(26,115,232,0.05), rgba(66,133,244,0.02));
+    border-bottom: 1px solid var(--gray-lighter, #e8eaed);
+}
+
+.header-icon {
+    font-size: 32px;
+}
+
+.header-info {
+    flex: 1;
+}
+
+.prescription-id {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dark, #202124);
+    margin: 0 0 4px;
+}
+
+.prescription-date {
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+    margin: 0;
+}
+
+.prescription-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(52,168,83,0.1);
+    color: var(--success, #34a853);
+}
+
+.prescription-status.expired {
+    background: rgba(234,67,53,0.1);
+    color: var(--danger, #ea4335);
+}
+
+.prescription-status.completed {
+    background: rgba(66,133,244,0.1);
+    color: var(--primary, #1a73e8);
+}
+
+.card-body {
+    padding: 20px 24px;
+}
+
+.patient-info {
+    background: var(--light, #f8f9fa);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.info-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+    min-width: 70px;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dark, #202124);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark, #202124);
+}
+
+.title-icon {
+    font-size: 16px;
+}
+
+.diagnosis-text {
+    font-size: 13px;
+    color: var(--gray-dark, #3c4043);
+    margin: 0 0 16px;
+    padding: 8px 12px;
+    background: var(--light, #f8f9fa);
+    border-radius: 8px;
+}
+
+.medications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.medication-item {
+    background: var(--light, #f8f9fa);
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.medication-item:hover {
+    background: rgba(26,115,232,0.05);
+}
+
+.med-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark, #202124);
+    margin-bottom: 6px;
+}
+
+.med-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+}
+
+.med-dose, .med-frequency, .med-duration {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.med-dose::before {
+    content: "💊";
+    font-size: 11px;
+}
+
+.med-frequency::before {
+    content: "⏰";
+    font-size: 11px;
+}
+
+.med-duration::before {
+    content: "📅";
+    font-size: 11px;
+}
+
+.interactions-warning {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(251,188,4,0.1);
+    border-radius: 12px;
+    margin: 16px 0;
+    border-right: 3px solid var(--warning, #fbbc04);
+}
+
+.warning-icon {
+    font-size: 20px;
+}
+
+.warning-text {
+    font-size: 12px;
+    color: var(--gray-dark, #3c4043);
+    flex: 1;
+}
+
+.notes-section {
+    margin-top: 16px;
+    padding: 12px;
+    background: var(--light, #f8f9fa);
+    border-radius: 12px;
+}
+
+.notes-text {
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.card-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-lighter, #e8eaed);
+    background: var(--light, #f8f9fa);
+}
+
+.btn-qr, .btn-download, .btn-print {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-qr {
+    background: var(--primary, #1a73e8);
+    color: white;
+}
+
+.btn-qr:hover {
+    background: var(--primary-dark, #0d47a1);
+    transform: translateY(-1px);
+}
+
+.btn-download {
+    background: var(--white, #ffffff);
+    border: 1px solid var(--primary, #1a73e8);
+    color: var(--primary, #1a73e8);
+}
+
+.btn-download:hover {
+    background: rgba(26,115,232,0.05);
+    transform: translateY(-1px);
+}
+
+.btn-print {
+    background: var(--white, #ffffff);
+    border: 1px solid var(--gray, #5f6368);
+    color: var(--gray, #5f6368);
+}
+
+.btn-print:hover {
+    background: var(--gray-lighter, #e8eaed);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .card-header {
+        flex-wrap: wrap;
+    }
+    .card-footer {
+        flex-direction: column;
+    }
+    .med-details {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+</style>
+
+<script>
+function updatePrescriptionCard(data) {
+    if (data.id) document.getElementById('prescription-id').textContent = data.id;
+    if (data.date) document.getElementById('prescription-date').textContent = data.date;
+    if (data.status) {
+        const statusEl = document.getElementById('prescription-status');
+        statusEl.textContent = data.status;
+        statusEl.className = 'prescription-status';
+        if (data.status === 'منتهية') statusEl.classList.add('expired');
+        if (data.status === 'مكتملة') statusEl.classList.add('completed');
+    }
+    if (data.patient_name) document.getElementById('patient-name').textContent = data.patient_name;
+    if (data.patient_id) document.getElementById('patient-id').textContent = data.patient_id;
+    if (data.doctor_name) document.getElementById('doctor-name').textContent = data.doctor_name;
+    if (data.diagnosis) document.getElementById('diagnosis-text').textContent = data.diagnosis;
+    
+    if (data.medications) {
+        const medList = document.getElementById('medications-list');
+        medList.innerHTML = data.medications.map(m => `
+            <div class="medication-item">
+                <div class="med-name">${m.name}</div>
+                <div class="med-details">
+                    <span class="med-dose">${m.dose}</span>
+                    <span class="med-frequency">${m.frequency}</span>
+                    <span class="med-duration">${m.duration} يوم</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    if (data.interactions && data.interactions.length > 0) {
+        const warningEl = document.getElementById('interactions-warning');
+        const warningText = document.getElementById('warning-text');
+        warningText.textContent = `⚠️ تم اكتشاف ${data.interactions.length} تداخل دوائي`;
+        warningEl.style.display = 'flex';
+    }
+    
+    if (data.notes) {
+        const notesEl = document.getElementById('notes-section');
+        const notesText = document.getElementById('notes-text');
+        notesText.textContent = data.notes;
+        notesEl.style.display = 'block';
+    }
+}
+
+function showPrescriptionQR() {
+    window.location.href = '/16_doctor_notes.html';
+}
+
+function downloadPrescription() {
+    const card = document.getElementById('prescription-card');
+    if (!card) return;
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>روشتة طبية</title>
+            <style>
+                body { font-family: 'Cairo', sans-serif; padding: 40px; direction: rtl; }
+                .prescription { border: 1px solid #ddd; padding: 20px; border-radius: 12px; }
+                .header { text-align: center; margin-bottom: 20px; }
+                .logo { width: 80px; }
+                h2 { color: #1a73e8; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { padding: 8px; border-bottom: 1px solid #eee; text-align: right; }
+                .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+            </style>
+        </head>
+        <body>
+            <div class="prescription">
+                <div class="header">
+                    <img src="/static/assets/images/logo.png" class="logo" alt="RIVA">
+                    <h2>روشتة طبية</h2>
+                </div>
+                ${card.cloneNode(true).innerHTML}
+                <div class="footer">
+                    <p>هذه روشتة صادرة من نظام ريفا الصحي</p>
+                    <p>تم الإصدار: ${new Date().toLocaleString('ar-EG')}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+document.getElementById('qr-btn')?.addEventListener('click', showPrescriptionQR);
+document.getElementById('download-btn')?.addEventListener('click', downloadPrescription);
+document.getElementById('print-btn')?.addEventListener('click', downloadPrescription);
+</script>
