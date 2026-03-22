@@ -1,1 +1,548 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - تحليل صحة الطلاب">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | تحليل صحة الطلاب</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل نظام الصحة المدرسية...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html" class="active">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="school-main">
+        <div class="container">
+            <div class="school-header">
+                <h1>📚 تحليل صحة الطلاب</h1>
+                <p>تقييم النمو البدني للطلاب وفق معايير منظمة الصحة العالمية (WHO)</p>
+            </div>
+            
+            <!-- تبويبات التحليل -->
+            <div class="school-tabs">
+                <button class="tab-btn active" data-tab="individual">👤 تحليل طالب فردي</button>
+                <button class="tab-btn" data-tab="class">📖 تحليل فصل دراسي</button>
+                <button class="tab-btn" data-tab="standards">📊 معايير WHO</button>
+            </div>
+            
+            <!-- تبويب التحليل الفردي -->
+            <div id="individual-tab" class="tab-content active">
+                <div class="school-form-card">
+                    <h2>📝 بيانات الطالب</h2>
+                    
+                    <form id="student-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="student-name">اسم الطالب</label>
+                                <input type="text" id="student-name" class="form-control" placeholder="اسم الطالب">
+                            </div>
+                            <div class="form-group">
+                                <label for="student-id">معرف الطالب</label>
+                                <input type="text" id="student-id" class="form-control" placeholder="اختياري">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="student-age">العمر (بالأشهر) *</label>
+                                <input type="number" id="student-age" class="form-control" placeholder="5-19 سنة = 60-228 شهر" min="60" max="228" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="student-gender">الجنس *</label>
+                                <select id="student-gender" class="form-control" required>
+                                    <option value="">اختر</option>
+                                    <option value="boys">ذكر</option>
+                                    <option value="girls">أنثى</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="student-height">الطول (سم) *</label>
+                                <input type="number" id="student-height" class="form-control" placeholder="الطول بالسنتيمتر" step="0.1" min="50" max="250" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="student-weight">الوزن (كجم) *</label>
+                                <input type="number" id="student-weight" class="form-control" placeholder="الوزن بالكيلوجرام" step="0.1" min="5" max="200" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyze-student-btn">
+                            <span>🔍</span> تحليل صحة الطالب
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- نتائج تحليل الطالب -->
+                <div id="student-result" class="student-result-card" style="display: none;">
+                    <div class="result-header">
+                        <h2>📊 نتيجة تحليل الطالب</h2>
+                    </div>
+                    
+                    <div class="result-bmi">
+                        <div class="bmi-value" id="bmi-value">-</div>
+                        <div class="bmi-label">مؤشر كتلة الجسم (BMI)</div>
+                    </div>
+                    
+                    <div class="result-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">حالة الوزن:</span>
+                            <span class="stat-value" id="nutrition-status">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">نسبة BMI:</span>
+                            <span class="stat-value" id="bmi-percentile">-</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">حالة الطول:</span>
+                            <span class="stat-value" id="height-status">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendations-section">
+                        <h3>💡 توصيات صحية</h3>
+                        <div id="student-recommendations" class="recommendations-list"></div>
+                    </div>
+                    
+                    <div class="alerts-section" id="student-alerts" style="display: none;">
+                        <h3>⚠️ تنبيهات</h3>
+                        <div id="student-alerts-list"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب تحليل الفصل الدراسي -->
+            <div id="class-tab" class="tab-content">
+                <div class="school-form-card">
+                    <h2>📚 بيانات الفصل الدراسي</h2>
+                    
+                    <form id="class-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="school-name">اسم المدرسة</label>
+                                <input type="text" id="school-name" class="form-control" placeholder="اسم المدرسة">
+                            </div>
+                            <div class="form-group">
+                                <label for="class-name">اسم الفصل</label>
+                                <input type="text" id="class-name" class="form-control" placeholder="مثلاً: الصف الخامس">
+                            </div>
+                        </div>
+                        
+                        <div class="students-list-section">
+                            <h3>👥 قائمة الطلاب</h3>
+                            <div id="students-container">
+                                <div class="student-entry">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <input type="text" class="student-name-input form-control" placeholder="اسم الطالب">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="number" class="student-age-input form-control" placeholder="العمر (شهر)" min="60" max="228">
+                                        </div>
+                                        <div class="form-group">
+                                            <select class="student-gender-input form-control">
+                                                <option value="boys">ذكر</option>
+                                                <option value="girls">أنثى</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="number" class="student-height-input form-control" placeholder="الطول (سم)" step="0.1">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="number" class="student-weight-input form-control" placeholder="الوزن (كجم)" step="0.1">
+                                        </div>
+                                        <button type="button" class="btn-remove-student">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline" id="add-student-btn">+ إضافة طالب</button>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyze-class-btn">
+                            <span>📊</span> تحليل الفصل
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- نتائج تحليل الفصل -->
+                <div id="class-result" class="class-result-card" style="display: none;">
+                    <div class="result-header">
+                        <h2>📊 نتائج تحليل الفصل</h2>
+                        <p id="class-summary"></p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-students">0</div>
+                            <div class="stat-label">إجمالي الطلاب</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="healthy-count">0</div>
+                            <div class="stat-label">طبيعي الوزن</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="underweight-count">0</div>
+                            <div class="stat-label">نحافة</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="overweight-count">0</div>
+                            <div class="stat-label">زيادة وزن</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="obese-count">0</div>
+                            <div class="stat-label">سمنة</div>
+                        </div>
+                    </div>
+                    
+                    <div class="class-recommendations">
+                        <h3>💡 توصيات للفصل</h3>
+                        <div id="class-recommendations-list"></div>
+                    </div>
+                    
+                    <div class="students-table-container">
+                        <h3>📋 تفاصيل الطلاب</h3>
+                        <div id="students-table"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب معايير WHO -->
+            <div id="standards-tab" class="tab-content">
+                <div class="standards-card">
+                    <h2>📊 معايير منظمة الصحة العالمية (WHO)</h2>
+                    <div id="standards-content">
+                        <div class="standards-info">
+                            <p>معايير النمو للأطفال والمراهقين (5-19 سنة)</p>
+                            <ul>
+                                <li><strong>نقص الوزن الشديد:</strong> BMI-for-age &lt; -3 SD</li>
+                                <li><strong>نقص الوزن:</strong> BMI-for-age &lt; -2 SD</li>
+                                <li><strong>وزن طبيعي:</strong> BMI-for-age بين -2 SD و +1 SD</li>
+                                <li><strong>زيادة الوزن:</strong> BMI-for-age > +1 SD</li>
+                                <li><strong>سمنة:</strong> BMI-for-age > +2 SD</li>
+                            </ul>
+                            <p class="standards-note">* بناءً على منحنيات النمو الخاصة بمنظمة الصحة العالمية</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import predictionClient from '/static/js/prediction_client.js';
+        
+        // عناصر DOM
+        const studentForm = document.getElementById('student-form');
+        const classForm = document.getElementById('class-form');
+        const addStudentBtn = document.getElementById('add-student-btn');
+        const studentsContainer = document.getElementById('students-container');
+        
+        // تبويبات
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`${tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // إضافة طالب جديد
+        addStudentBtn.addEventListener('click', () => {
+            const studentEntry = document.createElement('div');
+            studentEntry.className = 'student-entry';
+            studentEntry.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" class="student-name-input form-control" placeholder="اسم الطالب">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" class="student-age-input form-control" placeholder="العمر (شهر)" min="60" max="228">
+                    </div>
+                    <div class="form-group">
+                        <select class="student-gender-input form-control">
+                            <option value="boys">ذكر</option>
+                            <option value="girls">أنثى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" class="student-height-input form-control" placeholder="الطول (سم)" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" class="student-weight-input form-control" placeholder="الوزن (كجم)" step="0.1">
+                    </div>
+                    <button type="button" class="btn-remove-student">✕</button>
+                </div>
+            `;
+            studentEntry.querySelector('.btn-remove-student').addEventListener('click', () => studentEntry.remove());
+            studentsContainer.appendChild(studentEntry);
+        });
+        
+        // تحليل طالب فردي
+        studentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const analyzeBtn = document.getElementById('analyze-student-btn');
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<span>⏳</span> جاري التحليل...';
+            
+            try {
+                const data = {
+                    name: document.getElementById('student-name').value || 'طالب',
+                    age_months: parseInt(document.getElementById('student-age').value),
+                    gender: document.getElementById('student-gender').value,
+                    height_cm: parseFloat(document.getElementById('student-height').value),
+                    weight_kg: parseFloat(document.getElementById('student-weight').value)
+                };
+                
+                const result = await predictionClient.analyzeStudent(data);
+                
+                if (result.success && result.result) {
+                    const res = result.result;
+                    const bmi = res.bmi;
+                    const bmiPercentile = res.bmi_percentile;
+                    const nutritionStatus = res.nutrition_status_ar;
+                    const heightStatus = res.height_status_ar;
+                    
+                    document.getElementById('student-result').style.display = 'block';
+                    document.getElementById('bmi-value').textContent = bmi.toFixed(1);
+                    document.getElementById('nutrition-status').textContent = nutritionStatus;
+                    document.getElementById('bmi-percentile').textContent = `${Math.round(bmiPercentile)}%`;
+                    document.getElementById('height-status').textContent = heightStatus;
+                    
+                    // توصيات
+                    const recommendations = res.recommendations || [];
+                    const recContainer = document.getElementById('student-recommendations');
+                    recContainer.innerHTML = recommendations.map(rec => `<div class="recommendation-item">💡 ${rec}</div>`).join('');
+                    
+                    // تنبيهات
+                    const alerts = [];
+                    if (nutritionStatus === 'نحافة') alerts.push('⚠️ الطالب يعاني من نحافة - يحتاج متابعة غذائية');
+                    if (nutritionStatus === 'سمنة') alerts.push('⚠️ الطالب يعاني من سمنة - برنامج غذائي مطلوب');
+                    if (heightStatus === 'تقزم') alerts.push('⚠️ الطالب يعاني من تقزم - استشارة طبية مطلوبة');
+                    
+                    const alertsSection = document.getElementById('student-alerts');
+                    const alertsList = document.getElementById('student-alerts-list');
+                    if (alerts.length > 0) {
+                        alertsList.innerHTML = alerts.map(alert => `<div class="alert-item">${alert}</div>`).join('');
+                        alertsSection.style.display = 'block';
+                    } else {
+                        alertsSection.style.display = 'none';
+                    }
+                    
+                    document.getElementById('student-result').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('حدث خطأ في التحليل');
+                }
+            } catch (error) {
+                console.error('Student analysis error:', error);
+                alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<span>🔍</span> تحليل صحة الطالب';
+            }
+        });
+        
+        // تحليل الفصل
+        classForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const analyzeBtn = document.getElementById('analyze-class-btn');
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '<span>⏳</span> جاري التحليل...';
+            
+            try {
+                const students = [];
+                const entries = document.querySelectorAll('.student-entry');
+                
+                for (const entry of entries) {
+                    const name = entry.querySelector('.student-name-input')?.value || 'طالب';
+                    const age = parseInt(entry.querySelector('.student-age-input')?.value);
+                    const gender = entry.querySelector('.student-gender-input')?.value;
+                    const height = parseFloat(entry.querySelector('.student-height-input')?.value);
+                    const weight = parseFloat(entry.querySelector('.student-weight-input')?.value);
+                    
+                    if (age && gender && height && weight) {
+                        students.push({ name, age_months: age, gender, height_cm: height, weight_kg: weight });
+                    }
+                }
+                
+                if (students.length === 0) {
+                    alert('يرجى إضافة طالب واحد على الأقل');
+                    return;
+                }
+                
+                const data = {
+                    school_name: document.getElementById('school-name').value || 'مدرسة',
+                    class_name: document.getElementById('class-name').value || 'فصل',
+                    students: students,
+                    language: 'ar'
+                };
+                
+                const result = await predictionClient.analyzeClass(data);
+                
+                if (result.success && result.report) {
+                    const report = result.report;
+                    
+                    document.getElementById('class-result').style.display = 'block';
+                    document.getElementById('total-students').textContent = report.total_students;
+                    document.getElementById('healthy-count').textContent = report.nutrition_stats?.normal || 0;
+                    document.getElementById('underweight-count').textContent = (report.nutrition_stats?.wasting || 0) + (report.nutrition_stats?.underweight || 0);
+                    document.getElementById('overweight-count').textContent = report.nutrition_stats?.overweight || 0;
+                    document.getElementById('obese-count').textContent = report.nutrition_stats?.obese || 0;
+                    document.getElementById('class-summary').textContent = `تحليل ${report.total_students} طالب في ${report.class_name}`;
+                    
+                    // توصيات
+                    const recContainer = document.getElementById('class-recommendations-list');
+                    recContainer.innerHTML = report.recommendations.map(rec => `<div class="recommendation-item">📌 ${rec}</div>`).join('');
+                    
+                    // جدول الطلاب
+                    const studentsTable = document.getElementById('students-table');
+                    studentsTable.innerHTML = `
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>الاسم</th><th>BMI</th><th>الحالة</th><th>التوصية</th></tr>
+                            </thead>
+                            <tbody>
+                                ${report.students.map(s => `
+                                    <tr>
+                                        <td>${s.name}</td>
+                                        <td>${s.bmi.toFixed(1)}</td>
+                                        <td>${s.nutrition_status_ar}</td>
+                                        <td>${s.recommendations?.[0] || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    document.getElementById('class-result').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    alert('حدث خطأ في تحليل الفصل');
+                }
+            } catch (error) {
+                console.error('Class analysis error:', error);
+                alert('حدث خطأ. يرجى المحاولة مرة أخرى.');
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '<span>📊</span> تحليل الفصل';
+            }
+        });
+        
+        // إضافة أنماط الجدول
+        const style = document.createElement('style');
+        style.textContent = `
+            .data-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+            .data-table th, .data-table td { padding: 12px; text-align: right; border-bottom: 1px solid #e8eaed; }
+            .data-table th { background: #f8f9fa; font-weight: 600; }
+            .data-table tr:hover { background: #f8f9fa; }
+            .btn-remove-student { background: none; border: none; color: #ea4335; cursor: pointer; font-size: 18px; width: 32px; height: 32px; border-radius: 50%; }
+            .btn-remove-student:hover { background: rgba(234,67,53,0.1); }
+            .students-list-section { margin-top: 24px; }
+            .student-entry { margin-bottom: 12px; padding: 12px; background: #f8f9fa; border-radius: 12px; }
+            @media (max-width: 768px) { .data-table { font-size: 12px; } .data-table th, .data-table td { padding: 8px; } }
+        `;
+        document.head.appendChild(style);
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
