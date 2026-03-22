@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3.8 2">
+  <rect width="3.8" height="2" fill="#fff"/>
+  <path d="M0,0H3.8V.15H0ZM0,.31H3.8V.46H0ZM0,.62H3.8V.77H0ZM0,.92H3.8V1.08H0ZM0,1.23H3.8V1.38H0ZM0,1.54H3.8V1.69H0ZM0,1.85H3.8V2H0Z" fill="#b22234"/>
+  <rect width="1.52" height="1.08" fill="#3c3b6e"/>
+  <text x="0.76" y="0.8" fill="#fff" font-size="0.7" text-anchor="middle" font-family="sans-serif">★</text>
+</svg>
