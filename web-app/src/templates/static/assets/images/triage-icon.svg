@@ -1,1 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <linearGradient id="rivaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0056b3;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#00d2ff;stop-opacity:1" />
+        </linearGradient>
+    </defs>
 
+    <rect x="25" y="25" width="50" height="65" rx="5" fill="none" stroke="url(#rivaGrad)" stroke-width="5" stroke-linejoin="round"/>
+    
+    <path d="M 40 15 H 60 V 25 H 40 Z" fill="url(#rivaGrad)"/>
+    <line x1="32" y1="25" x2="68" y2="25" stroke="url(#rivaGrad)" stroke-width="5" stroke-linecap="round"/>
+
+    <path d="M 47 40 h 6 v 6 h 6 v 6 h -6 v 6 h -6 v -6 h -6 v -6 h 6 z" fill="url(#rivaGrad)"/>
+
+    <line x1="35" y1="65" x2="65" y2="65" stroke="url(#rivaGrad)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="35" y1="75" x2="52" y2="75" stroke="url(#rivaGrad)" stroke-width="4" stroke-linecap="round"/>
+
+    <circle cx="75" cy="75" r="14" fill="#dc3545" stroke="#ffffff" stroke-width="3"/>
+    <line x1="75" y1="68" x2="75" y2="76" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="75" cy="81" r="2" fill="#ffffff"/>
+</svg>
