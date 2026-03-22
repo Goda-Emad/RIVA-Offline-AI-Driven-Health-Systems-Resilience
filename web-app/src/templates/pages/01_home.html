@@ -1,1 +1,256 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - منصة الصحة الذكية تعمل بدون إنترنت">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | RIVA - صحتك في كل مكان</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل ريفا...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/" class="active">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>ريفا<span class="highlight">.</span></h1>
+                    <p class="hero-subtitle">منصة صحية ذكية تعمل بدون إنترنت</p>
+                    <p class="hero-description">
+                        ريفا هو مساعدك الطبي الذكي الذي يعمل في أي مكان، حتى بدون اتصال بالإنترنت.
+                        استشر طبيبتك الذكية، احصل على تنبؤات دقيقة، وتابع صحتك بكل سهولة.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="/02_chatbot.html" class="btn btn-primary btn-lg">
+                            <span>💬</span> تحدث مع ريفا
+                        </a>
+                        <a href="/03_triage.html" class="btn btn-outline btn-lg">
+                            <span>🚑</span> الفرز الطبي
+                        </a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="/static/assets/images/hero-bg.jpg" alt="RIVA Assistant">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Features Section -->
+        <section class="features">
+            <div class="container">
+                <h2 class="section-title">✨ ماذا تقدم ريفا؟</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>مساعد طبي ذكي</h3>
+                        <p>تحدث مع ريفا بالعامية المصرية، واحصل على استشارات طبية فورية</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎤</div>
+                        <h3>تحويل الصوت لنص</h3>
+                        <p>تحدث بدلاً من الكتابة، ريفا تسمعك وتفهمك</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>تنبؤات ذكية</h3>
+                        <p>خطر إعادة الدخول، مدة الإقامة، ومخاطر الحمل بدقة عالية</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🚑</div>
+                        <h3>فرز طبي فوري</h3>
+                        <p>تقييم الحالة وتوجيهك للقسم المناسب</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💊</div>
+                        <h3>تداخلات الأدوية</h3>
+                        <p>تأكد من سلامة الروشتة قبل صرفها</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>يعمل بدون إنترنت</h3>
+                        <p>استخدم ريفا في أي مكان، حتى في المناطق النائية</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Stats Section -->
+        <section class="stats">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="10000">0</div>
+                        <div class="stat-label">مريض استخدموا ريفا</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="98">0</div>
+                        <div class="stat-label">% دقة التنبؤات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="17">0</div>
+                        <div class="stat-label">خدمة طبية متكاملة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" data-count="100">0</div>
+                        <div class="stat-label">% يعمل بدون إنترنت</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- CTA Section -->
+        <section class="cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2>جاهز لتجربة ريفا؟</h2>
+                    <p>ابدأ محادثتك الآن مع مساعدك الطبي الذكي</p>
+                    <a href="/02_chatbot.html" class="btn btn-primary btn-lg">ابدأ الآن</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>الداشبوردات</h4>
+                        <ul>
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript Modules -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import offlineManager from '/static/js/offline-detection.js';
+        import pwaInstall from '/static/js/pwa-install.js';
+        
+        // عرض حالة الاتصال
+        function updateConnectionStatus() {
+            const statusEl = document.getElementById('connection-status');
+            if (statusEl) {
+                const isOnline = offlineManager ? offlineManager.isOnline : navigator.onLine;
+                statusEl.textContent = isOnline ? '🟢 متصل' : '🔴 غير متصل';
+            }
+        }
+        
+        // تأثير الأعداد المتحركة
+        function animateNumbers() {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(el => {
+                const target = parseInt(el.dataset.count);
+                let current = 0;
+                const increment = target / 50;
+                const updateNumber = () => {
+                    current += increment;
+                    if (current < target) {
+                        el.textContent = Math.floor(current);
+                        requestAnimationFrame(updateNumber);
+                    } else {
+                        el.textContent = target;
+                    }
+                };
+                updateNumber();
+            });
+        }
+        
+        // تشغيل التأثيرات عند التحميل
+        window.addEventListener('load', () => {
+            animateNumbers();
+            updateConnectionStatus();
+        });
+        
+        // مراقبة تغيير حالة الاتصال
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+    </script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
