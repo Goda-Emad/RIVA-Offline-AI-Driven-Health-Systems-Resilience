@@ -1,1 +1,25 @@
+version: '3.8'
 
+services:
+  riva-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: riva-health-platform
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./web-app:/app/web-app
+      - ./ai-core:/app/ai-core
+      - ./data-storage:/app/data-storage
+    environment:
+      - PYTHONUNBUFFERED=1
+      - RIVA_BASE_DIR=/app
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-riva_default_key_2024}
+    restart: unless-stopped
+    networks:
+      - riva-network
+
+networks:
+  riva-network:
+    driver: bridge
