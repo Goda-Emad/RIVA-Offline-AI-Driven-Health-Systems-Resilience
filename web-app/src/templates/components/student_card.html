@@ -1,1 +1,200 @@
+<div class="student-card">
+    <div class="card-status-strip"></div>
+    
+    <div class="student-header">
+        <div class="avatar-container">
+            <img src="/static/assets/images/student_placeholder.png" alt="صورة الطالب" class="student-avatar" id="student-photo">
+            <span class="status-indicator online" title="متصل الآن"></span>
+        </div>
+        <div class="student-main-info">
+            <h3 class="student-name" id="student-name">أحمد علي حسن</h3>
+            <p class="student-id">كود: <span id="student-code">STU-2026-004</span></p>
+        </div>
+    </div>
 
+    <div class="student-body">
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="label">التخصص</span>
+                <span class="value" id="student-major">طب طوارئ</span>
+            </div>
+            <div class="info-item">
+                <span class="label">المستوى</span>
+                <span class="value" id="student-level">السنة الخامسة</span>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-header">
+                <span class="progress-label">إنجاز المهام التدريبية</span>
+                <span class="progress-value" id="progress-text">75%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="student-progress" style="width: 75%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="student-footer">
+        <button class="btn-profile" onclick="viewProfile()">الملف الشخصي</button>
+        <button class="btn-message" title="إرسال رسالة">✉️</button>
+    </div>
+</div>
+
+<style>
+.student-card {
+    background: var(--white, #ffffff);
+    border-radius: 16px;
+    width: 300px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--gray-lighter, #e8eaed);
+    overflow: hidden;
+    direction: rtl;
+    font-family: 'Cairo', sans-serif;
+    transition: transform 0.3s ease;
+}
+
+.student-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-status-strip {
+    height: 6px;
+    background: linear-gradient(to left, var(--primary, #1a73e8), #64b5f6);
+}
+
+.student-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(26, 115, 232, 0.02);
+}
+
+.avatar-container {
+    position: relative;
+    width: 65px;
+    height: 65px;
+}
+
+.student-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--white, #fff);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+.status-indicator.online { background-color: var(--success, #34a853); }
+
+.student-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark, #202124);
+}
+
+.student-id {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+}
+
+.student-body {
+    padding: 0 20px 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--light, #f8f9fa);
+    border-radius: 12px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-item .label {
+    font-size: 10px;
+    color: var(--gray, #5f6368);
+}
+
+.info-item .value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark, #202124);
+}
+
+.progress-section {
+    margin-top: 15px;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.progress-label { font-size: 12px; color: var(--gray, #5f6368); }
+.progress-value { font-size: 12px; font-weight: 700; color: var(--primary, #1a73e8); }
+
+.progress-bar-bg {
+    height: 8px;
+    background: #e8eaed;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--primary, #1a73e8);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.student-footer {
+    padding: 15px 20px;
+    background: #fcfcfc;
+    border-top: 1px solid #f1f3f4;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-profile {
+    flex: 1;
+    background: var(--primary, #1a73e8);
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-message {
+    width: 38px;
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-message:hover { background: #f8f9fa; }
+</style>
