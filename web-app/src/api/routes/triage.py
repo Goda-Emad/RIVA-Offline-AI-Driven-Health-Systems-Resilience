@@ -45,7 +45,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 # =========================================================================
 # في بيئة الإنتاج، يجب أن يتوقف السيرفر إذا كانت أنظمة الأمان مفقودة
 try:
-    from access_control import require_role, require_any_role, Role
+    from access_control import require_any_role, Role
 except ImportError as e:
     logging.critical(f"❌ CRITICAL: access_control module not found: {e}")
     logging.critical("Server cannot start without security module")
