@@ -19,7 +19,7 @@ COPY requirements-web.txt .
 # تثبيت المتطلبات
 RUN pip install --no-cache-dir -r requirements-web.txt
 
-# نسخ المشروع بالكامل (باستخدام مجلد data الصحيح)
+# نسخ المشروع بالكامل
 COPY web-app/ ./web-app/
 COPY ai-core/ ./ai-core/
 COPY business-intelligence/ ./business-intelligence/
@@ -28,13 +28,13 @@ COPY data/ ./data/
 # إنشاء مجلد logs
 RUN mkdir -p /app/logs
 
+# ✅ التغيير المهم: WORKDIR على مستوى web-app مش src
+WORKDIR /app/web-app
+
 # متغيرات البيئة
 ENV PYTHONUNBUFFERED=1
 ENV RIVA_BASE_DIR=/app
 ENV PYTHONPATH=/app
-
-# مسار العمل
-WORKDIR /app/web-app/src
 
 # فتح المنفذ
 EXPOSE 8000
@@ -43,5 +43,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:8000/api/health || exit 1
 
-# تشغيل التطبيق
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# ✅ التغيير المهم: تشغيل app.py من داخل src
+CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8000"]
