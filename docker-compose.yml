@@ -17,6 +17,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - RIVA_BASE_DIR=/app
+      - PYTHONPATH=/app:/app/ai-core:/app/ai-core/security:/app/ai-core/storage
     restart: unless-stopped
     networks:
       - riva-network
