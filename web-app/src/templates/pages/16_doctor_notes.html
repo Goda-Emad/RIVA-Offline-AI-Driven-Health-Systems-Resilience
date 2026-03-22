@@ -1,1 +1,538 @@
-
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="RIVA Health Platform - ملاحظات الطبيب والروشتات الإلكترونية">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/assets/images/logo.png">
+    
+    <title>ريفا | ملاحظات الطبيب والروشتات</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
+    <link rel="stylesheet" href="/static/css/mobile.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+</head>
+<body>
+    <!-- شاشة التحميل -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>جاري تحميل محرر الروشتات...</p>
+    </div>
+    
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container nav-container">
+                <a href="/" class="logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="40">
+                    <span>ريفا</span>
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="القائمة">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/01_home.html">الرئيسية</a></li>
+                    <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                    <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                    <li><a href="/05_history.html">السجل الطبي</a></li>
+                    <li class="dropdown">
+                        <a href="#">الداشبوردات</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/09_doctor_dashboard.html">لوحة الدكتور</a></li>
+                            <li><a href="/10_mother_dashboard.html">لوحة الأم</a></li>
+                            <li><a href="/11_school_dashboard.html">لوحة المدرسة</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <div class="user-menu" id="user-menu"></div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="doctor-notes-main">
+        <div class="container">
+            <div class="notes-header">
+                <h1>📝 ملاحظات الطبيب والروشتات الإلكترونية</h1>
+                <p>إنشاء وتوقيع الروشتات الطبية إلكترونياً</p>
+            </div>
+            
+            <div class="notes-grid">
+                <!-- نموذج إنشاء الروشتة -->
+                <div class="notes-form-card">
+                    <h2>✍️ إنشاء روشتة جديدة</h2>
+                    
+                    <form id="prescription-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="patient-id">معرف المريض *</label>
+                                <input type="text" id="patient-id" class="form-control" placeholder="أدخل معرف المريض" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="patient-name">اسم المريض *</label>
+                                <input type="text" id="patient-name" class="form-control" placeholder="اسم المريض" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="diagnosis">التشخيص *</label>
+                            <textarea id="diagnosis" class="form-control" rows="2" placeholder="أدخل التشخيص الطبي..." required></textarea>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3>💊 الأدوية</h3>
+                            <div id="medications-list" class="medications-list">
+                                <div class="medication-item">
+                                    <div class="medication-row">
+                                        <div class="form-group">
+                                            <input type="text" class="med-name form-control" placeholder="اسم الدواء" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="med-dose form-control" placeholder="الجرعة (مثلاً: 500mg)">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="med-frequency form-control" placeholder="التكرار (مثلاً: مرتين يومياً)">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="number" class="med-duration form-control" placeholder="المدة (أيام)">
+                                        </div>
+                                        <button type="button" class="btn-remove-medicine" style="display: none;">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline btn-sm" id="add-medicine-btn">
+                                <span>➕</span> إضافة دواء
+                            </button>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3>📋 ملاحظات إضافية</h3>
+                            <textarea id="notes" class="form-control" rows="3" placeholder="أي ملاحظات إضافية للروشتة..."></textarea>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3>⚠️ فحص تداخلات الأدوية</h3>
+                            <div class="interaction-check">
+                                <button type="button" class="btn btn-secondary" id="check-interactions-btn">
+                                    <span>🔍</span> فحص التداخلات
+                                </button>
+                                <div id="interaction-results" class="interaction-results" style="display: none;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="create-prescription-btn">
+                                <span>📝</span> إنشاء روشتة وتوقيع إلكتروني
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="reset-form-btn">
+                                <span>🔄</span> إعادة تعيين
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- الروشتات السابقة -->
+                <div class="prescriptions-history-card">
+                    <h2>📋 الروشتات السابقة</h2>
+                    <div id="prescriptions-history" class="prescriptions-history">
+                        <div class="empty-state">لا توجد روشتات سابقة</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- نافذة التوقيع الإلكتروني -->
+            <div id="signature-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>🔐 التوقيع الإلكتروني</h3>
+                        <button class="modal-close">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>تأكيد البيانات قبل التوقيع الإلكتروني</p>
+                        <div id="prescription-preview" class="prescription-preview"></div>
+                        <div class="signature-actions">
+                            <button class="btn btn-primary" id="confirm-signature">
+                                <span>✍️</span> توقيع إلكتروني
+                            </button>
+                            <button class="btn btn-secondary" id="cancel-signature">إلغاء</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- نافذة QR Code -->
+            <div id="qr-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>📱 رمز QR للروشتة</h3>
+                        <button class="modal-close">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="qr-code" class="qr-container"></div>
+                        <p class="qr-note">امسح الرمز لمشاركة الروشتة مع الصيدلي</p>
+                        <div class="qr-actions">
+                            <button class="btn btn-secondary" id="download-qr">📥 تنزيل QR</button>
+                            <button class="btn btn-secondary" id="share-qr">📤 مشاركة</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="/static/assets/images/logo.png" alt="RIVA" height="32">
+                    <p>صحتك في كل مكان</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>الخدمات</h4>
+                        <ul>
+                            <li><a href="/02_chatbot.html">المساعد الطبي</a></li>
+                            <li><a href="/03_triage.html">الفرز الطبي</a></li>
+                            <li><a href="/05_history.html">السجل الطبي</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>عن ريفا</h4>
+                        <ul>
+                            <li><a href="/12_ai_explanation.html">كيف يعمل الـ AI</a></li>
+                            <li><a href="/17_sustainability.html">الاستدامة</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 RIVA Health Platform - منصة صحية للجميع</p>
+                <p class="disclaimer">⚠️ هذا النظام مساعد طبي وليس بديلاً عن استشارة الطبيب المختص</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script type="module">
+        import rivaClient from '/static/js/api_client.js';
+        import auth from '/static/js/auth.js';
+        import predictionClient from '/static/js/prediction_client.js';
+        import interactionChecker from '/static/js/interaction_checker.js';
+        import qrHandler from '/static/js/qr_handler.js';
+        
+        // عناصر DOM
+        const form = document.getElementById('prescription-form');
+        const medicationsContainer = document.getElementById('medications-list');
+        const addMedicineBtn = document.getElementById('add-medicine-btn');
+        const checkInteractionsBtn = document.getElementById('check-interactions-btn');
+        const interactionResults = document.getElementById('interaction-results');
+        const signatureModal = document.getElementById('signature-modal');
+        const qrModal = document.getElementById('qr-modal');
+        const prescriptionsHistory = document.getElementById('prescriptions-history');
+        
+        let currentPrescription = null;
+        
+        // إضافة دواء جديد
+        function addMedicineRow(medicineData = null) {
+            const item = document.createElement('div');
+            item.className = 'medication-item';
+            item.innerHTML = `
+                <div class="medication-row">
+                    <div class="form-group">
+                        <input type="text" class="med-name form-control" placeholder="اسم الدواء" value="${medicineData?.name || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="med-dose form-control" placeholder="الجرعة (مثلاً: 500mg)" value="${medicineData?.dose || ''}">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="med-frequency form-control" placeholder="التكرار (مثلاً: مرتين يومياً)" value="${medicineData?.frequency || ''}">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" class="med-duration form-control" placeholder="المدة (أيام)" value="${medicineData?.duration || ''}">
+                    </div>
+                    <button type="button" class="btn-remove-medicine">✕</button>
+                </div>
+            `;
+            
+            const removeBtn = item.querySelector('.btn-remove-medicine');
+            removeBtn.addEventListener('click', () => item.remove());
+            
+            medicationsContainer.appendChild(item);
+        }
+        
+        addMedicineBtn.addEventListener('click', () => addMedicineRow());
+        
+        // جمع بيانات الأدوية
+        function collectMedications() {
+            const medications = [];
+            document.querySelectorAll('.medication-item').forEach(item => {
+                const name = item.querySelector('.med-name')?.value.trim();
+                if (name) {
+                    medications.push({
+                        name: name,
+                        dose: item.querySelector('.med-dose')?.value.trim() || '',
+                        frequency: item.querySelector('.med-frequency')?.value.trim() || '',
+                        duration_days: parseInt(item.querySelector('.med-duration')?.value) || 7
+                    });
+                }
+            });
+            return medications;
+        }
+        
+        // فحص التداخلات
+        async function checkInteractions() {
+            const medications = collectMedications();
+            if (medications.length < 2) {
+                interactionResults.innerHTML = '<div class="interaction-info">⚠️ أضف دواءين على الأقل لفحص التداخلات</div>';
+                interactionResults.style.display = 'block';
+                return;
+            }
+            
+            const medNames = medications.map(m => m.name);
+            interactionResults.innerHTML = '<div class="interaction-loading">⏳ جاري فحص التداخلات...</div>';
+            interactionResults.style.display = 'block';
+            
+            try {
+                const result = await interactionChecker.checkBulkInteractions(medNames);
+                if (result.success) {
+                    if (result.alerts.length === 0) {
+                        interactionResults.innerHTML = '<div class="interaction-safe">✅ لا توجد تداخلات دوائية خطيرة</div>';
+                    } else {
+                        const alertsHtml = result.alerts.map(alert => `
+                            <div class="interaction-alert severity-${alert.severity}">
+                                <div class="alert-header">
+                                    <span class="severity-icon">${alert.severity === 'high' ? '🔴' : alert.severity === 'medium' ? '🟡' : '🟢'}</span>
+                                    <span class="alert-drugs">${alert.drug_a} ↔ ${alert.drug_b}</span>
+                                </div>
+                                <div class="alert-description">${alert.description}</div>
+                                <div class="alert-recommendation">💡 ${alert.recommendation}</div>
+                            </div>
+                        `).join('');
+                        interactionResults.innerHTML = `<div class="interaction-warning">⚠️ تم اكتشاف ${result.alerts.length} تداخل دوائي</div>${alertsHtml}`;
+                    }
+                } else {
+                    interactionResults.innerHTML = '<div class="interaction-error">❌ فشل فحص التداخلات</div>';
+                }
+            } catch (error) {
+                console.error('Interaction check error:', error);
+                interactionResults.innerHTML = '<div class="interaction-error">❌ حدث خطأ في فحص التداخلات</div>';
+            }
+        }
+        
+        checkInteractionsBtn.addEventListener('click', checkInteractions);
+        
+        // إنشاء الروشتة
+        async function createPrescription() {
+            const patientId = document.getElementById('patient-id').value.trim();
+            const patientName = document.getElementById('patient-name').value.trim();
+            const diagnosis = document.getElementById('diagnosis').value.trim();
+            const medications = collectMedications();
+            const notes = document.getElementById('notes').value.trim();
+            
+            if (!patientId || !patientName || !diagnosis || medications.length === 0) {
+                alert('يرجى إكمال جميع البيانات المطلوبة');
+                return false;
+            }
+            
+            currentPrescription = {
+                patient_id: patientId,
+                patient_name: patientName,
+                doctor_id: auth.getCurrentUser()?.id || 'DOC-001',
+                diagnosis: diagnosis,
+                medications: medications,
+                notes: notes,
+                created_at: new Date().toISOString()
+            };
+            
+            // عرض معاينة الروشتة
+            const preview = document.getElementById('prescription-preview');
+            preview.innerHTML = `
+                <div class="preview-row"><strong>المريض:</strong> ${patientName} (${patientId})</div>
+                <div class="preview-row"><strong>التشخيص:</strong> ${diagnosis}</div>
+                <div class="preview-row"><strong>الأدوية:</strong></div>
+                <ul>
+                    ${medications.map(m => `<li>${m.name} - ${m.dose} - ${m.frequency} - ${m.duration_days} يوم</li>`).join('')}
+                </ul>
+                ${notes ? `<div class="preview-row"><strong>ملاحظات:</strong> ${notes}</div>` : ''}
+            `;
+            
+            signatureModal.style.display = 'flex';
+            return true;
+        }
+        
+        // التوقيع الإلكتروني
+        async function signAndSave() {
+            try {
+                const result = await predictionClient.createPrescription(currentPrescription);
+                
+                if (result.success) {
+                    // توليد QR Code
+                    if (qrHandler && result.prescription) {
+                        await qrHandler.generateSecurePrescriptionQR('qr-code', result.prescription);
+                    }
+                    
+                    // إضافة للتاريخ
+                    addToHistory(result.prescription);
+                    
+                    signatureModal.style.display = 'none';
+                    qrModal.style.display = 'flex';
+                    
+                    resetForm();
+                } else {
+                    alert('فشل إنشاء الروشتة: ' + (result.error || 'خطأ غير معروف'));
+                }
+            } catch (error) {
+                console.error('Prescription creation error:', error);
+                alert('حدث خطأ في إنشاء الروشتة');
+            }
+        }
+        
+        // إضافة للتاريخ
+        function addToHistory(prescription) {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `
+                <div class="history-header">
+                    <span class="history-id">${prescription.prescription_id}</span>
+                    <span class="history-date">${new Date(prescription.prescribed_at).toLocaleDateString('ar-EG')}</span>
+                </div>
+                <div class="history-patient">${prescription.patient_name || prescription.patient_id}</div>
+                <div class="history-diagnosis">${prescription.diagnosis}</div>
+                <div class="history-medications">${prescription.medications.length} دواء</div>
+                <button class="btn-sm view-prescription" data-id="${prescription.prescription_id}">عرض</button>
+            `;
+            
+            const emptyState = prescriptionsHistory.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            prescriptionsHistory.insertBefore(historyItem, prescriptionsHistory.firstChild);
+        }
+        
+        // إعادة تعيين النموذج
+        function resetForm() {
+            form.reset();
+            medicationsContainer.innerHTML = '';
+            addMedicineRow();
+            interactionResults.style.display = 'none';
+            currentPrescription = null;
+        }
+        
+        // معالجة submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await createPrescription();
+        });
+        
+        document.getElementById('reset-form-btn')?.addEventListener('click', resetForm);
+        
+        // أزرار المودال
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                signatureModal.style.display = 'none';
+                qrModal.style.display = 'none';
+            });
+        });
+        
+        document.getElementById('confirm-signature')?.addEventListener('click', signAndSave);
+        document.getElementById('cancel-signature')?.addEventListener('click', () => {
+            signatureModal.style.display = 'none';
+        });
+        
+        document.getElementById('download-qr')?.addEventListener('click', () => {
+            const qrElement = document.querySelector('#qr-code canvas');
+            if (qrElement) {
+                const link = document.createElement('a');
+                link.download = `prescription_${Date.now()}.png`;
+                link.href = qrElement.toDataURL();
+                link.click();
+            }
+        });
+        
+        document.getElementById('share-qr')?.addEventListener('click', async () => {
+            const qrElement = document.querySelector('#qr-code canvas');
+            if (qrElement && navigator.share) {
+                const blob = await new Promise(resolve => qrElement.toBlob(resolve));
+                await navigator.share({
+                    title: 'روشتة طبية',
+                    files: [new File([blob], 'prescription.png', { type: 'image/png' })]
+                });
+            } else {
+                alert('المشاركة غير مدعومة على هذا الجهاز');
+            }
+        });
+        
+        // إضافة دواء افتراضي
+        addMedicineRow();
+        
+        // تحميل الروشتات السابقة
+        async function loadPrescriptionsHistory() {
+            try {
+                const result = await predictionClient.getPatientPrescriptions(auth.getCurrentUser()?.id);
+                if (result.success && result.prescriptions) {
+                    prescriptionsHistory.innerHTML = '';
+                    result.prescriptions.slice(0, 10).forEach(p => addToHistory(p));
+                }
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+        
+        loadPrescriptionsHistory();
+        
+        // إضافة أنماط إضافية
+        const style = document.createElement('style');
+        style.textContent = `
+            .doctor-notes-main { padding: 40px 0; min-height: calc(100vh - 200px); }
+            .notes-header { text-align: center; margin-bottom: 32px; }
+            .notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+            .notes-form-card, .prescriptions-history-card { background: var(--white); border-radius: 24px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+            .medication-row { display: grid; grid-template-columns: 2fr 1fr 1.5fr 1fr 0.5fr; gap: 12px; align-items: start; margin-bottom: 12px; }
+            .btn-remove-medicine { background: none; border: none; color: #ea4335; cursor: pointer; font-size: 18px; padding: 8px; }
+            .interaction-results { margin-top: 12px; padding: 12px; border-radius: 12px; }
+            .interaction-safe { color: #34a853; }
+            .interaction-warning { color: #fbbc04; margin-bottom: 12px; }
+            .interaction-alert { padding: 12px; margin-bottom: 8px; border-radius: 8px; background: #f8f9fa; }
+            .severity-high { border-right: 3px solid #ea4335; }
+            .prescription-preview { background: #f8f9fa; padding: 16px; border-radius: 12px; margin: 16px 0; }
+            .history-item { padding: 12px; border-bottom: 1px solid #e8eaed; margin-bottom: 12px; }
+            .history-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+            .history-id { font-weight: bold; color: #1a73e8; }
+            .history-date { font-size: 12px; color: #5f6368; }
+            .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+            .modal-content { background: white; border-radius: 24px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+            .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e8eaed; }
+            .modal-body { padding: 20px; }
+            @media (max-width: 768px) {
+                .notes-grid { grid-template-columns: 1fr; }
+                .medication-row { grid-template-columns: 1fr; gap: 8px; }
+                .medication-row .form-group { width: 100%; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // إخفاء شاشة التحميل
+        setTimeout(() => {
+            const loader = document.getElementById('loading-overlay');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 300);
+            }
+        }, 500);
+    </script>
+    
+    <!-- Main App -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
