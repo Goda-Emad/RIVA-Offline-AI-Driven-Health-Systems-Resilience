@@ -1,1 +1,329 @@
+<div class="los-timeline" id="los-timeline">
+    <div class="timeline-header">
+        <span class="timeline-icon">⏱️</span>
+        <span class="timeline-title">الجدول الزمني لمدة الإقامة المتوقعة</span>
+    </div>
+    
+    <div class="timeline-container">
+        <div class="timeline-scale">
+            <div class="scale-mark" style="left: 0%">يوم 1</div>
+            <div class="scale-mark" style="left: 25%">يوم 7</div>
+            <div class="scale-mark" style="left: 50%">يوم 14</div>
+            <div class="scale-mark" style="left: 75%">يوم 21</div>
+            <div class="scale-mark" style="left: 100%">يوم 30</div>
+        </div>
+        
+        <div class="timeline-track">
+            <div class="timeline-progress" id="timeline-progress" style="width: 0%"></div>
+            <div class="timeline-marker" id="timeline-marker" style="left: 0%">
+                <div class="marker-dot"></div>
+                <div class="marker-label" id="marker-label">0 يوم</div>
+            </div>
+        </div>
+        
+        <div class="timeline-categories">
+            <div class="category short">
+                <span class="category-color"></span>
+                <span class="category-text">قصيرة (≤3 أيام)</span>
+            </div>
+            <div class="category medium">
+                <span class="category-color"></span>
+                <span class="category-text">متوسطة (4-7 أيام)</span>
+            </div>
+            <div class="category long">
+                <span class="category-color"></span>
+                <span class="category-text">طويلة (8-14 يوم)</span>
+            </div>
+            <div class="category very-long">
+                <span class="category-color"></span>
+                <span class="category-text">طويلة جداً (>14 يوم)</span>
+            </div>
+        </div>
+        
+        <div class="timeline-info" id="timeline-info">
+            <div class="info-row">
+                <span class="info-label">مدة الإقامة المتوقعة:</span>
+                <span class="info-value" id="los-days">0</span>
+                <span class="info-unit">يوم</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">الفئة:</span>
+                <span class="info-value" id="los-category">-</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">هامش الخطأ:</span>
+                <span class="info-value" id="los-error">±2</span>
+                <span class="info-unit">يوم</span>
+            </div>
+        </div>
+    </div>
+</div>
 
+<style>
+.los-timeline {
+    background: var(--white, #ffffff);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-right: 3px solid var(--primary, #1a73e8);
+}
+
+.timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--gray-lighter, #e8eaed);
+}
+
+.timeline-icon {
+    font-size: 20px;
+}
+
+.timeline-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dark, #202124);
+}
+
+.timeline-container {
+    padding: 10px 0;
+}
+
+.timeline-scale {
+    position: relative;
+    height: 20px;
+    margin-bottom: 8px;
+}
+
+.scale-mark {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--gray, #5f6368);
+    white-space: nowrap;
+}
+
+.timeline-track {
+    position: relative;
+    height: 8px;
+    background: var(--gray-lighter, #e8eaed);
+    border-radius: 4px;
+    margin: 20px 0;
+    overflow: visible;
+}
+
+.timeline-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.timeline-marker {
+    position: absolute;
+    top: -10px;
+    transform: translateX(-50%);
+    transition: left 0.5s ease;
+    cursor: pointer;
+}
+
+.marker-dot {
+    width: 16px;
+    height: 16px;
+    background: var(--primary, #1a73e8);
+    border: 3px solid var(--white, #ffffff);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+}
+
+.marker-dot:hover {
+    transform: scale(1.2);
+}
+
+.marker-label {
+    position: absolute;
+    top: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary, #1a73e8);
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.timeline-categories {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.category {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+}
+
+.category-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.category.short .category-color {
+    background: var(--success, #34a853);
+}
+.category.medium .category-color {
+    background: var(--warning, #fbbc04);
+}
+.category.long .category-color {
+    background: var(--primary, #1a73e8);
+}
+.category.very-long .category-color {
+    background: var(--danger, #ea4335);
+}
+
+.category-text {
+    color: var(--gray, #5f6368);
+}
+
+.timeline-info {
+    background: var(--light, #f8f9fa);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-top: 16px;
+}
+
+.info-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-size: 12px;
+    color: var(--gray, #5f6368);
+    min-width: 100px;
+}
+
+.info-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--dark, #202124);
+}
+
+.info-unit {
+    font-size: 11px;
+    color: var(--gray, #5f6368);
+}
+
+@media (max-width: 768px) {
+    .los-timeline {
+        padding: 16px;
+    }
+    .timeline-scale {
+        display: none;
+    }
+    .timeline-categories {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .info-label {
+        min-width: 80px;
+    }
+    .info-value {
+        font-size: 14px;
+    }
+}
+</style>
+
+<script>
+function updateLOSTimeline(days, minDays = null, maxDays = null) {
+    const maxLos = 30;
+    const percentage = Math.min(100, (days / maxLos) * 100);
+    
+    const progressBar = document.getElementById('timeline-progress');
+    const marker = document.getElementById('timeline-marker');
+    const markerLabel = document.getElementById('marker-label');
+    const losDaysSpan = document.getElementById('los-days');
+    const losCategorySpan = document.getElementById('los-category');
+    const losErrorSpan = document.getElementById('los-error');
+    
+    if (progressBar) progressBar.style.width = percentage + '%';
+    if (marker) marker.style.left = percentage + '%';
+    if (markerLabel) markerLabel.textContent = days.toFixed(1) + ' يوم';
+    if (losDaysSpan) losDaysSpan.textContent = days.toFixed(1);
+    
+    // تحديد الفئة
+    let category = '';
+    let categoryColor = '';
+    if (days <= 3) {
+        category = 'قصيرة';
+        categoryColor = 'var(--success, #34a853)';
+    } else if (days <= 7) {
+        category = 'متوسطة';
+        categoryColor = 'var(--warning, #fbbc04)';
+    } else if (days <= 14) {
+        category = 'طويلة';
+        categoryColor = 'var(--primary, #1a73e8)';
+    } else {
+        category = 'طويلة جداً';
+        categoryColor = 'var(--danger, #ea4335)';
+    }
+    
+    if (losCategorySpan) {
+        losCategorySpan.textContent = category;
+        losCategorySpan.style.color = categoryColor;
+    }
+    
+    // تحديث هامش الخطأ
+    const error = maxDays && minDays ? ((maxDays - minDays) / 2).toFixed(1) : '2.0';
+    if (losErrorSpan) losErrorSpan.textContent = `±${error}`;
+    
+    // تحديث لون الماركر
+    const markerDot = document.querySelector('.marker-dot');
+    if (markerDot) markerDot.style.background = categoryColor;
+    
+    // تحديث لون شريط التقدم
+    if (progressBar) {
+        if (days <= 3) progressBar.style.background = `linear-gradient(90deg, var(--success, #34a853), var(--success, #34a853))`;
+        else if (days <= 7) progressBar.style.background = `linear-gradient(90deg, var(--warning, #fbbc04), var(--warning, #fbbc04))`;
+        else if (days <= 14) progressBar.style.background = `linear-gradient(90deg, var(--primary, #1a73e8), var(--primary-light, #4285f4))`;
+        else progressBar.style.background = `linear-gradient(90deg, var(--danger, #ea4335), var(--danger, #ea4335))`;
+    }
+}
+
+function setLOSTimelineData(data) {
+    if (data.days) updateLOSTimeline(data.days, data.min_days, data.max_days);
+    if (data.expected_date) {
+        const dateEl = document.getElementById('expected-date');
+        if (dateEl) dateEl.textContent = data.expected_date;
+    }
+}
+
+function resetLOSTimeline() {
+    updateLOSTimeline(0);
+    const losDaysSpan = document.getElementById('los-days');
+    const losCategorySpan = document.getElementById('los-category');
+    if (losDaysSpan) losDaysSpan.textContent = '0';
+    if (losCategorySpan) losCategorySpan.textContent = '-';
+}
+</script>
