@@ -1,1 +1,139 @@
+{
+  "name": "riva-health-platform",
+  "version": 2,
+  "builds": [
+    {
+      "src": "web-app/src/app.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/web-app/src/templates/static/$1"
+    },
+    {
+      "src": "/sw.js",
+      "dest": "/web-app/sw.js"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/web-app/manifest.json"
+    },
+    {
+      "src": "/(.*\\.html)",
+      "dest": "/web-app/src/templates/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/web-app/src/app.py"
+    }
+  ],
+  "env": {
+    "RIVA_BASE_DIR": ".",
+    "ENCRYPTION_KEY": "${RIVA_ENCRYPTION_KEY}",
+    "SIGNATURE_SECRET": "${RIVA_SIGNATURE_SECRET}",
+    "INTERNAL_API_KEY": "${RIVA_INTERNAL_API_KEY}"
+  },
+  "build": {
+    "env": {
+      "RIVA_BASE_DIR": "."
+    }
+  },
+  "functions": {
+    "web-app/src/app.py": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "includeFiles": "web-app/src/**/*.py",
+      "excludeFiles": "web-app/src/**/__pycache__/**"
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/web-app/src/app.py"
+    },
+    {
+      "source": "/consult/(.*)",
+      "destination": "/web-app/src/app.py"
+    },
+    {
+      "source": "/chat/(.*)",
+      "destination": "/web-app/src/app.py"
+    },
+    {
+      "source": "/voice/(.*)",
+      "destination": "/web-app/src/app.py"
+    },
+    {
+      "source": "/triage/(.*)",
+      "destination": "/web-app/src/app.py"
+    },
+    {
+      "source": "/prescriptions/(.*)",
+      "destination": "/web-app/src/app.py"
+    },
+    {
+      "source": "/interactions/(.*)",
+      "destination": "/web-app/src/app.py"
+    }
+  ]
+}
 
