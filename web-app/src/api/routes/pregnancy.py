@@ -33,7 +33,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
 
 # استيراد أنظمة الأمان v4.1
 try:
-    from access_control import require_role, require_any_role, Role
+    from access_control import require_any_role, Role
 except ImportError:
     # تعريف Role مؤقت في حالة عدم وجود الملف
     class Role(str, Enum):
