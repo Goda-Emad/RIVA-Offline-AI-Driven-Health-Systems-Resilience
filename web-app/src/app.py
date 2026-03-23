@@ -60,21 +60,17 @@ BASE_DIR     = Path(__file__).parent
 PROJECT_ROOT = BASE_DIR.parent.parent
 PUBLIC_DIR   = PROJECT_ROOT / "web-app" / "public"
 
-# ✅ الصفحات في templates/pages/
-TEMPLATES_DIR       = BASE_DIR / "templates"
-PAGES_DIR           = BASE_DIR / "templates" / "pages"
-STATIC_DIR          = BASE_DIR / "templates" / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
+PAGES_DIR     = BASE_DIR / "templates" / "pages"
+STATIC_DIR    = BASE_DIR / "static"          # ✅ غير ده بس
 
 # إنشاء المجلدات لو مش موجودة
 for d in [TEMPLATES_DIR, PAGES_DIR, STATIC_DIR, PUBLIC_DIR]:
     d.mkdir(parents=True, exist_ok=True)
 
-# ✅ Jinja2 يدور على الصفحات في pages/
 templates = Jinja2Templates(directory=str(PAGES_DIR))
-
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.mount("/public", StaticFiles(directory=str(PUBLIC_DIR)), name="public")
-
 # ──────────────────────────────────────────────────────────
 # 3. تسجيل الـ Routes
 # ──────────────────────────────────────────────────────────
