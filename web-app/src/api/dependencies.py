@@ -47,6 +47,10 @@ try:
     print("✅ Security modules loaded successfully from ai-core/security")
 except ImportError as e:
     print(f"⚠️ Warning: Security module error: {e}")
+    # تعريفات بديلة لتجنب UnboundLocalError
+    get_access_control = None
+    Role = None
+    AccessControl = None
 
 def require_role(required_role: Role):
     async def role_checker(access: AccessControl = Depends(get_access_control)):
