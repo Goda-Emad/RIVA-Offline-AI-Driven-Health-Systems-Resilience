@@ -71,11 +71,12 @@ except ImportError as e:
     raise ImportError("access_control module is required for production deployment")
 
 from .voice import transcribe_audio_sync
-from .chat import send_message as chat_send_message, ChatRequest, LOW_CONFIDENCE_THRESH
+from .chat import send_message as chat_send_message, ChatRequest  # ✅ حذف LOW_CONFIDENCE_THRESH
 
 log = logging.getLogger("riva.orchestrator")
 
 router = APIRouter(prefix="/consult", tags=["orchestrator"])
+LOW_CONFIDENCE_THRESH = 0.6  # ✅ معرّف هنا مباشرة
 
 
 # ─── Smart Routing Table — الـ 17 صفحة ──────────────────────────────────────
@@ -218,8 +219,6 @@ def process_consultation_sync(
     # Stage 3: Chat → intent + profile
     log.info("[RIVA-Orch] Stage 2: chat inference …")
     
-    # استدعاء chat بشكل متزامن (لكن chat نفسها ممكن تحتاج threadpool)
-    # للتبسيط، نستخدم الدالة المتزامنة من chat
     try:
         from .chat import send_message_sync
         chat_result = send_message_sync(
@@ -227,7 +226,6 @@ def process_consultation_sync(
             session_id=session_id
         )
     except ImportError:
-        # Fallback للدالة async
         import asyncio
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
@@ -255,7 +253,6 @@ def process_consultation_sync(
     # Stage 4: Smart routing → target page
     confidence  = chat_result.get("confidence_score", 1.0)
 
-    # Medical Transparency — low confidence → AI explanation page
     if confidence < LOW_CONFIDENCE_THRESH:
         target_page = "12_ai_explanation.html"
         log.warning(
@@ -334,14 +331,7 @@ async def text_consultation(
     req: TextConsultRequest,
     request: Request = None,
 ):
-    """
-    📝 استشارة نصية
-    
-    🔐 الأمان: متاح للمرضى والأطباء والممرضين
-    ✅ التحسين: CPU-bound tasks offloaded to threadpool
-    """
     try:
-        # ✅ CPU-bound task in threadpool
         result = await run_in_threadpool(
             process_consultation_sync,
             user_text=req.message,
@@ -374,12 +364,6 @@ async def voice_consultation(
     language:   str           = "ar",
     request: Request = None,
 ):
-    """
-    🎤 استشارة صوتية
-    
-    🔐 الأمان: متاح للمرضى والأطباء والممرضين
-    ✅ التحسين: CPU-bound tasks offloaded to threadpool
-    """
     if not file.content_type or not any(
         t in file.content_type for t in ("audio", "octet-stream", "video")
     ):
@@ -389,8 +373,6 @@ async def voice_consultation(
         )
     try:
         audio_bytes = await file.read()
-        
-        # ✅ CPU-bound task in threadpool
         result = await run_in_threadpool(
             process_consultation_sync,
             audio_bytes=audio_bytes,
@@ -417,19 +399,12 @@ async def voice_consultation_base64(
     req: Base64ConsultRequest,
     request: Request = None,
 ):
-    """
-    🎤 استشارة صوتية عبر base64 (للتطبيقات)
-    
-    🔐 الأمان: متاح للمرضى والأطباء والممرضين
-    ✅ التحسين: CPU-bound tasks offloaded to threadpool
-    """
     try:
         audio_bytes = base64.b64decode(req.audio_base64)
     except Exception:
         raise HTTPException(status_code=400, detail="base64 غير صحيح")
     
     try:
-        # ✅ CPU-bound task in threadpool
         result = await run_in_threadpool(
             process_consultation_sync,
             audio_bytes=audio_bytes,
@@ -451,11 +426,6 @@ async def voice_consultation_base64(
 async def get_route_table(
     request: Request = None,
 ):
-    """
-    📋 جدول التوجيه الكامل
-    
-    🔐 الأمان: متاح للأطباء والإداريين فقط
-    """
     return {
         "success": True,
         "route_table": _ROUTE_TABLE,
