@@ -1,1 +1,462 @@
+/* prediction_dashboard.css
+   RIVA Health Platform - AI Medical Assistant
+   اللون الأساسي: أزرق RIVA (مطابق للصورة)
+   ============================================ */
 
+/* ============================================
+   المتغيرات - الأزرق هو الأساس
+   ============================================ */
+:root {
+    --riva-blue: #1e88e5;      /* الأزرق الرئيسي كما في الصورة */
+    --riva-blue-dark: #0b5e8a; /* أزرق داكن للـ hover */
+    --riva-blue-light: #e3f2fd; /* أزرق فاتح للخلفيات */
+    --riva-blue-bg: #f0f8ff;    /* خلفية زرقاء فاتحة جدًا */
+    
+    --success: #388e3c;
+    --warning: #ffa000;
+    --danger: #d32f2f;
+    --gray-light: #f8f9fa;
+    --gray-border: #e9ecef;
+    --text-dark: #2c3e50;
+    --text-gray: #6c757d;
+    
+    --shadow-sm: 0 2px 8px rgba(30,136,229,0.08);
+    --shadow-md: 0 4px 16px rgba(30,136,229,0.12);
+    --border-radius: 16px;
+}
+
+/* ============================================
+   الحاوية الرئيسية
+   ============================================ */
+.prediction-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    background: var(--riva-blue-bg);
+    min-height: 100vh;
+}
+
+/* الهيدر */
+.prediction-header {
+    margin-bottom: 32px;
+}
+
+.prediction-header h1 {
+    font-size: 28px;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.prediction-header h1::before {
+    content: "📊";
+    margin-left: 10px;
+}
+
+.prediction-header p {
+    color: var(--text-gray);
+    font-size: 14px;
+}
+
+/* ============================================
+   بطاقات التوقعات - بلمسة زرقاء
+   ============================================ */
+.prediction-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.prediction-card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    border-top: 4px solid var(--riva-blue);
+}
+
+.prediction-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-right: 3px solid var(--riva-blue);
+    padding-right: 12px;
+}
+
+/* المقاييس */
+.prediction-metric {
+    margin-bottom: 20px;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: var(--text-gray);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.metric-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* شريط المخاطر - أزرق */
+.risk-bar {
+    background: var(--gray-border);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.risk-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: var(--riva-blue);
+    transition: width 0.5s ease;
+}
+
+/* درجات المخاطر */
+.risk-level {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 8px;
+}
+
+.risk-level.low {
+    background: #e8f5e9;
+    color: var(--success);
+}
+
+.risk-level.medium {
+    background: #fff3e0;
+    color: var(--warning);
+}
+
+.risk-level.high {
+    background: #ffebee;
+    color: var(--danger);
+}
+
+/* ============================================
+   مؤشر الثقة - أزرق متدرج
+   ============================================ */
+.confidence-score {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--riva-blue), var(--riva-blue-dark));
+    border-radius: 12px;
+    color: white;
+}
+
+.confidence-score .score {
+    font-size: 48px;
+    font-weight: 700;
+}
+
+.confidence-score .label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* ============================================
+   التوصيات الذكية
+   ============================================ */
+.recommendations-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-sm);
+}
+
+.recommendations-section h3 {
+    font-size: 18px;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.recommendations-section h3::before {
+    content: "💡";
+}
+
+.recommendations-list {
+    list-style: none;
+    padding: 0;
+}
+
+.recommendations-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.recommendation-icon {
+    font-size: 20px;
+}
+
+.recommendation-text {
+    flex: 1;
+    color: var(--text-dark);
+    line-height: 1.5;
+}
+
+/* ============================================
+   الشات بوت - باللون الأزرق
+   ============================================ */
+.chatbot-section {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-top: 24px;
+    border: 1px solid rgba(30,136,229,0.2);
+}
+
+.chatbot-header {
+    background: var(--riva-blue);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header h3 {
+    margin: 0;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chatbot-header h3::before {
+    content: "🤖";
+}
+
+.chatbot-toggle {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.chatbot-toggle:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+/* نافذة المحادثة */
+.chatbot-window {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+}
+
+.chatbot-window.collapsed {
+    display: none;
+}
+
+/* منطقة الرسائل */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* رسائل الشات - بوت باللون الأزرق الفاتح */
+.message {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.message.bot {
+    background: var(--riva-blue-light);
+    color: var(--text-dark);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.message.user {
+    background: var(--riva-blue);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message-time {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 4px;
+    display: block;
+}
+
+/* منطقة الإدخال */
+.chat-input-area {
+    display: flex;
+    padding: 12px;
+    background: white;
+    border-top: 1px solid var(--gray-border);
+    gap: 8px;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--gray-border);
+    border-radius: 24px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.chat-input:focus {
+    border-color: var(--riva-blue);
+    box-shadow: 0 0 0 3px rgba(30,136,229,0.1);
+}
+
+.chat-send-btn {
+    background: var(--riva-blue);
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.chat-send-btn:hover {
+    background: var(--riva-blue-dark);
+    transform: scale(1.02);
+}
+
+/* مؤشر الكتابة */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 18px;
+    width: fit-content;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--riva-blue);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ============================================
+   زر الشات بوت العائم - أزرق
+   ============================================ */
+.chatbot-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--riva-blue);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(30,136,229,0.4);
+    transition: all 0.2s;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-fab:hover {
+    transform: scale(1.08);
+    background: var(--riva-blue-dark);
+    box-shadow: 0 6px 16px rgba(30,136,229,0.5);
+}
+
+/* ============================================
+   RTL (عربي)
+   ============================================ */
+body.rtl .prediction-card .card-title {
+    border-right: 3px solid var(--riva-blue);
+    border-left: none;
+    padding-right: 12px;
+    padding-left: 0;
+}
+
+body.rtl .chatbot-fab {
+    right: auto;
+    left: 24px;
+}
+
+/* ============================================
+   تصميم متجاوب
+   ============================================ */
+@media (max-width: 768px) {
+    .prediction-container {
+        padding: 16px;
+    }
+    
+    .prediction-grid {
+        gap: 16px;
+    }
+    
+    .chatbot-window {
+        height: 350px;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .chatbot-fab {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+        bottom: 16px;
+        right: 16px;
+    }
+}
