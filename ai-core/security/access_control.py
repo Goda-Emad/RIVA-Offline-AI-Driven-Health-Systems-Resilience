@@ -67,8 +67,8 @@ class Role(str, Enum):
     SCHOOL     = "school"
     READONLY   = "readonly"
     SUPERVISOR = "supervisor"
-    GENETIC_COUNSELOR = "genetic_counselor"   # ✅ أضف هذا السطر
-
+    GENETIC_COUNSELOR = "genetic_counselor"
+    PHARMACIST = "pharmacist"  # ✅ أضف
 # ─── Permissions ─────────────────────────────────────────────────────────────
 
 class Permission(str, Enum):
