@@ -49,11 +49,13 @@ _ROOT     = _AICORE.parent
 _USERS_DB = _ROOT / "data" / "databases" / "users.encrypted"
 
 # ─── Salt ────────────────────────────────────────────────────────────────────
-
 _PWD_SALT = os.environb.get(
     b"RIVA_PWD_SALT",
     b"riva-pwd-salt-change-in-production-2026",
-)
+) if hasattr(os, 'environb') else os.environ.get(
+    "RIVA_PWD_SALT",
+    "riva-pwd-salt-change-in-production-2026",
+).encode()
 
 # ─── Roles ───────────────────────────────────────────────────────────────────
 
