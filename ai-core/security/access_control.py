@@ -68,6 +68,7 @@ class Role(str, Enum):
     READONLY   = "readonly"
     SUPERVISOR = "supervisor"
     GENETIC_COUNSELOR = "genetic_counselor"
+    SCHOOL_NURSE = "school_nurse"  # ✅
     PHARMACIST = "pharmacist"  # ✅ أضف
 # ─── Permissions ─────────────────────────────────────────────────────────────
 
