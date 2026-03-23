@@ -62,8 +62,7 @@ PUBLIC_DIR   = PROJECT_ROOT / "web-app" / "public"
 
 TEMPLATES_DIR = BASE_DIR / "templates"
 PAGES_DIR     = BASE_DIR / "templates" / "pages"
-STATIC_DIR    = BASE_DIR / "static"          # ✅ غير ده بس
-
+STATIC_DIR    = BASE_DIR / "templates" / "static"
 # إنشاء المجلدات لو مش موجودة
 for d in [TEMPLATES_DIR, PAGES_DIR, STATIC_DIR, PUBLIC_DIR]:
     d.mkdir(parents=True, exist_ok=True)
