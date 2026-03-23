@@ -41,23 +41,20 @@ for path in [SECURITY_PATH, STORAGE_PATH, AI_CORE_PATH]:
 # ─────────────────────────────────────────────────────────────────────────────
 security = HTTPBearer(auto_error=False)
 
+# تعريف المتغيرات قبل الـ try
+get_access_control = None
+Role = None
+AccessControl = None
+
 try:
     from access_control import get_access_control, Role, AccessControl
     from fastapi import Depends, HTTPException, status
     print("✅ Security modules loaded successfully from ai-core/security")
 except ImportError as e:
     print(f"⚠️ Warning: Security module error: {e}")
-    # تعريفات بديلة لتجنب UnboundLocalError
-    get_access_control = None
-    Role = None
-    AccessControl = None
-
-def require_role(required_role: Role):
-    async def role_checker(access: AccessControl = Depends(get_access_control)):
-        if access.current_user_role != required_role:
-            raise HTTPException(status_code=403, detail="غير مصرح")
-        return access
-    return role_checker
+    
+    # تعريفات بديلة في حالة عدم وجود access_control
+    from enum import Enum
     class Role(str, Enum):
         DOCTOR            = "doctor"
         NURSE             = "nurse"
@@ -87,6 +84,12 @@ def require_role(required_role: Role):
 
     logging.warning("Using fallback security (no ai-core/security found)")
 
+def require_role(required_role: Role):
+    async def role_checker(access: AccessControl = Depends(get_access_control)):
+        if access.current_user_role != required_role:
+            raise HTTPException(status_code=403, detail="غير مصرح")
+        return access
+    return role_checker
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. 🗄️ DATABASE LOADER
 # ─────────────────────────────────────────────────────────────────────────────
