@@ -43,7 +43,7 @@ for path in [SECURITY_PATH, STORAGE_PATH, AI_CORE_PATH]:
 security = HTTPBearer(auto_error=False)
 
 try:
-from access_control import get_access_control, Role, AccessControl
+    from access_control import get_access_control, Role, AccessControl  # ✅ صح
 from fastapi import Depends, HTTPException, status
 
 def require_role(required_role: Role):
