@@ -72,6 +72,7 @@ except ImportError as e:
         def __init__(self, request=None):
             self._user_id   = "guest"
             self._user_role = Role.PATIENT
+            self.current_user_role = self._user_role  # إضافة هذا للتوافق
 
         def authenticate(self):      return True
         def get_user_role(self):     return self._user_role
@@ -84,12 +85,14 @@ except ImportError as e:
 
     logging.warning("Using fallback security (no ai-core/security found)")
 
+# دالة require_role المعدلة
 def require_role(required_role: Role):
-    async def role_checker(access: AccessControl = Depends(get_access_control)):
-        if access.current_user_role != required_role:
+    def role_checker(access: AccessControl = Depends(get_access_control)):
+        if access.get_user_role() != required_role:
             raise HTTPException(status_code=403, detail="غير مصرح")
         return access
     return role_checker
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 2. 🗄️ DATABASE LOADER
 # ─────────────────────────────────────────────────────────────────────────────
@@ -474,4 +477,5 @@ __all__ = [
     "get_school_context",
     "Role",
     "DBLoader",
+    "require_role",  # أضف هذا للسطر
 ]
