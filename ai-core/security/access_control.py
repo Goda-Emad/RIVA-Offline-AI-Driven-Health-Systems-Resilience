@@ -60,16 +60,17 @@ _PWD_SALT = os.environb.get(
 # ─── Roles ───────────────────────────────────────────────────────────────────
 
 class Role(str, Enum):
-    ADMIN      = "admin"
-    DOCTOR     = "doctor"
-    NURSE      = "nurse"
-    PATIENT    = "patient"
-    SCHOOL     = "school"
-    READONLY   = "readonly"
-    SUPERVISOR = "supervisor"
+    ADMIN             = "admin"
+    DOCTOR            = "doctor"
+    NURSE             = "nurse"
+    PATIENT           = "patient"
+    SCHOOL            = "school"
+    READONLY          = "readonly"
+    SUPERVISOR        = "supervisor"
     GENETIC_COUNSELOR = "genetic_counselor"
-    SCHOOL_NURSE = "school_nurse"  # ✅
-    PHARMACIST = "pharmacist"  # ✅ أضف
+    PHARMACIST        = "pharmacist"
+    SCHOOL_NURSE      = "school_nurse"   # ✅ أضفناها قبل كده
+    PSYCHOLOGIST      = "psychologist"   # ✅ أضفها دلوقتي
 # ─── Permissions ─────────────────────────────────────────────────────────────
 
 class Permission(str, Enum):
