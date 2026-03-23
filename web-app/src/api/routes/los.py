@@ -41,7 +41,8 @@ from functools import lru_cache
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # استيراد أنظمة الأمان v4.1
-from access_control import require_any_role, Role
+from access_control import require_any_role, require_role, Role
+
 # استيراد db_loader v4.1
 from db_loader import get_db_loader
 
