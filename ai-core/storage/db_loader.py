@@ -41,9 +41,11 @@ logger = logging.getLogger("riva.db_loader")
 
 _LOG_SALT: bytes = os.environb.get(
     b"RIVA_LOG_SALT",
-    b"riva-dev-salt-change-in-production-2026",
-)
-
+    b"riva-log-salt-change-in-production-2026",
+) if hasattr(os, 'environb') else os.environ.get(
+    "RIVA_LOG_SALT",
+    "riva-log-salt-change-in-production-2026",
+).encode()
 # ─── Path resolution ─────────────────────────────────────────────────────────
 
 _HERE   = Path(__file__).resolve().parent   # ai-core/prediction/storage/
