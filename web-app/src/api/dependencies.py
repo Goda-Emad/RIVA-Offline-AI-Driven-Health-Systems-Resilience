@@ -39,14 +39,14 @@ for path in [SECURITY_PATH, STORAGE_PATH, AI_CORE_PATH]:
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. 🔐 SECURITY & AUTHENTICATION
 # ─────────────────────────────────────────────────────────────────────────────
-
 security = HTTPBearer(auto_error=False)
 
 try:
     from access_control import get_access_control, Role, AccessControl
     from fastapi import Depends, HTTPException, status
-except:
-    pass
+    print("✅ Security modules loaded successfully from ai-core/security")
+except ImportError as e:
+    print(f"⚠️ Warning: Security module error: {e}")
 
 def require_role(required_role: Role):
     async def role_checker(access: AccessControl = Depends(get_access_control)):
@@ -54,10 +54,6 @@ def require_role(required_role: Role):
             raise HTTPException(status_code=403, detail="غير مصرح")
         return access
     return role_checker
-    print("✅ Security modules loaded successfully from ai-core/security")
-except ImportError as e:
-    print(f"⚠️ Warning: Security module error: {e}")
-
     class Role(str, Enum):
         DOCTOR            = "doctor"
         NURSE             = "nurse"
