@@ -72,13 +72,14 @@ except ImportError as e:
         def __init__(self, request=None):
             self._user_id   = "guest"
             self._user_role = Role.PATIENT
-            self.current_user_role = self._user_role  # إضافة هذا للتوافق
+            self.current_user_role = self._user_role
 
         def authenticate(self):      return True
         def get_user_role(self):     return self._user_role
         def get_user_id(self):       return self._user_id
         def require_role(self, r):   return self._user_role == r
         def require_any_role(self, roles): return self._user_role in roles
+        def get_session(self, session_id): return None
 
     def get_access_control(request):
         return AccessControl(request)
@@ -87,10 +88,23 @@ except ImportError as e:
 
 # دالة require_role المعدلة
 def require_role(required_role: Role):
-    def role_checker(access: AccessControl = Depends(get_access_control)):
-        if access.get_user_role() != required_role:
-            raise HTTPException(status_code=403, detail="غير مصرح")
-        return access
+    async def role_checker(
+        request: Request,
+        ac: AccessControl = Depends(get_access_control)
+    ):
+        session_id = request.headers.get("X-Session-ID")
+        if not session_id:
+            session_id = request.cookies.get("session_id")
+        
+        session = ac.get_session(session_id)
+        
+        if not session or session.user.role != required_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"غير مصرح - مطلوب دور: {required_role.value}"
+            )
+        
+        return session.user
     return role_checker
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -98,7 +112,6 @@ def require_role(required_role: Role):
 # ─────────────────────────────────────────────────────────────────────────────
 
 try:
-    # ✅ الاسم الصحيح هو DbLoader مش DBLoader
     from db_loader import get_db_loader, DbLoader as DBLoader
     print("✅ Storage module (db_loader) loaded successfully from ai-core/storage")
 except ImportError as e:
@@ -477,5 +490,5 @@ __all__ = [
     "get_school_context",
     "Role",
     "DBLoader",
-    "require_role",  # أضف هذا للسطر
+    "require_role",
 ]
