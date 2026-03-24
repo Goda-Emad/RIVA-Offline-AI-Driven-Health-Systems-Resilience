@@ -1012,9 +1012,13 @@ class ReadmissionChart {
 // ──────────────────────────────────────────────────────────
 // 13. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
-
+// إنشاء نسخة واحدة
 const readmissionChart = new ReadmissionChart();
 
+// تخزين في window للاستخدام العادي
 window.readmissionChart = readmissionChart;
+window.rivaReadmissionChart = readmissionChart;
 
+// ES Module export
 export default readmissionChart;
+export { readmissionChart };
