@@ -77,7 +77,7 @@ except ImportError as e:
 
 log = logging.getLogger("riva.chat")
 
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(prefix="/api/chat", tags=["chat"])
 
 # ─── Paths ───────────────────────────────────────────────────────────────────
 
