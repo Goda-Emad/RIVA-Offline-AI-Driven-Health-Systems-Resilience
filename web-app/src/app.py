@@ -82,9 +82,11 @@ routers = [
 ]
 
 for router in routers:
-    app.include_router(router)
+    if router.prefix == "/chat":
+        app.include_router(router, prefix="/api/chat", tags=["Chat"])
+    else:
+        app.include_router(router)
     logger.info(f"✅ Router registered: {router.prefix}")
-
 # ──────────────────────────────────────────────────────────
 # 4. صفحات HTML (الـ 17 صفحة)
 # ──────────────────────────────────────────────────────────
