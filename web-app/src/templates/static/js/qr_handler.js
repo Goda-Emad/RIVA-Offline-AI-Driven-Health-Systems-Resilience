@@ -930,9 +930,12 @@ function downloadQR(elementId, filename = 'riva_qr.png') {
 // 22. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const qrHandler = new QRHandler();
 
+// تخزين في window للاستخدام العادي
 window.qrHandler = qrHandler;
+window.rivaQRHandler = qrHandler;
 window.startQRScanner = startQRScanner;
 window.stopQRScanner = stopQRScanner;
 window.generatePrescriptionQR = generatePrescriptionQR;
@@ -941,4 +944,6 @@ window.generatePatientQR = generatePatientQR;
 window.shareQR = shareQR;
 window.downloadQR = downloadQR;
 
+// ES Module export
 export default qrHandler;
+export { qrHandler };
