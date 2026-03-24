@@ -41,19 +41,50 @@ for path in [SECURITY_PATH, STORAGE_PATH, AI_CORE_PATH]:
 # ─────────────────────────────────────────────────────────────────────────────
 security = HTTPBearer(auto_error=False)
 
-# تعريف المتغيرات قبل الـ try
+# تعريف المتغيرات قبل الـ try عشان لو حصل خطأ ميبقاش في مشكلة
 get_access_control = None
 Role = None
 AccessControl = None
 
 try:
     from access_control import get_access_control, Role, AccessControl
-    from fastapi import Depends, HTTPException, status
     print("✅ Security modules loaded successfully from ai-core/security")
 except ImportError as e:
     print(f"⚠️ Warning: Security module error: {e}")
-    
-    # تعريفات بديلة في حالة عدم وجود access_control
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. 🛡️ Role Checker Dependency (التعديل السحري)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def role_checker(required_role):
+    """
+    Dependency to check if the current user has the required role.
+    """
+    def role_dependency(access = Depends(get_access_control)):
+        
+        # لو الموديول مكنش موجود أو حصل فيه خطأ في الـ import فوق
+        if access is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Security module is not loaded correctly."
+            )
+        
+        # 💡 احتياطي: لو access لسه function لأي سبب، نشغلها إحنا
+        if callable(access):
+            access = access()
+            
+        # هنا access بقى الـ Object الفعلي، نقدر ننادي الدوال بتاعته بأمان
+        current_role = access.get_user_role()
+        
+        if current_role != required_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have enough permissions to access this resource."
+            )
+            
+        return access
+        
+    return role_dependency
     from enum import Enum
     class Role(str, Enum):
         DOCTOR            = "doctor"
