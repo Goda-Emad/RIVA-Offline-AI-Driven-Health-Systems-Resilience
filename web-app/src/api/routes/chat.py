@@ -5,11 +5,12 @@ RIVA Health Platform — Medical Chatbot API Route
 -------------------------------------------------
 FastAPI router for offline Egyptian-dialect medical conversational AI.
 
-🏆 الإصدار: 4.2.2 - Fixed Import Edition
+🏆 الإصدار: 4.2.2 - Rule-Based Fallback Edition
 """
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 import time
@@ -212,6 +213,7 @@ def _get_tokenizer():
         log.info("[RIVA-Chat] tokenizer loaded from HuggingFace (arabic fallback)")
     return tok
 
+
 # ─── Model integrity ─────────────────────────────────────────────────────────
 
 @lru_cache(maxsize=1)
@@ -225,53 +227,31 @@ def _model_md5() -> str:
     return h.hexdigest()
 
 
-# ─── Semantic triage ─────────────────────────────────────────────────────────
-
-_INTENT_PROMPT = (
-    "حلل الرسالة دي وحدد نوع الحالة بكلمة واحدة بس من الخيارات دي:\n"
-    "Emergency (طوارئ فورية تهدد الحياة)\n"
-    "Pregnancy (متعلقة بالحمل والولادة)\n"
-    "School (صحة مدرسية وأطفال)\n"
-    "Triage (أعراض تحتاج تقييم)\n"
-    "General (استفسار عام)\n\n"
-    "الرسالة: \"{message}\"\n"
-    "الإجابة (كلمة واحدة فقط):"
-)
-
-_VALID_INTENTS = {"Emergency", "Pregnancy", "School", "Triage", "General"}
-
+# ─── Semantic triage & Rule-Based Fallback ───────────────────────────────────
 
 def _semantic_intent(message: str) -> str:
-    # مؤقتًا: نرجع General بدون تشغيل النموذج
-    # ده عشان الشات يشتغل مؤقتًا
+    """تحليل نية المريض بناءً على الكلمات المفتاحية (سريع جداً ويعمل 100% أوفلاين)"""
+    msg = message.lower()
+    if any(w in msg for w in ["طوارئ", "بموت", "اسعاف", "إسعاف", "حادث", "نزيف", "ألم شديد"]):
+        return "Emergency"
+    if any(w in msg for w in ["حمل", "ولادة", "حامل", "جنين", "سونار", "نسا"]):
+        return "Pregnancy"
+    if any(w in msg for w in ["مدرسة", "مدرسه", "طالب", "تطعيم", "طفلي", "فحص"]):
+        return "School"
+    if any(w in msg for w in ["صداع", "حرارة", "سخونية", "كحة", "مغص", "دواء", "علاج", "دكتور", "وجع", "الم", "عندي"]):
+        return "Triage"
     return "General"
-# ─── Hallucination guardrail ─────────────────────────────────────────────────
 
-def _apply_guardrail(text: str) -> str:
-    if any(drug.lower() in text.lower() for drug in DRUG_KEYWORDS):
-        log.warning("[RIVA-Chat] Drug mention detected — appending disclaimer")
-        return text + DRUG_DISCLAIMER
-    return text
-
-
-# ─── Prompt builder ──────────────────────────────────────────────────────────
-
-def _build_prompt(session: dict, user_message: str) -> str:
-    m          = session["metadata"]
-    conditions = []
-    if m["has_diabetes"]:      conditions.append("المريض مصاب بالسكري")
-    if m["is_pregnant"]:       conditions.append("المريضة حامل")
-    if m["has_hypertension"]:  conditions.append("المريض عنده ضغط مرتفع")
-    if m["has_heart_disease"]: conditions.append("المريض عنده أمراض قلب")
-    if m["age"]:               conditions.append(f"السن: {m['age']} سنة")
-    system = SYSTEM_PROMPT
-    if conditions:
-        system += "\n\nمعلومات طبية مهمة عن المريض: " + "، ".join(conditions) + "."
-    parts = [f"<|system|>\n{system}\n"]
-    for turn in _trim_history(session["history"]):
-        parts.append(f"<|{turn['role']}|>\n{turn['content']}\n")
-    parts.append(f"<|user|>\n{user_message}\n<|assistant|>\n")
-    return "".join(parts)
+def _get_rule_based_reply(intent: str) -> str:
+    """توليد ردود طبية احترافية بالعامية المصرية بناءً على الحالة"""
+    replies = {
+        "Emergency": "⚠️ دي حالة طوارئ! أرجوك توجه لأقرب مستشفى فوراً أو كلم الإسعاف على رقم 123.",
+        "Pregnancy": "ألف مبروك الحمل! صحتك وصحة الجنين تهمنا جداً. أقدر أساعدك بمعلومات عن التغذية أو مواعيد السونار، تحبي تسألي عن إيه؟",
+        "School": "صحة أطفالنا في المدارس هي أولوية ريفا. إحنا هنا لمتابعة التطعيمات والفحص الدوري. إيه استفسارك بخصوص صحة طفلك؟",
+        "Triage": "ألف سلامة عليك. من الأعراض اللي قلتها، يفضل تاخد قسط من الراحة وتشرب سوائل دافية. لو الأعراض استمرت أو زادت، لازم تزور أقرب دكتور للفحص السريري.",
+        "General": "أهلاً بك يا فندم في منصة ريفا. أنا المساعد الطبي الذكي، أقدر أساعدك إزاي النهاردة؟"
+    }
+    return replies.get(intent, replies["General"])
 
 
 # ─── Sampling helpers ────────────────────────────────────────────────────────
@@ -397,6 +377,35 @@ def _emergency_response() -> str:
     )
 
 
+# ─── Hallucination guardrail ─────────────────────────────────────────────────
+
+def _apply_guardrail(text: str) -> str:
+    if any(drug.lower() in text.lower() for drug in DRUG_KEYWORDS):
+        log.warning("[RIVA-Chat] Drug mention detected — appending disclaimer")
+        return text + DRUG_DISCLAIMER
+    return text
+
+
+# ─── Prompt builder ──────────────────────────────────────────────────────────
+
+def _build_prompt(session: dict, user_message: str) -> str:
+    m          = session["metadata"]
+    conditions = []
+    if m["has_diabetes"]:      conditions.append("المريض مصاب بالسكري")
+    if m["is_pregnant"]:       conditions.append("المريضة حامل")
+    if m["has_hypertension"]:  conditions.append("المريض عنده ضغط مرتفع")
+    if m["has_heart_disease"]: conditions.append("المريض عنده أمراض قلب")
+    if m["age"]:               conditions.append(f"السن: {m['age']} سنة")
+    system = SYSTEM_PROMPT
+    if conditions:
+        system += "\n\nمعلومات طبية مهمة عن المريض: " + "، ".join(conditions) + "."
+    parts = [f"<|system|>\n{system}\n"]
+    for turn in _trim_history(session["history"]):
+        parts.append(f"<|{turn['role']}|>\n{turn['content']}\n")
+    parts.append(f"<|user|>\n{user_message}\n<|assistant|>\n")
+    return "".join(parts)
+
+
 # ─── Pydantic schemas ─────────────────────────────────────────────────────────
 
 class ChatRequest(BaseModel):
@@ -432,40 +441,39 @@ async def send_message(req: ChatRequest, request: Request = None):
         session_id, session = _get_or_create_session(req.session_id)
         _update_clinical_profile(session, req.message)
         t0     = time.perf_counter()
+        
+        # 1. فهم الحالة
         intent = _semantic_intent(req.message)
-        if intent == "Emergency":
-            response = _emergency_response()
-            session["history"].append({"role": "user",      "content": req.message})
-            session["history"].append({"role": "assistant", "content": response})
-            return ChatResponse(
-                text=response, intent=intent, session_id=session_id,
-                duration_ms=round((time.perf_counter() - t0) * 1000, 1),
-            )
-        prompt = _build_prompt(session, req.message)
+        
+        # 2. تجهيز الرد المناسب
+        response_text = _get_rule_based_reply(intent)
+
+        # 3. إرسال الرد للواجهة (مع تأثير الكتابة الحية Streaming)
         if req.stream:
-            gen = _stream_tokens(prompt)
             async def _streamer():
-                collected = ""
-                async for token in gen:
-                    collected += token
-                    yield token
-                session["history"].append({"role": "user",      "content": req.message})
-                session["history"].append({"role": "assistant", "content": collected})
+                # بنقسم الجملة لكلمات عشان نبعتها كلمة كلمة للواجهة
+                words = response_text.split(" ")
+                for word in words:
+                    yield word + " "
+                    await asyncio.sleep(0.05) # تأخير بسيط لمحاكاة سرعة كتابة الإنسان
+            
+            session["history"].append({"role": "user",      "content": req.message})
+            session["history"].append({"role": "assistant", "content": response_text})
+            
             return StreamingResponse(
                 _streamer(), media_type="text/plain; charset=utf-8",
                 headers={"X-Session-ID": session_id, "X-Intent": intent, "X-Offline": "true"},
             )
-        response   = _generate_full(prompt)
-        confidence = _confidence(intent, response)
+
+        # في حالة عدم استخدام الـ Stream
+        confidence = _confidence(intent, response_text)
         session["history"].append({"role": "user",      "content": req.message})
-        session["history"].append({"role": "assistant", "content": response})
+        session["history"].append({"role": "assistant", "content": response_text})
         return ChatResponse(
-            text=response, intent=intent, session_id=session_id,
+            text=response_text, intent=intent, session_id=session_id,
             duration_ms=round((time.perf_counter() - t0) * 1000, 1),
             confidence_score=confidence, clinical_profile=session["metadata"],
         )
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         log.exception("[RIVA-Chat] message error")
         raise HTTPException(status_code=500, detail=f"خطأ في المحادثة: {e}")
