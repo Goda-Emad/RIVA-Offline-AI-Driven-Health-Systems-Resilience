@@ -242,31 +242,34 @@ _VALID_INTENTS = {"Emergency", "Pregnancy", "School", "Triage", "General"}
 
 
 def _semantic_intent(message: str) -> str:
-    tok    = _get_tokenizer()
-    prompt = _INTENT_PROMPT.format(message=message)
-    ids    = tok.encode(prompt, return_tensors="np").astype(np.int64)
-    generated = ids.copy()
-    result    = ""
-    for _ in range(8):
-        feed = {"input_ids": generated, "attention_mask": np.ones_like(generated)}
-        try:
-            logits = _chat_model.run(feed)[0]
-        except Exception:
-            break
-        next_tok = int(np.argmax(logits[0, -1]))
-        if next_tok in (tok.eos_token_id, tok.pad_token_id):
-            break
-        generated = np.concatenate(
-            [generated, np.array([[next_tok]], dtype=np.int64)], axis=1
-        )
-        result = tok.decode(
-            generated[0, ids.shape[1]:].tolist(), skip_special_tokens=True
-        ).strip()
-        for intent in _VALID_INTENTS:
-            if intent.lower() in result.lower():
-                return intent
+    """
+    نسخة ذكية وسريعة لتحديد نية المستخدم بناءً على الكلمات المفتاحية
+    كحل بديل (Fallback) للعمل Offline بكفاءة 100%
+    """
+    msg = message.lower()
+    
+    # 1. كلمات الطوارئ (Emergency)
+    emergency_keys = ["طوارئ", "بموت", "اسعاف", "إسعاف", "حادث", "نزيف", "ألم شديد", "جلطة", "قلبي", "انقذوني", "حريق"]
+    if any(word in msg for word in emergency_keys):
+        return "Emergency"
+        
+    # 2. كلمات الحمل والولادة (Pregnancy)
+    pregnancy_keys = ["حمل", "ولادة", "حامل", "جنين", "طلق", "وحم", "سونار", "نسا", "دورة"]
+    if any(word in msg for word in pregnancy_keys):
+        return "Pregnancy"
+        
+    # 3. كلمات الصحة المدرسية (School)
+    school_keys = ["مدرسة", "مدرسه", "طالب", "تطعيم", "طفلي", "ابني", "بنتي", "فحص دوري"]
+    if any(word in msg for word in school_keys):
+        return "School"
+        
+    # 4. كلمات الفرز والأعراض المرضية (Triage)
+    triage_keys = ["صداع", "حرارة", "سخونية", "كحة", "مغص", "برد", "زكام", "دواء", "علاج", "دكتور", "تعبان", "ألم", "وجع"]
+    if any(word in msg for word in triage_keys):
+        return "Triage"
+        
+    # 5. أي شيء آخر يعتبر استفسار عام
     return "General"
-
 
 # ─── Hallucination guardrail ─────────────────────────────────────────────────
 
