@@ -909,8 +909,13 @@ class TimelineViewer {
 // 10. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const timelineViewer = new TimelineViewer();
 
+// تخزين في window للاستخدام العادي
 window.timelineViewer = timelineViewer;
+window.rivaTimelineViewer = timelineViewer;
 
+// ES Module export
 export default timelineViewer;
+export { timelineViewer };
