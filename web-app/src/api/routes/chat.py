@@ -242,35 +242,9 @@ _VALID_INTENTS = {"Emergency", "Pregnancy", "School", "Triage", "General"}
 
 
 def _semantic_intent(message: str) -> str:
-    """
-    نسخة ذكية وسريعة لتحديد نية المستخدم بناءً على الكلمات المفتاحية
-    كحل بديل (Fallback) للعمل Offline بكفاءة 100%
-    """
-    msg = message.lower()
-    
-    # 1. كلمات الطوارئ (Emergency)
-    emergency_keys = ["طوارئ", "بموت", "اسعاف", "إسعاف", "حادث", "نزيف", "ألم شديد", "جلطة", "قلبي", "انقذوني", "حريق"]
-    if any(word in msg for word in emergency_keys):
-        return "Emergency"
-        
-    # 2. كلمات الحمل والولادة (Pregnancy)
-    pregnancy_keys = ["حمل", "ولادة", "حامل", "جنين", "طلق", "وحم", "سونار", "نسا", "دورة"]
-    if any(word in msg for word in pregnancy_keys):
-        return "Pregnancy"
-        
-    # 3. كلمات الصحة المدرسية (School)
-    school_keys = ["مدرسة", "مدرسه", "طالب", "تطعيم", "طفلي", "ابني", "بنتي", "فحص دوري"]
-    if any(word in msg for word in school_keys):
-        return "School"
-        
-    # 4. كلمات الفرز والأعراض المرضية (Triage)
-    triage_keys = ["صداع", "حرارة", "سخونية", "كحة", "مغص", "برد", "زكام", "دواء", "علاج", "دكتور", "تعبان", "ألم", "وجع"]
-    if any(word in msg for word in triage_keys):
-        return "Triage"
-        
-    # 5. أي شيء آخر يعتبر استفسار عام
+    # مؤقتًا: نرجع General بدون تشغيل النموذج
+    # ده عشان الشات يشتغل مؤقتًا
     return "General"
-
 # ─── Hallucination guardrail ─────────────────────────────────────────────────
 
 def _apply_guardrail(text: str) -> str:
