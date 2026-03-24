@@ -819,9 +819,12 @@ class RIVACharts {
 // 21. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const rivaCharts = new RIVACharts();
 
-// إتاحته للاستخدام العالمي
+// تخزين في window للاستخدام العادي
 window.rivaCharts = rivaCharts;
 
+// ES Module export
 export default rivaCharts;
+export { rivaCharts };
