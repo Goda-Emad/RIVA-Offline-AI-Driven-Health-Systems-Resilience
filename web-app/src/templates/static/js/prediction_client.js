@@ -712,8 +712,13 @@ class PredictionClient {
 // 20. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const predictionClient = new PredictionClient();
 
+// تخزين في window للاستخدام العادي
 window.predictionClient = predictionClient;
+window.rivaPredictionClient = predictionClient;
 
+// ES Module export
 export default predictionClient;
+export { predictionClient };
