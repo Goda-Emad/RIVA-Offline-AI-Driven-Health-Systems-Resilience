@@ -738,8 +738,13 @@ class Authentication {
 // 14. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة وتخزينها في window
 const auth = new Authentication();
 
+// تخزين في window للاستخدام العادي
 window.auth = auth;
+window.rivaAuth = auth;
 
+// ES Module export
 export default auth;
+export { aut
