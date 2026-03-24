@@ -65,7 +65,43 @@
     </footer>
     
     <!-- Scripts -->
+    <!-- Core Modules -->
+    <script src="/static/js/api_client.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/offline-detection.js"></script>
+    <script src="/static/js/pwa-install.js"></script>
+    
+    <!-- UI Modules -->
+    <script src="/static/js/chat_ui.js"></script>
+    <script src="/static/js/voice_recorder.js"></script>
+    <script src="/static/js/charts.js"></script>
+    <script src="/static/js/qr_handler.js"></script>
+    
+    <!-- Prediction Modules -->
+    <script src="/static/js/prediction_client.js"></script>
+    <script src="/static/js/readmission_chart.js"></script>
+    <script src="/static/js/los_chart.js"></script>
+    <script src="/static/js/sentiment_display.js"></script>
+    <script src="/static/js/timeline_viewer.js"></script>
+    <script src="/static/js/interaction_checker.js"></script>
+    <script src="/static/js/explainability.js"></script>
+    <script src="/static/js/explanation_viewer.js"></script>
+    <script src="/static/js/background-sync.js"></script>
+    
+    <!-- Main Entry Point -->
     <script src="/static/js/main.js"></script>
+    
+    <script>
+        // تهيئة التطبيق بعد تحميل جميع الملفات
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.rivaMain) {
+                console.log('✅ RIVA application ready');
+            } else {
+                console.log('⚠️ Waiting for RIVA main module...');
+            }
+        });
+    </script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>
