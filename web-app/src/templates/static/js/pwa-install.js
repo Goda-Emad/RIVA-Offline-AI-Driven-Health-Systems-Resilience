@@ -799,8 +799,13 @@ class PWAInstallManager {
 // 20. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const pwaInstall = new PWAInstallManager();
 
+// تخزين في window للاستخدام العادي
 window.pwaInstall = pwaInstall;
+window.rivaPWAInstall = pwaInstall;
 
+// ES Module export
 export default pwaInstall;
+export { pwaInstall };
