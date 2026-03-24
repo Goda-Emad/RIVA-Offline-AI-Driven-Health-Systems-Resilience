@@ -706,8 +706,13 @@ class OfflineManager {
 // 15. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const offlineManager = new OfflineManager();
 
+// تخزين في window للاستخدام العادي
 window.offlineManager = offlineManager;
+window.rivaOfflineManager = offlineManager;
 
+// ES Module export
 export default offlineManager;
+export { offlineManager };
