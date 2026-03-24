@@ -1205,8 +1205,13 @@ class SentimentDisplay {
 // 12. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const sentimentDisplay = new SentimentDisplay();
 
+// تخزين في window للاستخدام العادي
 window.sentimentDisplay = sentimentDisplay;
+window.rivaSentimentDisplay = sentimentDisplay;
 
+// ES Module export
 export default sentimentDisplay;
+export { sentimentDisplay };
