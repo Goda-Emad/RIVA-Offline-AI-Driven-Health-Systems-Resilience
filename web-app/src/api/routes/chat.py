@@ -201,14 +201,16 @@ _chat_model = _ONNXSession()
 def _get_tokenizer():
     from transformers import AutoTokenizer
     try:
-        tok = AutoTokenizer.from_pretrained(str(TOKENIZER_DIR))
-        log.info("[RIVA-Chat] tokenizer loaded from %s", TOKENIZER_DIR)
+        tokenizer_path = str(TOKENIZER_DIR)
+        if not tokenizer_path or tokenizer_path == "None":
+            raise ValueError("TOKENIZER_DIR is None or empty")
+        tok = AutoTokenizer.from_pretrained(tokenizer_path)
+        log.info("[RIVA-Chat] tokenizer loaded from %s", tokenizer_path)
     except Exception as e:
         log.warning("[RIVA-Chat] Local tokenizer failed: %s, using fallback", e)
         tok = AutoTokenizer.from_pretrained("asafaya/bert-base-arabic")
         log.info("[RIVA-Chat] tokenizer loaded from HuggingFace (arabic fallback)")
     return tok
-
 
 # ─── Model integrity ─────────────────────────────────────────────────────────
 
