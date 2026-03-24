@@ -745,9 +745,13 @@ class InteractionChecker {
 // ──────────────────────────────────────────────────────────
 // 10. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
-
+// إنشاء نسخة واحدة
 const interactionChecker = new InteractionChecker();
 
+// تخزين في window للاستخدام العادي
 window.interactionChecker = interactionChecker;
+window.rivaInteractionChecker = interactionChecker;
 
+// ES Module export
 export default interactionChecker;
+export { interactionChecker };
