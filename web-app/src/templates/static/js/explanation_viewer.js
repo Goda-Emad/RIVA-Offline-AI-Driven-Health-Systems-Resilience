@@ -763,8 +763,13 @@ class ExplanationViewer {
 // 4. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const explanationViewer = new ExplanationViewer();
 
+// تخزين في window للاستخدام العادي
 window.explanationViewer = explanationViewer;
+window.rivaExplanationViewer = explanationViewer;
 
+// ES Module export
 export default explanationViewer;
+export { explanationViewer };
