@@ -95,3 +95,6 @@ httpx==0.25.2
 black==23.12.1
 flake8==7.0.0
 mypy==1.7.1
+optimum[onnxruntime]==1.17.0
+pydub==0.25.1
+python-multipart==0.0.6
