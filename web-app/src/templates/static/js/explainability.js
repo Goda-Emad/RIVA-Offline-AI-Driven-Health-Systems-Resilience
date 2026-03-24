@@ -735,8 +735,13 @@ class AIExplainability {
 // 11. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const aiExplainability = new AIExplainability();
 
+// تخزين في window للاستخدام العادي
 window.aiExplainability = aiExplainability;
+window.rivaExplainability = aiExplainability;
 
+// ES Module export
 export default aiExplainability;
+export { aiExplainability };
