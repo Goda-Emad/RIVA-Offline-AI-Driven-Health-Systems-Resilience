@@ -849,12 +849,18 @@ class ChatUI {
 // 11. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// ──────────────────────────────────────────────────────────
+// 11. تصدير نسخة واحدة (Singleton)
+// ──────────────────────────────────────────────────────────
+
 let chatUI = null;
 
 function getChatUI() {
     if (!chatUI) {
         chatUI = new ChatUI();
+        // تخزين في window
         window.chatUI = chatUI;
+        window.rivaChatUI = chatUI;
     }
     return chatUI;
 }
@@ -864,4 +870,6 @@ if (document.getElementById('chat-container')) {
     getChatUI();
 }
 
+// ES Module exports
 export default getChatUI;
+export { getChatUI, chatUI };
