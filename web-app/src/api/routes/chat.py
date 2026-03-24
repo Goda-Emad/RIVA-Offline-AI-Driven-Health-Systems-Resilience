@@ -200,8 +200,13 @@ _chat_model = _ONNXSession()
 @lru_cache(maxsize=1)
 def _get_tokenizer():
     from transformers import AutoTokenizer
-    tok = AutoTokenizer.from_pretrained(str(TOKENIZER_DIR))
-    log.info("[RIVA-Chat] tokenizer loaded from %s", TOKENIZER_DIR)
+    try:
+        tok = AutoTokenizer.from_pretrained(str(TOKENIZER_DIR))
+        log.info("[RIVA-Chat] tokenizer loaded from %s", TOKENIZER_DIR)
+    except Exception as e:
+        log.warning("[RIVA-Chat] Local tokenizer failed: %s, using fallback", e)
+        tok = AutoTokenizer.from_pretrained("asafaya/bert-base-arabic")
+        log.info("[RIVA-Chat] tokenizer loaded from HuggingFace (arabic fallback)")
     return tok
 
 
