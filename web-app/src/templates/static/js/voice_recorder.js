@@ -915,8 +915,13 @@ class VoiceRecorder {
 // 16. تصدير نسخة واحدة (Singleton)
 // ──────────────────────────────────────────────────────────
 
+// إنشاء نسخة واحدة
 const voiceRecorder = new VoiceRecorder();
 
+// تخزين في window للاستخدام العادي
 window.voiceRecorder = voiceRecorder;
+window.rivaVoiceRecorder = voiceRecorder;
 
+// ES Module export
 export default voiceRecorder;
+export { voiceRecorder };
