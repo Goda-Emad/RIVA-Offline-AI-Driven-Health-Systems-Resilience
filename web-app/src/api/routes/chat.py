@@ -5,7 +5,7 @@ RIVA Health Platform — Medical Chatbot API Route
 -------------------------------------------------
 FastAPI router for offline Egyptian-dialect medical conversational AI.
 
-🏆 الإصدار: 4.2.2 - Rule-Based Fallback Edition
+🏆 الإصدار: 4.2.2 - Ollama + RAG Edition
 """
 
 from __future__ import annotations
@@ -40,13 +40,16 @@ for _p in [str(_SECURITY), str(_AICORE), str(_APP), str(_SRC)]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+# استيراد Ollama client و RAG
+from ollama_client import generate_response, check_ollama_health
+from local_inference import get_medical_rag
+
 # 🔒 استيراد أنظمة الأمان
 try:
     from access_control import require_any_role, require_role, Role
     logging.info("✅ access_control imported successfully")
 except ImportError as e:
     logging.critical(f"❌ CRITICAL: access_control module not found: {e}")
-    # Fallback بدل ما يوقف السيرفر كله
     from enum import Enum
 
     class Role(str, Enum):
@@ -456,7 +459,10 @@ async def send_message(req: ChatRequest, request: Request = None):
         # 4. بناء الـ system prompt مع السياق الطبي
         system_prompt = SYSTEM_PROMPT
         if context:
-            system_prompt += f"\n\nمعلومات من المراجع الطبية الموثقة:\n{context}"
+            system_prompt += (
+                "\n\nاستخدم المعلومات التالية من المراجع الطبية الموثقة للرد على المريض بدقة: "
+                f"\n--- سياق طبي ---\n{context}\n----------------"
+            )
         
         # 5. فحص اتصال Ollama
         ollama_available = await check_ollama_health()
@@ -521,6 +527,7 @@ async def send_message(req: ChatRequest, request: Request = None):
     except Exception as e:
         log.exception("[RIVA-Chat] message error")
         raise HTTPException(status_code=500, detail=f"خطأ في المحادثة: {e}")
+
 
 @router.post("/triage", response_model=ChatResponse, summary="فرز طبي سريع بالأعراض")
 async def triage(req: TriageRequest, request: Request = None):
