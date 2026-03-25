@@ -5,7 +5,7 @@ RIVA Health Platform — Medical Chatbot API Route
 -------------------------------------------------
 FastAPI router for offline Egyptian-dialect medical conversational AI.
 
-🏆 الإصدار: 4.2.2 - Ollama + RAG Edition
+🏆 الإصدار: 4.2.2 - Ollama + RAG + QR Edition
 """
 
 from __future__ import annotations
@@ -15,6 +15,8 @@ import hashlib
 import logging
 import time
 import uuid
+import json
+import base64
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
@@ -409,6 +411,33 @@ def _build_prompt(session: dict, user_message: str) -> str:
     return "".join(parts)
 
 
+# ─── QR Code generation ───────────────────────────────────────────────────────
+
+def _generate_qr_response(patient_id: str, risk_level: str) -> dict:
+    """توليد QR Code للحالات الحرجة"""
+    qr_data = {
+        "patient_id": patient_id,
+        "risk_level": risk_level,
+        "timestamp": datetime.now().isoformat(),
+        "action": "emergency_transfer"
+    }
+    
+    # تحويل إلى JSON
+    json_str = json.dumps(qr_data)
+    
+    # تشفير base64 للـ QR
+    qr_base64 = base64.b64encode(json_str.encode()).decode()
+    
+    # توليد QR Code (مؤقتًا)
+    qr_code = f"RIVA_EMERGENCY_{patient_id}_{int(time.time())}"
+    
+    return {
+        "qr_code": qr_code,
+        "qr_base64": qr_base64,
+        "data": qr_data
+    }
+
+
 # ─── Pydantic schemas ─────────────────────────────────────────────────────────
 
 class ChatRequest(BaseModel):
@@ -432,6 +461,7 @@ class ChatResponse(BaseModel):
     confidence_score: float = 1.0
     clinical_profile: dict  = {}
     offline:          bool  = True
+    qr_code:          Optional[str] = None
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
@@ -512,6 +542,12 @@ async def send_message(req: ChatRequest, request: Request = None):
         ):
             response_text += chunk
         
+        # فحص إذا كان الرد يحتاج QR Code
+        qr_info = None
+        if "حالة طوارئ" in response_text or "طوارئ" in response_text:
+            qr_info = _generate_qr_response(session_id, "critical")
+            response_text += f"\n\n📱 رمز QR للطوارئ: {qr_info['qr_code']}"
+        
         session["history"].append({"role": "user", "content": req.message})
         session["history"].append({"role": "assistant", "content": response_text})
         
@@ -522,6 +558,7 @@ async def send_message(req: ChatRequest, request: Request = None):
             duration_ms=round((time.perf_counter() - t0) * 1000, 1),
             confidence_score=_confidence(intent, response_text),
             clinical_profile=session["metadata"],
+            qr_code=qr_info["qr_code"] if qr_info else None
         )
         
     except Exception as e:
