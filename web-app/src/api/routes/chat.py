@@ -5,7 +5,7 @@ RIVA Health Platform — Medical Chatbot API Route
 -------------------------------------------------
 FastAPI router for offline Egyptian-dialect medical conversational AI.
 
-🏆 الإصدار: 4.2.2 - Ollama + RAG + QR Edition
+🏆 الإصدار: 4.2.2 - Ollama + RAG + QR + Actions Edition
 """
 
 from __future__ import annotations
@@ -438,6 +438,30 @@ def _generate_qr_response(patient_id: str, risk_level: str) -> dict:
     }
 
 
+# ─── Action parser ───────────────────────────────────────────────────────────
+
+def _parse_action_response(response_text: str) -> dict:
+    """تحليل الرد لاستخراج الـ Action"""
+    result = {
+        "text": response_text,
+        "action": "chat",
+        "redirect": None
+    }
+    
+    # فحص إذا كان الرد يحتوي على أمر توجيه
+    if "توجيه إلى لوحة المدرسة" in response_text or "اذهب إلى لوحة المدرسة" in response_text:
+        result["action"] = "redirect"
+        result["redirect"] = "/11_school_dashboard.html"
+    elif "توجيه إلى لوحة الدكتور" in response_text or "اذهب إلى لوحة الدكتور" in response_text:
+        result["action"] = "redirect"
+        result["redirect"] = "/09_doctor_dashboard.html"
+    elif "توجيه إلى لوحة الأم" in response_text or "اذهب إلى لوحة الأم" in response_text:
+        result["action"] = "redirect"
+        result["redirect"] = "/10_mother_dashboard.html"
+    
+    return result
+
+
 # ─── Pydantic schemas ─────────────────────────────────────────────────────────
 
 class ChatRequest(BaseModel):
@@ -462,6 +486,8 @@ class ChatResponse(BaseModel):
     clinical_profile: dict  = {}
     offline:          bool  = True
     qr_code:          Optional[str] = None
+    action:           Optional[str] = None
+    redirect_url:     Optional[str] = None
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
@@ -525,11 +551,37 @@ async def send_message(req: ChatRequest, request: Request = None):
                 
                 session["history"].append({"role": "user", "content": req.message})
                 session["history"].append({"role": "assistant", "content": full_response})
+                
+                # تحليل الـ Action بعد انتهاء البث
+                action_result = _parse_action_response(full_response)
+                
+                # فحص QR Code
+                if "حالة طوارئ" in full_response or "طوارئ" in full_response:
+                    qr_info = _generate_qr_response(session_id, "critical")
+                    yield f"\n\n📱 رمز QR للطوارئ: {qr_info['qr_code']}"
+                    session["pending_qr"] = qr_info["qr_code"]
+                
+                # تخزين الـ Action في الجلسة
+                if action_result["action"] != "chat":
+                    session["pending_action"] = action_result
+            
+            # بناء الـ Headers
+            headers = {
+                "X-Session-ID": session_id,
+                "X-Intent": intent,
+                "X-Offline": "true"
+            }
+            
+            # إضافة الـ Action في الـ Headers إذا وجد
+            if "pending_action" in session:
+                headers["X-Action"] = session["pending_action"]["action"]
+                if session["pending_action"].get("redirect"):
+                    headers["X-Redirect-URL"] = session["pending_action"]["redirect"]
             
             return StreamingResponse(
                 _streamer(),
                 media_type="text/plain; charset=utf-8",
-                headers={"X-Session-ID": session_id, "X-Intent": intent}
+                headers=headers
             )
         
         # Non-streaming
@@ -541,6 +593,10 @@ async def send_message(req: ChatRequest, request: Request = None):
             stream=True
         ):
             response_text += chunk
+        
+        # تحليل الـ Action
+        action_result = _parse_action_response(response_text)
+        response_text = action_result["text"]
         
         # فحص إذا كان الرد يحتاج QR Code
         qr_info = None
@@ -558,13 +614,10 @@ async def send_message(req: ChatRequest, request: Request = None):
             duration_ms=round((time.perf_counter() - t0) * 1000, 1),
             confidence_score=_confidence(intent, response_text),
             clinical_profile=session["metadata"],
-            qr_code=qr_info["qr_code"] if qr_info else None
+            qr_code=qr_info["qr_code"] if qr_info else None,
+            action=action_result["action"],
+            redirect_url=action_result["redirect"]
         )
-        
-    except Exception as e:
-        log.exception("[RIVA-Chat] message error")
-        raise HTTPException(status_code=500, detail=f"خطأ في المحادثة: {e}")
-
 
 @router.post("/triage", response_model=ChatResponse, summary="فرز طبي سريع بالأعراض")
 async def triage(req: TriageRequest, request: Request = None):
