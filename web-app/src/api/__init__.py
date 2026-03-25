@@ -47,6 +47,8 @@ from .dependencies import (
     Role,
 )
 
+from .ollama_client import *
+
 from .routes import (
     # All routers
     chat_router,
