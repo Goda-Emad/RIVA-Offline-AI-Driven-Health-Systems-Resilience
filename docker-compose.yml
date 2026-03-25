@@ -18,9 +18,24 @@ services:
       - PYTHONUNBUFFERED=1
       - RIVA_BASE_DIR=/app
       - PYTHONPATH=/app:/app/ai-core:/app/ai-core/security:/app/ai-core/storage
+      - OLLAMA_HOST=http://ollama:11434
+    depends_on:
+      - ollama
     restart: unless-stopped
     networks:
       - riva-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: riva-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama-data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - riva-network
+    command: serve
 
 networks:
   riva-network:
