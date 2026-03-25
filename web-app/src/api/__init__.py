@@ -118,6 +118,12 @@ __all__ = [
     "ALL_ROUTERS",
     "ROUTES_INFO",
     "get_routes_stats",
+    
+    # Ollama
+    "ollama_client",
+    "generate_response",
+    "get_available_models",
+    "pull_model",
 ]
 
 # معلومات عن الـ API Package
