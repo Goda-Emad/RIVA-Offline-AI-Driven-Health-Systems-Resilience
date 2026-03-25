@@ -21,7 +21,7 @@
  * - حفظ حالة المحادثة
  * - عرض وقت الرسائل
  * 
- * الإصدار: 4.2.1
+ * الإصدار: 4.2.2 - Actions Support + Stream Error Handling
  */
 
 // ──────────────────────────────────────────────────────────
@@ -338,6 +338,16 @@ class ChatUI {
                 throw new Error(`HTTP ${response.status}`);
             }
             
+            // معالجة الـ Actions من الـ Headers
+            const action = response.headers.get('X-Action');
+            const redirectUrl = response.headers.get('X-Redirect-URL');
+            
+            if (action === 'redirect' && redirectUrl) {
+                console.log('[ChatUI] Redirecting to:', redirectUrl);
+                window.location.href = redirectUrl;
+                return;
+            }
+            
             // إنشاء رسالة البوت (فارغة في البداية)
             const messageDiv = this.addBotMessage('', true);
             let fullText = '';
@@ -345,13 +355,20 @@ class ChatUI {
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                
-                const token = decoder.decode(value);
-                fullText += token;
-                this.updateStreamingMessage(messageDiv, fullText);
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const token = decoder.decode(value);
+                    fullText += token;
+                    this.updateStreamingMessage(messageDiv, fullText);
+                }
+            } catch (streamError) {
+                console.error('[ChatUI] Stream read error:', streamError);
+                this.updateStreamingMessage(messageDiv, fullText + '...', false);
+            } finally {
+                reader.releaseLock();
             }
             
             // تحديث الرسالة كاملة
@@ -421,12 +438,18 @@ class ChatUI {
         
         console.log(`[ChatUI] Syncing ${offlineMessages.length} offline messages`);
         
-        for (const msg of offlineMessages) {
+        for (let i = 0; i < offlineMessages.length; i++) {
+            const msg = offlineMessages[i];
             try {
                 await this.streamMessage(msg.text);
+                // تأخير 500ms بين كل رسالة عشان السيرفر ما يتعبش
+                await new Promise(resolve => setTimeout(resolve, 500));
             } catch (error) {
                 console.error('[ChatUI] Failed to sync offline message:', error);
-                return; // توقف إذا فشل أحد الرسائل
+                // حفظ الرسائل اللي فشلت لوقت تاني
+                const remaining = offlineMessages.slice(i);
+                localStorage.setItem('riva_offline_messages', JSON.stringify(remaining));
+                return;
             }
         }
         
@@ -844,10 +867,6 @@ class ChatUI {
         document.head.insertAdjacentHTML('beforeend', styles);
     }
 }
-
-// ──────────────────────────────────────────────────────────
-// 11. تصدير نسخة واحدة (Singleton)
-// ──────────────────────────────────────────────────────────
 
 // ──────────────────────────────────────────────────────────
 // 11. تصدير نسخة واحدة (Singleton)
