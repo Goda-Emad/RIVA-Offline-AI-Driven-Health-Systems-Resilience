@@ -437,47 +437,90 @@ class ChatResponse(BaseModel):
 async def send_message(req: ChatRequest, request: Request = None):
     if not req.message.strip():
         raise HTTPException(status_code=400, detail="الرسالة فاضية")
+    
     try:
         session_id, session = _get_or_create_session(req.session_id)
         _update_clinical_profile(session, req.message)
-        t0     = time.perf_counter()
+        t0 = time.perf_counter()
         
-        # 1. فهم الحالة
+        # 1. تحديد الـ Intent
         intent = _semantic_intent(req.message)
         
-        # 2. تجهيز الرد المناسب
-        response_text = _get_rule_based_reply(intent)
-
-        # 3. إرسال الرد للواجهة (مع تأثير الكتابة الحية Streaming)
+        # 2. البحث في قاعدة المعرفة الطبية (RAG)
+        rag = get_medical_rag()
+        context = rag.get_context(req.message)
+        
+        # 3. بناء الـ Prompt الكامل (بما فيه التاريخ)
+        full_prompt_with_history = _build_prompt(session, req.message)
+        
+        # 4. بناء الـ system prompt مع السياق الطبي
+        system_prompt = SYSTEM_PROMPT
+        if context:
+            system_prompt += f"\n\nمعلومات من المراجع الطبية الموثقة:\n{context}"
+        
+        # 5. فحص اتصال Ollama
+        ollama_available = await check_ollama_health()
+        
+        if not ollama_available:
+            log.warning("⚠️ Ollama offline - using Rule-based fallback")
+            response_text = _get_rule_based_reply(intent)
+            session["history"].append({"role": "user", "content": req.message})
+            session["history"].append({"role": "assistant", "content": response_text})
+            return ChatResponse(
+                text=response_text,
+                intent=intent,
+                session_id=session_id,
+                duration_ms=round((time.perf_counter() - t0) * 1000, 1),
+                clinical_profile=session["metadata"],
+            )
+        
+        # 6. إرسال إلى Ollama
         if req.stream:
             async def _streamer():
-                # بنقسم الجملة لكلمات عشان نبعتها كلمة كلمة للواجهة
-                words = response_text.split(" ")
-                for word in words:
-                    yield word + " "
-                    await asyncio.sleep(0.05) # تأخير بسيط لمحاكاة سرعة كتابة الإنسان
-            
-            session["history"].append({"role": "user",      "content": req.message})
-            session["history"].append({"role": "assistant", "content": response_text})
+                full_response = ""
+                async for chunk in generate_response(
+                    prompt=full_prompt_with_history,
+                    system_prompt=system_prompt,
+                    model="mistral",
+                    stream=True
+                ):
+                    full_response += chunk
+                    yield chunk
+                
+                session["history"].append({"role": "user", "content": req.message})
+                session["history"].append({"role": "assistant", "content": full_response})
             
             return StreamingResponse(
-                _streamer(), media_type="text/plain; charset=utf-8",
-                headers={"X-Session-ID": session_id, "X-Intent": intent, "X-Offline": "true"},
+                _streamer(),
+                media_type="text/plain; charset=utf-8",
+                headers={"X-Session-ID": session_id, "X-Intent": intent}
             )
-
-        # في حالة عدم استخدام الـ Stream
-        confidence = _confidence(intent, response_text)
-        session["history"].append({"role": "user",      "content": req.message})
+        
+        # Non-streaming
+        response_text = ""
+        async for chunk in generate_response(
+            prompt=full_prompt_with_history,
+            system_prompt=system_prompt,
+            model="mistral",
+            stream=True
+        ):
+            response_text += chunk
+        
+        session["history"].append({"role": "user", "content": req.message})
         session["history"].append({"role": "assistant", "content": response_text})
+        
         return ChatResponse(
-            text=response_text, intent=intent, session_id=session_id,
+            text=_apply_guardrail(response_text),
+            intent=intent,
+            session_id=session_id,
             duration_ms=round((time.perf_counter() - t0) * 1000, 1),
-            confidence_score=confidence, clinical_profile=session["metadata"],
+            confidence_score=_confidence(intent, response_text),
+            clinical_profile=session["metadata"],
         )
+        
     except Exception as e:
         log.exception("[RIVA-Chat] message error")
         raise HTTPException(status_code=500, detail=f"خطأ في المحادثة: {e}")
-
 
 @router.post("/triage", response_model=ChatResponse, summary="فرز طبي سريع بالأعراض")
 async def triage(req: TriageRequest, request: Request = None):
