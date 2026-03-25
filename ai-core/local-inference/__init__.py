@@ -18,6 +18,7 @@ from .triage_classifier   import classify_triage, classify_batch
 from .triage_engine       import decide, get_target_page
 from .unified_predictor   import predict, predict_batch, get_statistics
 from .prescription_gen    import generate_prescription, verify_prescription, check_ai_drug
+from .medical_rag         import *
 
 __all__ = [
     # Model manager
@@ -46,4 +47,6 @@ __all__ = [
     "predict", "predict_batch", "get_statistics",
     # Prescription
     "generate_prescription", "verify_prescription", "check_ai_drug",
+    # Medical RAG
+    "medical_rag",
 ]
